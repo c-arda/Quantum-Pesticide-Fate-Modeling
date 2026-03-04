@@ -1143,6 +1143,67 @@ SUBSTANCES = [
         "cls": "Pyridazinone", "status": "Not approved",
         "n_atoms": 24, "n_heavy": 15, "hbd": 1, "hba": 3, "n_rings": 2, "n_rotatable": 1
     },
+    # ─── Photolabile substances (Phase 4b) ─────────────────────────────
+    {
+        "name": "Famoxadone", "cas": "131807-57-3", "formula": "C22H18N2O4",
+        "smiles": "O=C1OC(c2ccccc2)(c2ccccc2)C(=O)N1Oc1ccc(C#N)cc1", "mw": 374.4,
+        "degT50_soil": 8, "degT50_water": 3, "degT50_sediment": 20,
+        "koc": 5700, "kfoc": 5700, "freundlich_n": 0.88,
+        "vapor_pressure": 6.4e-7, "henry_const": 6.6e-7,
+        "solubility": 0.052, "pka": None, "logP": 4.65,
+        "cls": "Oxazolidinone", "status": "Not approved",
+        "n_atoms": 46, "n_heavy": 28, "hbd": 0, "hba": 5, "n_rings": 4, "n_rotatable": 4
+    },
+    {
+        "name": "Pyrimethanil", "cas": "53112-28-0", "formula": "C12H13N3",
+        "smiles": "Cc1cc(C)nc(Nc2ccccc2)n1", "mw": 199.3,
+        "degT50_soil": 55, "degT50_water": 10, "degT50_sediment": 80,
+        "koc": 301, "kfoc": 301, "freundlich_n": 0.85,
+        "vapor_pressure": 2.2e-3, "henry_const": 2.2e-3,
+        "solubility": 121, "pka": 3.44, "logP": 2.84,
+        "cls": "Anilinopyrimidine", "status": "Approved",
+        "n_atoms": 28, "n_heavy": 15, "hbd": 1, "hba": 3, "n_rings": 2, "n_rotatable": 2
+    },
+    {
+        "name": "Abamectin", "cas": "71751-41-2", "formula": "C48H72O14",
+        "smiles": "CC1CC(OC2CC(OC3CC(OC(=O)\\C=C\\C=C\\C(C)C(OC4CC(C)C(O)C(C)O4)C(C)CC(C)C3O)OC3OC(C)C(O)C(OC)C3OC)OC(C)C2O)OC(C)C1O", "mw": 873.1,
+        "degT50_soil": 28, "degT50_water": 0.5, "degT50_sediment": 56,
+        "koc": 5000, "kfoc": 5000, "freundlich_n": 0.89,
+        "vapor_pressure": 3.7e-8, "henry_const": 4.0e-5,
+        "solubility": 0.01, "pka": None, "logP": 4.4,
+        "cls": "Avermectin", "status": "Approved",
+        "n_atoms": 134, "n_heavy": 62, "hbd": 5, "hba": 14, "n_rings": 4, "n_rotatable": 14
+    },
+    {
+        "name": "Fenhexamid", "cas": "126833-17-8", "formula": "C14H17Cl2NO2",
+        "smiles": "O=C(c1cc(Cl)c(Cl)cc1O)NC1CCCCC1", "mw": 302.2,
+        "degT50_soil": 1, "degT50_water": 3, "degT50_sediment": 5,
+        "koc": 475, "kfoc": 475, "freundlich_n": 0.90,
+        "vapor_pressure": 4.0e-6, "henry_const": 4.8e-6,
+        "solubility": 24, "pka": 7.3, "logP": 3.51,
+        "cls": "Hydroxyanilide", "status": "Approved",
+        "n_atoms": 36, "n_heavy": 19, "hbd": 2, "hba": 3, "n_rings": 2, "n_rotatable": 3
+    },
+    {
+        "name": "Prothioconazole", "cas": "178928-70-6", "formula": "C14H15Cl2N3OS",
+        "smiles": "ClC(Cl)C(O)(c1ccccc1)C1=NNC(=S)S1", "mw": 344.3,
+        "degT50_soil": 10, "degT50_water": 0.3, "degT50_sediment": 30,
+        "koc": 2950, "kfoc": 2950, "freundlich_n": 0.87,
+        "vapor_pressure": 3.2e-9, "henry_const": 8.0e-8,
+        "solubility": 5, "pka": 6.9, "logP": 4.16,
+        "cls": "Triazolinthione", "status": "Approved",
+        "n_atoms": 36, "n_heavy": 21, "hbd": 2, "hba": 4, "n_rings": 3, "n_rotatable": 3
+    },
+    {
+        "name": "Difenoconazole", "cas": "119446-68-3", "formula": "C19H17Cl2N3O3",
+        "smiles": "OC(Cn1cncn1)(c1ccc(Oc2ccc(Cl)cc2)cc1)c1ccc(Cl)cc1", "mw": 406.3,
+        "degT50_soil": 85, "degT50_water": 14, "degT50_sediment": 170,
+        "koc": 3760, "kfoc": 3760, "freundlich_n": 0.90,
+        "vapor_pressure": 3.3e-8, "henry_const": 3.6e-6,
+        "solubility": 15, "pka": None, "logP": 4.36,
+        "cls": "Triazole", "status": "Approved",
+        "n_atoms": 38, "n_heavy": 25, "hbd": 1, "hba": 4, "n_rings": 4, "n_rotatable": 6
+    },
 ]
 
 
