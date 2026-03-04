@@ -35,17 +35,20 @@ FEATURE_NAMES = [
     "n_rings", "n_rotatable", "solubility_log",
     "vapor_pressure_log", "freundlich_n",
     "tpsa_approx", "aromatic_ring_frac",
-    # Phase 4: microbial degradation proxies
+    # Phase 4a: microbial degradation proxies
     "n_hydrolyzable", "n_halogens", "bioaccessibility",
+    # Phase 4b: blind-spot corrections
+    "charge_state", "conjugated_pi_size",
 ]
-N_FEATURES = len(FEATURE_NAMES)  # 15
+N_FEATURES = len(FEATURE_NAMES)  # 17
 
 
 def extract_features(substance):
     """
-    Extract and normalize 15 molecular descriptor features.
-    Returns PennyLane-compatible numpy array of length 15.
-    Includes 3 microbial degradation proxy features (Phase 4).
+    Extract and normalize 17 molecular descriptor features.
+    Returns PennyLane-compatible numpy array of length 17.
+    Includes microbial degradation proxies (Phase 4a) and
+    blind-spot corrections (Phase 4b: charge_state, conjugated_pi_size).
     """
     sol = substance.get("solubility", 1.0)
     vp  = substance.get("vapor_pressure", 1e-6)
@@ -99,6 +102,44 @@ def extract_features(substance):
     # 3. Bioaccessibility: log10(solubility / koc) — microbial availability
     bioaccessibility = np.log10(max(sol, 1e-6) / max(koc, 1))
 
+    # ── Phase 4b: Blind-spot corrections ──
+    # 4. Charge state — pKa-based cationic correction
+    #    Permanently charged molecules (Diquat, Paraquat) bind irreversibly
+    #    to clay minerals → effective bioaccessibility ≈ 0
+    pka = substance.get("pka", None)
+    if pka is None:
+        # Neutral molecule — no charge correction
+        charge_state = 0.0
+    elif pka > 10:
+        # Strong base → fully protonated at soil pH → cationic binding
+        charge_state = 1.0
+    elif pka < 2:
+        # Strong acid → anionic at soil pH → mobile
+        charge_state = -0.5
+    else:
+        # Weak acid/base — partial correction
+        charge_state = max(0, (pka - 5.0) / 5.0)  # 0 at pH5, 1.0 at pH10
+
+    # 5. Conjugated pi system size — photolability proxy
+    #    Large conjugated systems (rotenone, pyrethrins) absorb UV/vis
+    #    and undergo rapid photodegradation
+    conjugated_pi_size = 0
+    if smiles:
+        try:
+            from rdkit import Chem
+            mol = Chem.MolFromSmiles(smiles)
+            if mol:
+                # Count aromatic atoms as proxy for conjugated system extent
+                aromatic_atoms = sum(1 for a in mol.GetAtoms() if a.GetIsAromatic())
+                # Also count non-aromatic double bonds (extended conjugation)
+                conj_double = 0
+                for bond in mol.GetBonds():
+                    if bond.GetBondTypeAsDouble() == 2.0 and not bond.GetIsAromatic():
+                        conj_double += 1
+                conjugated_pi_size = aromatic_atoms + conj_double * 2
+        except Exception:
+            pass
+
     raw = pnp.array([
         substance.get("mw", 300),
         substance.get("logP", 2.0),
@@ -112,15 +153,18 @@ def extract_features(substance):
         substance.get("freundlich_n", 0.9),
         tpsa_approx,
         aromatic_frac,
-        # Phase 4 proxies
+        # Phase 4a proxies
         n_hydrolyzable,
         n_halogens,
         bioaccessibility,
+        # Phase 4b blind-spot corrections
+        charge_state,
+        conjugated_pi_size,
     ], dtype=float, requires_grad=False)
 
     # Min-max scaling to [0, π] based on dataset statistics
-    mins = pnp.array([150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80, 0.0, 0.0,  0, 0, -8.0], dtype=float, requires_grad=False)
-    maxs = pnp.array([731.9,  7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00, 150.0, 3.0, 5, 6,  2.0], dtype=float, requires_grad=False)
+    mins = pnp.array([150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80, 0.0, 0.0,  0, 0, -8.0,  -0.5, 0], dtype=float, requires_grad=False)
+    maxs = pnp.array([731.9,  7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00, 150.0, 3.0, 5, 6,  2.0,  1.0, 30], dtype=float, requires_grad=False)
 
     scaled = (raw - mins) / (maxs - mins + 1e-8)
     scaled = pnp.clip(scaled, 0.0, 1.0) * np.pi
