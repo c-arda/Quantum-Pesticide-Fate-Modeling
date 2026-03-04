@@ -224,6 +224,73 @@ def api_classical_baseline():
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 
+# ── Hybrid QML+RF Stacking ────────────────────────────────────────
+
+from backend.hybrid_predictor import get_hybrid_results
+
+
+@app.route("/api/hybrid-results")
+def api_hybrid_results():
+    """Return hybrid stacking model results."""
+    try:
+        results = get_hybrid_results()
+        return jsonify(results or {"error": "No data available"})
+    except Exception as e:
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
+
+# ── Error Analysis by Chemical Class ──────────────────────────────
+
+@app.route("/api/error-analysis")
+def api_error_analysis():
+    """Return prediction errors grouped by chemical class."""
+    try:
+        cl_data = train_classical_baseline()
+        rf_results = cl_data["models"]["RandomForest"]["loo"]["results"]
+
+        cls_map = {s["name"]: s["cls"] for s in get_all_substances()}
+
+        from collections import defaultdict
+        deg_by_cls = defaultdict(list)
+        koc_by_cls = defaultdict(list)
+
+        for r in rf_results:
+            cls = cls_map.get(r["name"], "Unknown")
+            deg_by_cls[cls].append({
+                "name": r["name"],
+                "error": abs(r["deg_exp"] - r["deg_pred"]),
+                "pred_days": r["deg_pred_days"],
+                "exp_days": r["deg_exp_days"],
+            })
+            koc_by_cls[cls].append({
+                "name": r["name"],
+                "error": abs(r["koc_exp"] - r["koc_pred"]),
+                "pred_ml_g": r.get("koc_pred_val", 10 ** r["koc_pred"]),
+                "exp_ml_g": r.get("koc_exp_val", 10 ** r["koc_exp"]),
+            })
+
+        def summarize(cls_dict):
+            import numpy as np
+            summary = []
+            for cls, items in sorted(cls_dict.items(), key=lambda x: -np.mean([i["error"] for i in x[1]])):
+                errs = [i["error"] for i in items]
+                summary.append({
+                    "cls": cls,
+                    "n": len(items),
+                    "mean_error": round(np.mean(errs), 3),
+                    "max_error": round(np.max(errs), 3),
+                    "substances": items,
+                })
+            return summary
+
+        return jsonify({
+            "deg_by_class": summarize(deg_by_cls),
+            "koc_by_class": summarize(koc_by_cls),
+        })
+    except Exception as e:
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
+
 # ── Simulation ──────────────────────────────────────────────────────
 
 @app.route("/api/run", methods=["POST"])

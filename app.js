@@ -889,6 +889,60 @@ async function renderComparison() {
       </div>
     `;
 
+    // Fetch error analysis and append
+    try {
+      const errData = await apiFetch('/error-analysis');
+      const degClasses = errData.deg_by_class.slice(0, 15);
+      const kocClasses = errData.koc_by_class.slice(0, 15);
+
+      function errColor(e) {
+        if (e > 0.8) return '#f44';
+        if (e > 0.5) return '#fa0';
+        if (e > 0.3) return '#ff0';
+        return '#6f6';
+      }
+
+      function errRow(d) {
+        return `<tr style="border-bottom:1px solid var(--glass-border);">
+          <td style="padding:6px 8px;font-size:13px;">${d.cls}</td>
+          <td style="text-align:center;padding:6px;font-size:13px;">${d.n}</td>
+          <td style="text-align:center;padding:6px;font-weight:700;color:${errColor(d.mean_error)}">${d.mean_error.toFixed(2)}</td>
+          <td style="text-align:center;padding:6px;font-size:12px;color:var(--text-dim)">${d.max_error.toFixed(2)}</td>
+        </tr>`;
+      }
+
+      content.innerHTML += `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;">
+          <div class="glass" style="padding:20px;">
+            <div class="section-title" style="font-size:14px;"><span class="st-icon">🔴</span> DegT50 Error by Class (RF LOO)</div>
+            <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+              <thead><tr style="border-bottom:1px solid var(--glass-border);">
+                <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-muted);text-transform:uppercase">Class</th>
+                <th style="text-align:center;padding:6px;font-size:11px;color:var(--text-muted)">N</th>
+                <th style="text-align:center;padding:6px;font-size:11px;color:var(--text-muted)">Mean Err</th>
+                <th style="text-align:center;padding:6px;font-size:11px;color:var(--text-muted)">Max</th>
+              </tr></thead>
+              <tbody>${degClasses.map(errRow).join('')}</tbody>
+            </table>
+          </div>
+          <div class="glass" style="padding:20px;">
+            <div class="section-title" style="font-size:14px;"><span class="st-icon">🔵</span> Koc Error by Class (RF LOO)</div>
+            <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+              <thead><tr style="border-bottom:1px solid var(--glass-border);">
+                <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-muted);text-transform:uppercase">Class</th>
+                <th style="text-align:center;padding:6px;font-size:11px;color:var(--text-muted)">N</th>
+                <th style="text-align:center;padding:6px;font-size:11px;color:var(--text-muted)">Mean Err</th>
+                <th style="text-align:center;padding:6px;font-size:11px;color:var(--text-muted)">Max</th>
+              </tr></thead>
+              <tbody>${kocClasses.map(errRow).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    } catch (e) {
+      // Error analysis not critical — silently skip
+    }
+
   } catch (e) {
     loading.style.display = 'none';
     content.innerHTML = `<div style="padding:20px;color:#f06060;">Error loading comparison: ${e.message}</div>`;
