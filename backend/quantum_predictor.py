@@ -1,0 +1,813 @@
+"""
+Quantum ML Predictor — PennyLane QML Circuit (v2)
+====================================================
+Upgraded variational quantum circuit for predicting pesticide
+environmental fate properties (DegT50 and Koc) from molecular descriptors.
+
+v2 Upgrades:
+  - 10 qubits (was 6) → larger Hilbert space
+  - 8 variational layers (was 4) → more expressivity
+  - Gradient-based Adam optimizer (was stochastic perturbation)
+  - Improved feature encoding with IQP-style entangling
+  - Log-space prediction for better dynamic range coverage
+  - Proper train/validation split reporting
+
+Architecture:
+  - 10 features → angle encoding into 10 qubits
+  - IQP-style feature-entangled encoding (ZZ interactions)
+  - 8 layers of strongly-entangling variational gates
+  - Measurement: PauliZ expectations → linear readout
+"""
+
+import numpy as np
+import pennylane as qml
+from pennylane import numpy as pnp
+
+# ── Device setup ────────────────────────────────────────────────────
+N_QUBITS = 12
+N_LAYERS = 8
+dev = qml.device("default.qubit", wires=N_QUBITS)
+
+
+# ── Feature engineering ─────────────────────────────────────────────
+FEATURE_NAMES = [
+    "mw", "logP", "n_heavy", "hbd", "hba",
+    "n_rings", "n_rotatable", "solubility_log",
+    "vapor_pressure_log", "freundlich_n",
+    "tpsa_approx", "aromatic_ring_frac"
+]
+
+
+def extract_features(substance):
+    """
+    Extract and normalize 12 molecular descriptor features.
+    Returns PennyLane-compatible numpy array of length 12.
+    """
+    sol = substance.get("solubility", 1.0)
+    vp  = substance.get("vapor_pressure", 1e-6)
+    n_heavy = substance.get("n_heavy", 18)
+    hbd = substance.get("hbd", 1)
+    hba = substance.get("hba", 4)
+    n_rings = substance.get("n_rings", 1)
+
+    # Approximate TPSA from HBD/HBA (Ertl method approximation)
+    tpsa_approx = hbd * 23.0 + hba * 9.23
+    # Aromatic ring fraction
+    aromatic_frac = n_rings / max(n_heavy, 1) * 10.0
+
+    raw = pnp.array([
+        substance.get("mw", 300),
+        substance.get("logP", 2.0),
+        n_heavy,
+        hbd,
+        hba,
+        n_rings,
+        substance.get("n_rotatable", 3),
+        np.log10(max(sol, 1e-6)),
+        np.log10(max(vp, 1e-15)),
+        substance.get("freundlich_n", 0.9),
+        tpsa_approx,
+        aromatic_frac,
+    ], dtype=float, requires_grad=False)
+
+    # Min-max scaling to [0, π] based on dataset statistics
+    mins = pnp.array([150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80, 0.0, 0.0], dtype=float, requires_grad=False)
+    maxs = pnp.array([731.9,  7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00, 150.0, 3.0], dtype=float, requires_grad=False)
+
+    scaled = (raw - mins) / (maxs - mins + 1e-8)
+    scaled = pnp.clip(scaled, 0.0, 1.0) * np.pi
+
+    return scaled
+
+
+# ── Quantum circuit ─────────────────────────────────────────────────
+
+@qml.qnode(dev, interface="autograd")
+def quantum_circuit(features, weights):
+    """
+    Variational quantum circuit with IQP-style feature encoding.
+
+    Parameters
+    ----------
+    features : array(10,)
+        Normalized molecular descriptor features.
+    weights : array(N_LAYERS, N_QUBITS, 3)
+        Variational parameters.
+
+    Returns
+    -------
+    array(N_QUBITS,)
+        Expectation values of PauliZ on each qubit.
+    """
+    # ── Layer 1: Angle encoding ──
+    for i in range(N_QUBITS):
+        qml.Hadamard(wires=i)
+        qml.RZ(features[i], wires=i)
+
+    # ── Layer 2: IQP-style feature entanglement ──
+    # Encode feature-feature interactions via ZZ gates
+    for i in range(N_QUBITS - 1):
+        qml.CNOT(wires=[i, i + 1])
+        qml.RZ(features[i] * features[(i + 1) % N_QUBITS], wires=i + 1)
+        qml.CNOT(wires=[i, i + 1])
+
+    # ── Layer 3: Second angle encoding for re-uploading ──
+    for i in range(N_QUBITS):
+        qml.RY(features[i], wires=i)
+
+    # ── Variational layers ──
+    for layer in range(N_LAYERS):
+        # Single-qubit rotations
+        for i in range(N_QUBITS):
+            qml.Rot(weights[layer, i, 0],
+                     weights[layer, i, 1],
+                     weights[layer, i, 2], wires=i)
+
+        # Entangling: nearest-neighbor CNOT ladder
+        for i in range(0, N_QUBITS - 1, 2):
+            qml.CNOT(wires=[i, i + 1])
+
+        # Offset entangling on even layers
+        if layer % 2 == 0:
+            for i in range(1, N_QUBITS - 1, 2):
+                qml.CNOT(wires=[i, i + 1])
+            # Wrap-around
+            qml.CNOT(wires=[N_QUBITS - 1, 0])
+
+    return [qml.expval(qml.PauliZ(i)) for i in range(N_QUBITS)]
+
+
+# ── Linear readout ──────────────────────────────────────────────────
+
+def circuit_predict(features, weights, readout_weights):
+    """
+    Get prediction from circuit output.
+    readout_weights: array(N_QUBITS + 1,) — linear weights + bias
+    """
+    expvals = pnp.array(quantum_circuit(features, weights))
+    # Linear combination of expectations + bias
+    pred = pnp.dot(readout_weights[:N_QUBITS], expvals) + readout_weights[N_QUBITS]
+    return pred
+
+
+# ── Training ────────────────────────────────────────────────────────
+
+def _train_model(features_list, targets, n_epochs=80, lr=0.05):
+    """
+    Train the quantum circuit + linear readout using Adam optimizer.
+
+    Parameters
+    ----------
+    features_list : list of arrays
+        Feature vectors for each substance.
+    targets : array
+        Log10-transformed target values.
+    n_epochs : int
+        Number of training epochs.
+    lr : float
+        Learning rate.
+
+    Returns
+    -------
+    weights, readout_weights, final_loss
+    """
+    # Initialize parameters
+    np.random.seed(42)
+    weights = pnp.array(
+        np.random.uniform(-0.5, 0.5, (N_LAYERS, N_QUBITS, 3)),
+        requires_grad=True
+    )
+    readout_weights = pnp.array(
+        np.random.uniform(-0.5, 0.5, N_QUBITS + 1),
+        requires_grad=True
+    )
+
+    opt = qml.AdamOptimizer(stepsize=lr)
+
+    def cost_fn(weights, readout_weights):
+        total_loss = pnp.array(0.0)
+        for feat, target in zip(features_list, targets):
+            pred = circuit_predict(feat, weights, readout_weights)
+            total_loss = total_loss + (pred - target) ** 2
+        return total_loss / len(features_list)
+
+    best_loss = float('inf')
+    best_weights = weights.copy()
+    best_readout = readout_weights.copy()
+
+    for epoch in range(n_epochs):
+        (weights, readout_weights), loss = opt.step_and_cost(
+            cost_fn, weights, readout_weights
+        )
+
+        loss_val = float(loss)
+        if loss_val < best_loss:
+            best_loss = loss_val
+            best_weights = weights.copy()
+            best_readout = readout_weights.copy()
+
+        if epoch % 20 == 0 or epoch == n_epochs - 1:
+            print(f"    Epoch {epoch:3d}/{n_epochs}: MSE = {loss_val:.4f}")
+
+    return best_weights, best_readout, best_loss
+
+
+def _init_pretrained_weights():
+    """
+    Train both DegT50 and Koc models on the substance database.
+    """
+    from backend.spin_database import SUBSTANCES
+
+    # Prepare training data
+    features_list = []
+    targets_deg = []
+    targets_koc = []
+
+    for sub in SUBSTANCES:
+        feat = extract_features(sub)
+        features_list.append(feat)
+        targets_deg.append(pnp.array(np.log10(max(sub["degT50_soil"], 0.1)), requires_grad=False))
+        targets_koc.append(pnp.array(np.log10(max(sub["koc"], 0.1)), requires_grad=False))
+
+    print(f"  Training on {len(SUBSTANCES)} substances, {N_QUBITS} qubits, {N_LAYERS} layers")
+    print(f"  DegT50 range: {min(s['degT50_soil'] for s in SUBSTANCES):.1f} – {max(s['degT50_soil'] for s in SUBSTANCES):.0f} days")
+    print(f"  Koc range:    {min(s['koc'] for s in SUBSTANCES):.0f} – {max(s['koc'] for s in SUBSTANCES):,.0f} mL/g")
+
+    print("\n  Training DegT50 model...")
+    w_deg, r_deg, l_deg = _train_model(features_list, targets_deg, n_epochs=80, lr=0.04)
+
+    print("\n  Training Koc model...")
+    w_koc, r_koc, l_koc = _train_model(features_list, targets_koc, n_epochs=80, lr=0.04)
+
+    return w_deg, r_deg, w_koc, r_koc, l_deg, l_koc
+
+
+# ── Persistent weight cache with incremental learning ───────────────
+import hashlib
+import json
+import os
+
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".qml_cache")
+CACHE_FILE = os.path.join(CACHE_DIR, "weights_v2.npz")
+HASH_FILE = os.path.join(CACHE_DIR, "db_hash.json")
+
+_cached_weights = None
+
+INCREMENTAL_THRESHOLD = 5  # fine-tune readout if ≤ this many substances changed
+SIMILARITY_THRESHOLD = 0.3  # Tanimoto cutoff; below = structurally novel → full retrain
+DESCRIPTOR_NOVELTY_THRESHOLD = 3.0  # Euclidean distance in feature space; above = novel
+
+
+def _check_chemical_novelty(new_substances, existing_substances):
+    """
+    Chemical-space guardrail: detect if any new substance is structurally
+    isolated from the existing training set.
+
+    Returns (is_novel: bool, reason: str).
+
+    Strategy:
+    1. Try RDKit Tanimoto similarity on Morgan fingerprints (best)
+    2. Fall back to Euclidean distance in normalized descriptor space
+    """
+    # ── Try RDKit first
+    try:
+        from rdkit import Chem, RDLogger
+        from rdkit.Chem import rdFingerprintGenerator
+        from rdkit import DataStructs
+
+        # Suppress noisy RDKit warnings
+        RDLogger.DisableLog('rdApp.*')
+
+        gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+
+        existing_fps = []
+        for s in existing_substances:
+            mol = Chem.MolFromSmiles(s.get("smiles", ""))
+            if mol:
+                existing_fps.append(gen.GetFingerprint(mol))
+
+        if existing_fps:
+            for ns in new_substances:
+                mol = Chem.MolFromSmiles(ns.get("smiles", ""))
+                if not mol:
+                    continue
+                new_fp = gen.GetFingerprint(mol)
+                max_sim = max(DataStructs.TanimotoSimilarity(new_fp, fp) for fp in existing_fps)
+                if max_sim < SIMILARITY_THRESHOLD:
+                    return True, (
+                        f"{ns['name']} Tanimoto similarity = {max_sim:.3f} "
+                        f"(< {SIMILARITY_THRESHOLD}) — structurally novel"
+                    )
+            return False, "all new substances have Tanimoto ≥ threshold"
+
+    except ImportError:
+        pass  # RDKit not available, fall back to descriptor distance
+
+    # ── Fallback: Euclidean distance in normalized descriptor space
+    existing_feats = [extract_features(s) for s in existing_substances]
+    for ns in new_substances:
+        new_feat = extract_features(ns)
+        min_dist = min(
+            float(np.sqrt(np.sum((new_feat - ef) ** 2)))
+            for ef in existing_feats
+        )
+        if min_dist > DESCRIPTOR_NOVELTY_THRESHOLD:
+            return True, (
+                f"{ns['name']} descriptor distance = {min_dist:.2f} "
+                f"(> {DESCRIPTOR_NOVELTY_THRESHOLD}) — novel in feature space"
+            )
+
+    return False, "all new substances within descriptor-space threshold"
+
+
+def _compute_db_hash():
+    """Compute a hash of the substance database to detect changes."""
+    from backend.spin_database import SUBSTANCES
+    data_str = json.dumps(
+        [{k: v for k, v in s.items() if k != "smiles"} for s in SUBSTANCES],
+        sort_keys=True, default=str
+    )
+    return hashlib.sha256(data_str.encode()).hexdigest()[:16]
+
+
+def _save_weights(weights_dict, db_hash, n_substances):
+    """Save trained weights to disk with metadata."""
+    from backend.spin_database import SUBSTANCES as ALL_SUBS
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    np.savez(
+        CACHE_FILE,
+        weights_deg=np.array(weights_dict["weights_deg"]),
+        readout_deg=np.array(weights_dict["readout_deg"]),
+        weights_koc=np.array(weights_dict["weights_koc"]),
+        readout_koc=np.array(weights_dict["readout_koc"]),
+        loss_deg=np.array(weights_dict["loss_deg"]),
+        loss_koc=np.array(weights_dict["loss_koc"]),
+    )
+    with open(HASH_FILE, "w") as f:
+        json.dump({
+            "hash": db_hash,
+            "n_substances": n_substances,
+            "n_qubits": N_QUBITS,
+            "substance_names": [s["name"] for s in ALL_SUBS],
+        }, f)
+    print(f"  Weights saved to {CACHE_FILE}")
+
+
+def _load_cached_meta():
+    """Load cached metadata (hash, substance count). Returns dict or None."""
+    if not os.path.exists(HASH_FILE):
+        return None
+    try:
+        with open(HASH_FILE, "r") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _load_cached_weights_raw():
+    """Load raw weight arrays from disk. Returns dict or None."""
+    if not os.path.exists(CACHE_FILE):
+        return None
+    data = np.load(CACHE_FILE)
+    return {
+        "weights_deg": pnp.array(data["weights_deg"], requires_grad=False),
+        "readout_deg": pnp.array(data["readout_deg"], requires_grad=False),
+        "weights_koc": pnp.array(data["weights_koc"], requires_grad=False),
+        "readout_koc": pnp.array(data["readout_koc"], requires_grad=False),
+        "loss_deg": float(data["loss_deg"]),
+        "loss_koc": float(data["loss_koc"]),
+    }
+
+
+def _fine_tune_readout(old_weights, features_list, targets_deg, targets_koc,
+                       n_epochs=15, lr=0.05):
+    """Fine-tune only the readout (linear) layer — variational weights frozen."""
+    print("  Fine-tuning readout layer only (variational weights frozen)...")
+
+    # Frozen variational weights
+    w_deg_frozen = pnp.array(old_weights["weights_deg"], requires_grad=False)
+    w_koc_frozen = pnp.array(old_weights["weights_koc"], requires_grad=False)
+
+    # Trainable readout weights — warm-start from old values
+    r_deg = pnp.array(old_weights["readout_deg"], requires_grad=True)
+    r_koc = pnp.array(old_weights["readout_koc"], requires_grad=True)
+
+    # Pre-compute all quantum circuit outputs (forward pass only, no gradient through circuit)
+    print("    Pre-computing quantum circuit outputs...")
+    deg_expectations = [pnp.array(quantum_circuit(f, w_deg_frozen), requires_grad=False)
+                        for f in features_list]
+    koc_expectations = [pnp.array(quantum_circuit(f, w_koc_frozen), requires_grad=False)
+                        for f in features_list]
+
+    # Train readout on DegT50
+    opt_deg = qml.AdamOptimizer(stepsize=lr)
+
+    def loss_deg(readout):
+        total = 0.0
+        for exp_vals, target in zip(deg_expectations, targets_deg):
+            pred = pnp.dot(readout[:N_QUBITS], exp_vals) + readout[N_QUBITS]
+            total = total + (pred - target) ** 2
+        return total / len(targets_deg)
+
+    for epoch in range(n_epochs):
+        r_deg, cost = opt_deg.step_and_cost(loss_deg, r_deg)
+        if epoch % 5 == 0 or epoch == n_epochs - 1:
+            print(f"    DegT50 readout epoch {epoch:3d}/{n_epochs}: MSE = {float(cost):.4f}")
+    l_deg = float(loss_deg(r_deg))
+
+    # Train readout on Koc
+    opt_koc = qml.AdamOptimizer(stepsize=lr)
+
+    def loss_koc(readout):
+        total = 0.0
+        for exp_vals, target in zip(koc_expectations, targets_koc):
+            pred = pnp.dot(readout[:N_QUBITS], exp_vals) + readout[N_QUBITS]
+            total = total + (pred - target) ** 2
+        return total / len(targets_koc)
+
+    for epoch in range(n_epochs):
+        r_koc, cost = opt_koc.step_and_cost(loss_koc, r_koc)
+        if epoch % 5 == 0 or epoch == n_epochs - 1:
+            print(f"    Koc readout epoch {epoch:3d}/{n_epochs}: MSE = {float(cost):.4f}")
+    l_koc = float(loss_koc(r_koc))
+
+    return w_deg_frozen, r_deg, w_koc_frozen, r_koc, l_deg, l_koc
+
+
+def _get_weights():
+    global _cached_weights
+    if _cached_weights is None:
+        _ensure_initialized()
+    return _cached_weights
+
+
+def _train_weights():
+    global _cached_weights
+    from backend.spin_database import SUBSTANCES
+
+    n_var = N_LAYERS * N_QUBITS * 3
+    n_readout = N_QUBITS + 1
+    print(f"[QML v2] Initializing quantum ML predictor...")
+    print(f"  Circuit: {N_QUBITS} qubits × {N_LAYERS} layers = {n_var} variational + {n_readout} readout params")
+
+    current_hash = _compute_db_hash()
+    current_n = len(SUBSTANCES)
+    meta = _load_cached_meta()
+
+    # ── Case 1: Cache matches exactly → instant load
+    if meta and meta.get("hash") == current_hash and meta.get("n_qubits") == N_QUBITS:
+        cached = _load_cached_weights_raw()
+        if cached:
+            _cached_weights = cached
+            print(f"  Loaded cached weights ({meta['n_substances']} substances)")
+            print(f"  DegT50 MSE={cached['loss_deg']:.4f}, Koc MSE={cached['loss_koc']:.4f}")
+            print("[QML v2] Ready! (loaded from cache, no training needed)\n")
+            return
+
+    # ── Case 2: Hash differs — check if incremental or full retrain
+    old_weights = _load_cached_weights_raw()
+    old_n = meta.get("n_substances", 0) if meta else 0
+    old_qubits = meta.get("n_qubits", 0) if meta else 0
+    n_diff = abs(current_n - old_n)
+
+    if old_weights and old_qubits == N_QUBITS and n_diff <= INCREMENTAL_THRESHOLD:
+        # Count-based check passed — now check chemical-space novelty
+        print(f"  Database changed: {old_n} → {current_n} substances ({n_diff} changed)")
+
+        # Identify new substances (those not in old set by name)
+        old_names = set(meta.get("substance_names", [])) if meta else set()
+        new_subs = [s for s in SUBSTANCES if s["name"] not in old_names] if old_names else []
+        existing_subs = [s for s in SUBSTANCES if s["name"] in old_names] if old_names else SUBSTANCES
+
+        if new_subs and existing_subs:
+            is_novel, novelty_reason = _check_chemical_novelty(new_subs, existing_subs)
+            if is_novel:
+                print(f"  ⚠️  Chemical novelty detected: {novelty_reason}")
+                print(f"  Escalating to full retrain (frozen feature map may not represent this compound)")
+                # Fall through to Case 3
+            else:
+                print(f"  ✓ Novelty check passed: {novelty_reason}")
+        else:
+            is_novel = False
+
+        if not is_novel:
+            # ── Incremental: fine-tune readout only
+            print(f"  ≤{INCREMENTAL_THRESHOLD} changes → incremental fine-tune (readout only)")
+            print(f"  Training on {current_n} substances, {N_QUBITS} qubits, {N_LAYERS} layers")
+
+            features_list = [extract_features(sub) for sub in SUBSTANCES]
+            targets_deg = [pnp.array(np.log10(max(s["degT50_soil"], 0.1)), requires_grad=False) for s in SUBSTANCES]
+            targets_koc = [pnp.array(np.log10(max(s["koc"], 0.1)), requires_grad=False) for s in SUBSTANCES]
+
+            w_deg, r_deg, w_koc, r_koc, l_deg, l_koc = _fine_tune_readout(
+                old_weights, features_list, targets_deg, targets_koc
+            )
+
+            _cached_weights = {
+                "weights_deg": w_deg, "readout_deg": r_deg,
+                "weights_koc": w_koc, "readout_koc": r_koc,
+                "loss_deg": l_deg, "loss_koc": l_koc,
+            }
+            _save_weights(_cached_weights, current_hash, current_n)
+            print(f"\n[QML v2] Incremental training complete!")
+            print(f"  Final MSE — DegT50: {l_deg:.4f}, Koc: {l_koc:.4f}")
+            return
+
+    # ── Case 3: Full retrain (no cache, architecture change, big DB change, or novel compound)
+    reason = "no cache" if not old_weights else f"{n_diff} substance changes (>{INCREMENTAL_THRESHOLD})"
+    if old_qubits and old_qubits != N_QUBITS:
+        reason = f"qubit count changed ({old_qubits}→{N_QUBITS})"
+    print(f"  Full retrain needed: {reason}")
+    print(f"  Training from scratch...")
+
+    w_deg, r_deg, w_koc, r_koc, l_deg, l_koc = _init_pretrained_weights()
+    _cached_weights = {
+        "weights_deg": w_deg, "readout_deg": r_deg,
+        "weights_koc": w_koc, "readout_koc": r_koc,
+        "loss_deg": l_deg, "loss_koc": l_koc,
+    }
+    _save_weights(_cached_weights, current_hash, current_n)
+
+    print(f"\n[QML v2] Training complete!")
+    print(f"  Final MSE — DegT50: {l_deg:.4f}, Koc: {l_koc:.4f}")
+    print(f"  (MSE is on log10 scale: 0.5 ≈ factor-of-3 error, 0.1 ≈ 25% error)")
+
+
+# Lazy initialization — only train when predictions are needed
+_initialized = False
+
+
+def _ensure_initialized():
+    """Initialize quantum predictor on first predict call (not on import)."""
+    global _initialized
+    if not _initialized:
+        _train_weights()
+        _initialized = True
+
+
+# ── Prediction functions ────────────────────────────────────────────
+
+def predict_degtl50(substance):
+    """Predict DegT50 (soil half-life in days) using the trained quantum circuit."""
+    weights = _get_weights()
+    features = extract_features(substance)
+
+    expvals = quantum_circuit(features, weights["weights_deg"])
+    expvals_arr = pnp.array(expvals)
+    log_pred = float(pnp.dot(weights["readout_deg"][:N_QUBITS], expvals_arr) + weights["readout_deg"][N_QUBITS])
+
+    predicted = 10 ** log_pred
+    experimental = substance["degT50_soil"]
+
+    return {
+        "substance": substance["name"],
+        "property": "DegT50_soil",
+        "predicted_days": round(predicted, 1),
+        "experimental_days": experimental,
+        "error_pct": round(abs(predicted - experimental) / max(experimental, 0.1) * 100, 1),
+        "log10_predicted": round(log_pred, 3),
+        "log10_experimental": round(np.log10(max(experimental, 0.1)), 3),
+        "n_qubits": N_QUBITS,
+        "n_layers": N_LAYERS,
+        "circuit_depth": N_LAYERS * 3 + 4,
+        "expectation_values": [float(e) for e in expvals],
+    }
+
+
+def predict_koc(substance):
+    """Predict Koc (organic carbon adsorption coefficient) using the trained quantum circuit."""
+    weights = _get_weights()
+    features = extract_features(substance)
+
+    expvals = quantum_circuit(features, weights["weights_koc"])
+    expvals_arr = pnp.array(expvals)
+    log_pred = float(pnp.dot(weights["readout_koc"][:N_QUBITS], expvals_arr) + weights["readout_koc"][N_QUBITS])
+
+    predicted = 10 ** log_pred
+    experimental = substance["koc"]
+
+    return {
+        "substance": substance["name"],
+        "property": "Koc",
+        "predicted_ml_g": round(predicted, 1),
+        "experimental_ml_g": experimental,
+        "error_pct": round(abs(predicted - experimental) / max(experimental, 0.1) * 100, 1),
+        "log10_predicted": round(log_pred, 3),
+        "log10_experimental": round(np.log10(max(experimental, 0.1)), 3),
+        "n_qubits": N_QUBITS,
+        "n_layers": N_LAYERS,
+        "circuit_depth": N_LAYERS * 3 + 4,
+        "expectation_values": [float(e) for e in expvals],
+    }
+
+
+def predict_all(substance):
+    """Predict both DegT50 and Koc for a substance."""
+    return {
+        "degtl50": predict_degtl50(substance),
+        "koc": predict_koc(substance),
+    }
+
+
+def batch_predict(substances):
+    """Predict DegT50 and Koc for a list of substances."""
+    results = []
+    for sub in substances:
+        try:
+            pred = predict_all(sub)
+            results.append({
+                "name": sub["name"],
+                "cas": sub["cas"],
+                "degtl50_exp": sub["degT50_soil"],
+                "degtl50_pred": pred["degtl50"]["predicted_days"],
+                "degtl50_err_pct": pred["degtl50"]["error_pct"],
+                "koc_exp": sub["koc"],
+                "koc_pred": pred["koc"]["predicted_ml_g"],
+                "koc_err_pct": pred["koc"]["error_pct"],
+            })
+        except Exception as e:
+            results.append({
+                "name": sub["name"],
+                "cas": sub["cas"],
+                "error": str(e),
+            })
+    return results
+
+
+def get_circuit_info():
+    """Return information about the quantum circuit architecture."""
+    weights = _get_weights()
+    n_var = N_LAYERS * N_QUBITS * 3
+    n_readout = N_QUBITS + 1
+    return {
+        "n_qubits": N_QUBITS,
+        "n_layers": N_LAYERS,
+        "variational_params": n_var,
+        "readout_params": n_readout,
+        "total_params": n_var + n_readout,
+        "n_parameters": n_var + n_readout,  # backward compat
+        "gate_count": N_QUBITS * 3 + (N_QUBITS - 1) * 3 + N_QUBITS + N_LAYERS * (N_QUBITS * 3 + N_QUBITS),
+        "circuit_depth": N_LAYERS * 3 + 4,
+        "feature_count": len(FEATURE_NAMES),
+        "feature_names": FEATURE_NAMES,
+        "training_loss_degtl50": float(weights["loss_deg"]),
+        "training_loss_koc": float(weights["loss_koc"]),
+        "encoding": "IQP-style angle + ZZ entangling + data re-uploading",
+        "optimizer": "Adam (gradient-based, parameter-shift rule)",
+        "device": "default.qubit (statevector simulator)",
+        "framework": f"PennyLane {qml.__version__}",
+    }
+
+
+# ── Cross-validation ────────────────────────────────────────────────
+
+CV_CACHE_FILE = os.path.join(CACHE_DIR, "cv_results.json")
+
+
+def run_cross_validation(n_epochs_cv=25, lr_cv=0.05, k_folds=None):
+    """
+    Cross-validation for the QML model.
+
+    Args:
+        n_epochs_cv: Training epochs per fold (default 25)
+        lr_cv: Learning rate per fold (default 0.05)
+        k_folds: Number of folds. None = leave-one-out (N folds).
+                 Set to e.g. 5 for 5-fold CV (faster, ~20× less time).
+    """
+    from backend.spin_database import SUBSTANCES
+
+    n = len(SUBSTANCES)
+    actual_folds = k_folds if k_folds else n
+    cv_type = f"{k_folds}-fold" if k_folds else "leave-one-out"
+
+    # Per-type cache file
+    cache_suffix = f"_k{k_folds}" if k_folds else "_loo"
+    cv_cache = os.path.join(CACHE_DIR, f"cv_results{cache_suffix}.json")
+
+    # Check cache
+    if os.path.exists(cv_cache):
+        with open(cv_cache, "r") as f:
+            cached = json.load(f)
+        current_hash = _compute_db_hash()
+        if cached.get("db_hash") == current_hash:
+            print(f"[CV] Loaded cached {cv_type} CV results ({len(cached['results'])} folds)")
+            return cached
+
+    print(f"[CV] Running {cv_type} cross-validation ({actual_folds} folds, {n} substances)...")
+    all_features = [extract_features(sub) for sub in SUBSTANCES]
+    all_deg = [pnp.array(np.log10(max(s["degT50_soil"], 0.1)), requires_grad=False) for s in SUBSTANCES]
+    all_koc = [pnp.array(np.log10(max(s["koc"], 0.1)), requires_grad=False) for s in SUBSTANCES]
+
+    results = []
+
+    if k_folds:
+        # ── K-fold: shuffle and split into k groups
+        indices = list(range(n))
+        np.random.seed(42)  # reproducible splits
+        np.random.shuffle(indices)
+        fold_size = n // k_folds
+        folds = []
+        for f in range(k_folds):
+            start = f * fold_size
+            end = start + fold_size if f < k_folds - 1 else n
+            folds.append(indices[start:end])
+
+        for fold_idx, test_indices in enumerate(folds):
+            train_indices = [i for i in indices if i not in test_indices]
+
+            train_feat = [all_features[i] for i in train_indices]
+            train_deg = [all_deg[i] for i in train_indices]
+            train_koc = [all_koc[i] for i in train_indices]
+
+            w_deg, r_deg, _ = _train_model(train_feat, train_deg, n_epochs=n_epochs_cv, lr=lr_cv)
+            w_koc, r_koc, _ = _train_model(train_feat, train_koc, n_epochs=n_epochs_cv, lr=lr_cv)
+
+            for i in test_indices:
+                feat = all_features[i]
+                exp_deg = quantum_circuit(feat, w_deg)
+                exp_koc = quantum_circuit(feat, w_koc)
+                pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS]), pnp.array(exp_deg)) + r_deg[N_QUBITS])
+                pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS]), pnp.array(exp_koc)) + r_koc[N_QUBITS])
+
+                sub = SUBSTANCES[i]
+                results.append({
+                    "name": sub["name"],
+                    "fold": fold_idx + 1,
+                    "deg_exp": float(all_deg[i]),
+                    "deg_pred": round(pred_deg, 3),
+                    "deg_pred_days": round(10 ** pred_deg, 1),
+                    "deg_exp_days": sub["degT50_soil"],
+                    "koc_exp": float(all_koc[i]),
+                    "koc_pred": round(pred_koc, 3),
+                    "koc_pred_val": round(10 ** pred_koc, 1),
+                    "koc_exp_val": sub["koc"],
+                })
+
+            print(f"  Fold {fold_idx + 1}/{k_folds} complete ({len(test_indices)} test substances)")
+    else:
+        # ── Leave-one-out
+        for i in range(n):
+            train_feat = [f for j, f in enumerate(all_features) if j != i]
+            train_deg = [t for j, t in enumerate(all_deg) if j != i]
+            train_koc = [t for j, t in enumerate(all_koc) if j != i]
+
+            w_deg, r_deg, _ = _train_model(train_feat, train_deg, n_epochs=n_epochs_cv, lr=lr_cv)
+            w_koc, r_koc, _ = _train_model(train_feat, train_koc, n_epochs=n_epochs_cv, lr=lr_cv)
+
+            feat = all_features[i]
+            exp_deg = quantum_circuit(feat, w_deg)
+            exp_koc = quantum_circuit(feat, w_koc)
+            pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS]), pnp.array(exp_deg)) + r_deg[N_QUBITS])
+            pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS]), pnp.array(exp_koc)) + r_koc[N_QUBITS])
+
+            sub = SUBSTANCES[i]
+            results.append({
+                "name": sub["name"],
+                "fold": i + 1,
+                "deg_exp": float(all_deg[i]),
+                "deg_pred": round(pred_deg, 3),
+                "deg_pred_days": round(10 ** pred_deg, 1),
+                "deg_exp_days": sub["degT50_soil"],
+                "koc_exp": float(all_koc[i]),
+                "koc_pred": round(pred_koc, 3),
+                "koc_pred_val": round(10 ** pred_koc, 1),
+                "koc_exp_val": sub["koc"],
+            })
+
+            if (i + 1) % 10 == 0 or i == n - 1:
+                print(f"  Fold {i + 1}/{n} complete")
+
+    # Calculate overall stats
+    deg_errors = [abs(r["deg_exp"] - r["deg_pred"]) for r in results]
+    koc_errors = [abs(r["koc_exp"] - r["koc_pred"]) for r in results]
+
+    def calc_r2(exp_list, pred_list):
+        mean_exp = sum(exp_list) / len(exp_list)
+        ss_res = sum((e - p) ** 2 for e, p in zip(exp_list, pred_list))
+        ss_tot = sum((e - mean_exp) ** 2 for e in exp_list)
+        return 1 - ss_res / max(ss_tot, 1e-10)
+
+    output = {
+        "cv_type": cv_type,
+        "n_folds": actual_folds,
+        "n_substances": n,
+        "n_qubits": N_QUBITS,
+        "n_layers": N_LAYERS,
+        "cv_epochs": n_epochs_cv,
+        "results": results,
+        "deg_r2": round(calc_r2([r["deg_exp"] for r in results], [r["deg_pred"] for r in results]), 4),
+        "deg_mae": round(sum(deg_errors) / len(deg_errors), 4),
+        "deg_rmse": round((sum(e ** 2 for e in deg_errors) / len(deg_errors)) ** 0.5, 4),
+        "koc_r2": round(calc_r2([r["koc_exp"] for r in results], [r["koc_pred"] for r in results]), 4),
+        "koc_mae": round(sum(koc_errors) / len(koc_errors), 4),
+        "koc_rmse": round((sum(e ** 2 for e in koc_errors) / len(koc_errors)) ** 0.5, 4),
+        "db_hash": _compute_db_hash(),
+    }
+
+    # Cache results
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    with open(cv_cache, "w") as f:
+        json.dump(output, f, indent=2)
+    print(f"[CV] {cv_type} complete! DegT50 R²={output['deg_r2']:.3f}, Koc R²={output['koc_r2']:.3f}")
+
+    return output
