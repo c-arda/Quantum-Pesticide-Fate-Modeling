@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Quantum-enhanced pesticide environmental fate modeling dashboard — substance lookup, FOCUS scenarios, quantum acceleration status, and run configuration.">
+  <title>QP-FATE · Quantum Pesticide Fate Modeling</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Mobile burger -->
+  <button class="mobile-burger" aria-label="Toggle navigation">☰</button>
+
+  <div class="app-container">
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ====== SIDEBAR ====== -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">⚛️</div>
+        <div>
+          <div class="logo-text">QP-FATE</div>
+          <div class="logo-sub">Quantum Pesticide Modeling</div>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-section">
+          <div class="nav-section-label">Overview</div>
+          <div class="nav-item active" data-panel="panel-dashboard" id="nav-dashboard">
+            <span class="nav-icon">📊</span> Dashboard
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Data</div>
+          <div class="nav-item" data-panel="panel-substances" id="nav-substances">
+            <span class="nav-icon">🧪</span> Substances
+            <span class="nav-badge">15</span>
+          </div>
+          <div class="nav-item" data-panel="panel-scenarios" id="nav-scenarios">
+            <span class="nav-icon">🌍</span> FOCUS Scenarios
+            <span class="nav-badge">9</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Quantum</div>
+          <div class="nav-item" data-panel="panel-quantum" id="nav-quantum">
+            <span class="nav-icon">💠</span> Quantum Status
+            <span class="nav-badge">6</span>
+          </div>
+          <div class="nav-item" data-panel="panel-validation" id="nav-validation">
+            <span class="nav-icon">📊</span> Validation
+            <span class="nav-badge">8</span>
+          </div>
+          <div class="nav-item" data-panel="panel-comparison" id="nav-comparison">
+            <span class="nav-icon">⚔️</span> QML vs Classical
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Simulate</div>
+          <div class="nav-item" data-panel="panel-run" id="nav-run">
+            <span class="nav-icon">▶️</span> Run Config
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        v0.2.0 · Phase 1+2 · EC 1107/2009<br>
+        © 2026 Quantum Fate Project
+      </div>
+    </aside>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="main-content">
+
+      <!-- ============ PANEL: DASHBOARD ============ -->
+      <section class="panel active" id="panel-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-subtitle">Quantum-Enhanced Pesticide Environmental Fate Modeling</div>
+          </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="stats-grid">
+          <div class="stat-card glass">
+            <div class="stat-icon">🧪</div>
+            <div class="stat-value" id="stat-substances">0</div>
+            <div class="stat-label">Substances in SPIN database</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-value" id="stat-scenarios">0</div>
+            <div class="stat-label">FOCUS EU scenarios</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-icon">💠</div>
+            <div class="stat-value" id="stat-quantum">0</div>
+            <div class="stat-label">Quantum approaches mapped</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-icon">📐</div>
+            <div class="stat-value" id="stat-models">0</div>
+            <div class="stat-label">EU fate models catalogued</div>
+          </div>
+        </div>
+
+        <!-- Roadmap timeline -->
+        <div class="section-title">
+          <span class="st-icon">🗺️</span> Project Roadmap
+        </div>
+        <div class="roadmap">
+          <div class="roadmap-item glass completed">
+            <div class="rm-phase">Phase 1 — Complete ✓</div>
+            <div class="rm-title">Data Integration Tool</div>
+            <div class="rm-desc">Flask API + SPIN DB (50 substances) + FOCUS scenarios + 1D fate solver</div>
+            <span class="rm-time">Classical · Python</span>
+          </div>
+          <div class="roadmap-item glass completed">
+            <div class="rm-phase">Phase 2 — Active ✓</div>
+            <div class="rm-title">QML-Based QSAR for DegT50 / Koc</div>
+            <div class="rm-desc">PennyLane 6-qubit VQC · Trained on 50 substances · Predicts DegT50 + Koc</div>
+            <span class="rm-time">PennyLane simulator</span>
+          </div>
+          <div class="roadmap-item glass">
+            <div class="rm-phase">Phase 3 — 2026–2028</div>
+            <div class="rm-title">VQE for Small-Molecule Properties</div>
+            <div class="rm-desc">Ground state energy calculation for binding and sorption · 100–200 qubits</div>
+            <span class="rm-time">NISQ hardware</span>
+          </div>
+          <div class="roadmap-item glass">
+            <div class="rm-phase">Phase 4 — 2028–2030</div>
+            <div class="rm-title">Quantum Monte Carlo for Exposure</div>
+            <div class="rm-desc">Quadratic speedup for probabilistic assessment · early fault-tolerant</div>
+            <span class="rm-time">Early FT</span>
+          </div>
+          <div class="roadmap-item glass">
+            <div class="rm-phase">Phase 5 — 2030+</div>
+            <div class="rm-title">HHL PDE Solvers for Richards Equation</div>
+            <div class="rm-desc">Exponential speedup for 20-year soil transport · 1000+ logical qubits</div>
+            <span class="rm-time">Fault-tolerant</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PANEL: SUBSTANCES ============ -->
+      <section class="panel" id="panel-substances">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Substance Lookup</div>
+            <div class="page-subtitle">SPIN-style pesticide property database — with quantum ML predictions</div>
+          </div>
+        </div>
+
+        <div class="search-bar">
+          <div class="search-wrapper">
+            <input type="text" class="search-input" id="substance-search"
+              placeholder="Search by name, CAS number, or class…">
+          </div>
+          <select class="filter-select" id="substance-class-filter">
+            <option value="all">All Classes</option>
+          </select>
+        </div>
+
+        <div class="table-container glass">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th data-sort="name">Substance ↕</th>
+                <th data-sort="cas">CAS No. ↕</th>
+                <th data-sort="degT50_soil">DegT50 (exp) ↕</th>
+                <th>DegT50 (QML) ⚛</th>
+                <th data-sort="koc">Koc (exp) ↕</th>
+                <th>Koc (QML) ⚛</th>
+                <th data-sort="vapor_pressure">Vapor P. ↕</th>
+                <th data-sort="solubility">Solubility ↕</th>
+                <th data-sort="mw">MW ↕</th>
+                <th data-sort="cls">Class ↕</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="substance-tbody"></tbody>
+          </table>
+          <div class="table-footer">
+            <span id="substance-count">15 of 15 substances</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">
+              Units: DegT50 (days) · Koc (mL/g) · VP (Pa) · Sol (mg/L) · MW (g/mol)
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PANEL: FOCUS SCENARIOS ============ -->
+      <section class="panel" id="panel-scenarios">
+        <div class="page-header">
+          <div>
+            <div class="page-title">FOCUS Scenarios</div>
+            <div class="page-subtitle">Standardized EU climate / soil / crop scenarios for PEC calculations</div>
+          </div>
+        </div>
+
+        <div class="scenario-grid" id="scenario-grid"></div>
+      </section>
+
+      <!-- ============ PANEL: QUANTUM STATUS ============ -->
+      <section class="panel" id="panel-quantum">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Quantum Acceleration Status</div>
+            <div class="page-subtitle">Readiness assessment for quantum algorithms applied to pesticide fate modeling
+            </div>
+          </div>
+        </div>
+
+        <div class="quantum-grid" id="quantum-grid"></div>
+      </section>
+
+      <!-- ============ PANEL: FIELD VALIDATION ============ -->
+      <section class="panel" id="panel-validation">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Field Validation</div>
+            <div class="page-subtitle">Model predictions vs published groundwater monitoring data</div>
+          </div>
+        </div>
+
+        <div id="validation-loading" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">
+          <div class="spinner" style="margin:0 auto 16px;"></div>
+          Running validation simulations...
+        </div>
+
+        <div id="validation-content"></div>
+      </section>
+
+      <!-- ============ PANEL: QML vs CLASSICAL COMPARISON ============ -->
+      <section class="panel" id="panel-comparison">
+        <div class="page-header">
+          <div>
+            <div class="page-title">QML vs Classical ML</div>
+            <div class="page-subtitle">Head-to-head comparison: Quantum VQC vs Random Forest vs Gradient Boosting</div>
+          </div>
+        </div>
+
+        <div id="comparison-loading" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">
+          <div class="spinner" style="margin:0 auto 16px;"></div>
+          Loading comparison data...
+        </div>
+
+        <div id="comparison-content"></div>
+      </section>
+
+      <!-- ============ PANEL: RUN CONFIGURATION ============ -->
+      <section class="panel" id="panel-run">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Run Configuration</div>
+            <div class="page-subtitle">Configure and launch a simulated fate assessment run</div>
+          </div>
+        </div>
+
+        <div id="running-indicator" class="running-indicator">
+          <div class="spinner"></div>
+          Running simulation… computing 20-year exposure profile
+        </div>
+
+        <div class="run-layout">
+          <!-- Config form -->
+          <form class="config-form glass" id="run-form">
+            <div class="section-title"><span class="st-icon">⚙️</span> Parameters</div>
+
+            <div class="form-group">
+              <label class="form-label" for="run-substance">Active Substance</label>
+              <select class="form-select" id="run-substance"></select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="run-scenario">FOCUS Scenario</label>
+              <select class="form-select" id="run-scenario"></select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="run-model">Fate Model</label>
+              <select class="form-select" id="run-model">
+                <option value="PEARL">PEARL — Leaching & runoff</option>
+                <option value="GEM">GEM 4.4.2 — Greenhouse emission</option>
+                <option value="PELMO">PELMO — FOCUS leaching</option>
+                <option value="MACRO">MACRO — Macropore flow</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="run-years">Time Horizon (years)</label>
+              <input class="form-input" id="run-years" type="number" value="20" min="1" max="50">
+            </div>
+
+            <div class="form-group">
+              <div class="toggle-group">
+                <input type="checkbox" class="toggle" id="run-quantum" checked>
+                <label class="form-label" for="run-quantum" style="margin:0;text-transform:none;font-size:14px;">
+                  Enable quantum acceleration
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              ▶ Launch Simulation
+            </button>
+          </form>
+
+          <!-- Results area -->
+          <div class="results-area glass">
+            <div class="section-title"><span class="st-icon">📈</span> Results</div>
+
+            <!-- Placeholder when no results -->
+            <div class="results-placeholder" id="results-placeholder">
+              <div class="rp-icon">🧬</div>
+              <div class="rp-text">Configure parameters and launch a simulation<br>to see PEC exposure results here.
+              </div>
+            </div>
+
+            <!-- Chart area (hidden until run) -->
+            <div class="result-chart-area" id="result-chart-area">
+              <div style="font-size:14px;font-weight:600;margin-bottom:8px;">
+                Predicted Environmental Concentration (PEC) — 20-year profile
+              </div>
+              <div class="chart-container">
+                <canvas id="result-canvas"></canvas>
+              </div>
+              <div class="result-summary">
+                <div class="result-stat">
+                  <div class="rs-label" id="rs-label-peak-c">PEC 80th (Classical)</div>
+                  <div class="rs-value" id="rs-peak-classical">—</div>
+                </div>
+                <div class="result-stat">
+                  <div class="rs-label">PEC 80th (Quantum)</div>
+                  <div class="rs-value" id="rs-peak-quantum">—</div>
+                </div>
+                <div class="result-stat">
+                  <div class="rs-label" id="rs-label-avg-c">Total Leached (Classical)</div>
+                  <div class="rs-value" id="rs-avg-classical">—</div>
+                </div>
+                <div class="result-stat">
+                  <div class="rs-label">Total Leached (Quantum)</div>
+                  <div class="rs-value" id="rs-avg-quantum">—</div>
+                </div>
+              </div>
+              <div id="quantum-meta"
+                style="display:none;margin-top:14px;padding:12px;background:rgba(0,240,255,0.04);border-radius:var(--radius-sm);border:1px solid rgba(0,240,255,0.12);">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
