@@ -34,14 +34,18 @@ FEATURE_NAMES = [
     "mw", "logP", "n_heavy", "hbd", "hba",
     "n_rings", "n_rotatable", "solubility_log",
     "vapor_pressure_log", "freundlich_n",
-    "tpsa_approx", "aromatic_ring_frac"
+    "tpsa_approx", "aromatic_ring_frac",
+    # Phase 4: microbial degradation proxies
+    "n_hydrolyzable", "n_halogens", "bioaccessibility",
 ]
+N_FEATURES = len(FEATURE_NAMES)  # 15
 
 
 def extract_features(substance):
     """
-    Extract and normalize 12 molecular descriptor features.
-    Returns PennyLane-compatible numpy array of length 12.
+    Extract and normalize 15 molecular descriptor features.
+    Returns PennyLane-compatible numpy array of length 15.
+    Includes 3 microbial degradation proxy features (Phase 4).
     """
     sol = substance.get("solubility", 1.0)
     vp  = substance.get("vapor_pressure", 1e-6)
@@ -49,11 +53,51 @@ def extract_features(substance):
     hbd = substance.get("hbd", 1)
     hba = substance.get("hba", 4)
     n_rings = substance.get("n_rings", 1)
+    koc = substance.get("koc", 100)
 
     # Approximate TPSA from HBD/HBA (Ertl method approximation)
     tpsa_approx = hbd * 23.0 + hba * 9.23
     # Aromatic ring fraction
     aromatic_frac = n_rings / max(n_heavy, 1) * 10.0
+
+    # ── Phase 4: Microbial degradation proxies ──
+    # 1. Count hydrolyzable bonds (esters, amides, carbamates) from SMILES
+    n_hydrolyzable = 0
+    smiles = substance.get("smiles", "")
+    if smiles:
+        try:
+            from rdkit import Chem
+            mol = Chem.MolFromSmiles(smiles)
+            if mol:
+                # SMARTS patterns for enzymatically-cleavable bonds
+                patterns = [
+                    Chem.MolFromSmarts("[C](=O)[O][C,c]"),    # ester
+                    Chem.MolFromSmarts("[C](=O)[NH]"),         # amide
+                    Chem.MolFromSmarts("[NH]C(=O)O"),          # carbamate
+                    Chem.MolFromSmarts("[P](=O)(O)(O)"),       # phosphoester
+                    Chem.MolFromSmarts("[C](=O)S"),            # thioester
+                ]
+                for pat in patterns:
+                    if pat:
+                        n_hydrolyzable += len(mol.GetSubstructMatches(pat))
+        except Exception:
+            pass
+
+    # 2. Halogen count (resistance to biodegradation)
+    n_halogens = 0
+    if smiles:
+        try:
+            from rdkit import Chem
+            mol = Chem.MolFromSmiles(smiles)
+            if mol:
+                for atom in mol.GetAtoms():
+                    if atom.GetSymbol() in ('Cl', 'Br', 'F', 'I'):
+                        n_halogens += 1
+        except Exception:
+            pass
+
+    # 3. Bioaccessibility: log10(solubility / koc) — microbial availability
+    bioaccessibility = np.log10(max(sol, 1e-6) / max(koc, 1))
 
     raw = pnp.array([
         substance.get("mw", 300),
@@ -68,11 +112,15 @@ def extract_features(substance):
         substance.get("freundlich_n", 0.9),
         tpsa_approx,
         aromatic_frac,
+        # Phase 4 proxies
+        n_hydrolyzable,
+        n_halogens,
+        bioaccessibility,
     ], dtype=float, requires_grad=False)
 
     # Min-max scaling to [0, π] based on dataset statistics
-    mins = pnp.array([150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80, 0.0, 0.0], dtype=float, requires_grad=False)
-    maxs = pnp.array([731.9,  7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00, 150.0, 3.0], dtype=float, requires_grad=False)
+    mins = pnp.array([150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80, 0.0, 0.0,  0, 0, -8.0], dtype=float, requires_grad=False)
+    maxs = pnp.array([731.9,  7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00, 150.0, 3.0, 5, 6,  2.0], dtype=float, requires_grad=False)
 
     scaled = (raw - mins) / (maxs - mins + 1e-8)
     scaled = pnp.clip(scaled, 0.0, 1.0) * np.pi
@@ -99,21 +147,27 @@ def quantum_circuit(features, weights):
     array(N_QUBITS,)
         Expectation values of PauliZ on each qubit.
     """
-    # ── Layer 1: Angle encoding ──
+    # ── Layer 1: Angle encoding (first N_QUBITS features) ──
+    n_feat = len(features)
     for i in range(N_QUBITS):
         qml.Hadamard(wires=i)
-        qml.RZ(features[i], wires=i)
+        qml.RZ(features[i % n_feat], wires=i)
 
     # ── Layer 2: IQP-style feature entanglement ──
     # Encode feature-feature interactions via ZZ gates
     for i in range(N_QUBITS - 1):
         qml.CNOT(wires=[i, i + 1])
-        qml.RZ(features[i] * features[(i + 1) % N_QUBITS], wires=i + 1)
+        qml.RZ(features[i % n_feat] * features[(i + 1) % n_feat], wires=i + 1)
         qml.CNOT(wires=[i, i + 1])
+
+    # ── Layer 2b: Encode remaining features (>N_QUBITS) via cross-rotation ──
+    for j in range(N_QUBITS, n_feat):
+        wire = j % N_QUBITS
+        qml.RY(features[j], wires=wire)
 
     # ── Layer 3: Second angle encoding for re-uploading ──
     for i in range(N_QUBITS):
-        qml.RY(features[i], wires=i)
+        qml.RY(features[i % n_feat], wires=i)
 
     # ── Variational layers ──
     for layer in range(N_LAYERS):
