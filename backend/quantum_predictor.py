@@ -843,8 +843,28 @@ def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
 
             print(f"  Fold {fold_idx + 1}/{k_folds} complete ({len(test_indices)} test substances)")
     else:
-        # ── Leave-one-out
+        # ── Leave-one-out (with fold-level checkpointing)
+        checkpoint_file = os.path.join(CACHE_DIR, "loo_checkpoint.json")
+
+        # Resume from checkpoint if available
+        completed_results = {}
+        if os.path.exists(checkpoint_file):
+            try:
+                with open(checkpoint_file, "r") as f:
+                    checkpoint = json.load(f)
+                for r in checkpoint.get("results", []):
+                    completed_results[r["name"]] = r
+                print(f"  Resuming from checkpoint: {len(completed_results)}/{n} folds complete")
+            except Exception:
+                pass
+
         for i in range(n):
+            sub = SUBSTANCES[i]
+            # Skip already-completed folds
+            if sub["name"] in completed_results:
+                results.append(completed_results[sub["name"]])
+                continue
+
             train_feat = [f for j, f in enumerate(all_features) if j != i]
             train_deg = [t for j, t in enumerate(all_deg) if j != i]
             train_koc = [t for j, t in enumerate(all_koc) if j != i]
@@ -858,8 +878,7 @@ def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
             pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS]), pnp.array(exp_deg)) + r_deg[N_QUBITS])
             pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS]), pnp.array(exp_koc)) + r_koc[N_QUBITS])
 
-            sub = SUBSTANCES[i]
-            results.append({
+            fold_result = {
                 "name": sub["name"],
                 "fold": i + 1,
                 "deg_exp": float(all_deg[i]),
@@ -870,10 +889,17 @@ def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
                 "koc_pred": round(pred_koc, 3),
                 "koc_pred_val": round(10 ** pred_koc, 1),
                 "koc_exp_val": sub["koc"],
-            })
+            }
+            results.append(fold_result)
 
-            if (i + 1) % 10 == 0 or i == n - 1:
-                print(f"  Fold {i + 1}/{n} complete")
+            # Save checkpoint after every fold
+            os.makedirs(CACHE_DIR, exist_ok=True)
+            with open(checkpoint_file, "w") as f:
+                json.dump({"results": results, "completed": len(results)}, f)
+
+            if (i + 1) % 5 == 0 or i == n - 1:
+                print(f"  Fold {i + 1}/{n} complete (checkpointed)")
+
 
     # Calculate overall stats
     deg_errors = [abs(r["deg_exp"] - r["deg_pred"]) for r in results]
