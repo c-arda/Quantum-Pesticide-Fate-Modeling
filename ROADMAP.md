@@ -126,17 +126,24 @@ Inspired by [Bf3R — Ersatzmethoden](https://www.bf3r.de/angebote/ersatzmethode
 
 ## Key Metrics Tracker
 
-| Metric | Phase 2 | Phase 3 | Phase 4 | Phase 4d (pending) |
-|--------|---------|---------|---------|---------------------|
+| Metric | Phase 2 | Phase 3 | Phase 4 | Phase 4d (60ep) |
+|--------|---------|---------|---------|-----------------|
 | Substances | 50 | 50 | 111 | 111 |
 | Features | 8 | 12 | 17 | 17 |
 | Qubits | 6 | 12 | 12 | 12 |
-| RF DegT50 R² (LOO) | — | 0.191 | 0.194 | pending |
-| GBM DegT50 R² (LOO) | — | 0.211 | 0.223 | pending |
-| QML DegT50 R² (5-fold) | 0.258 | 0.258 | *25ep: 0.015* | *60ep: pending* |
-| RF Koc R² (LOO) | — | 0.766 | 0.766 | pending |
-| QML Koc R² (5-fold) | 0.321 | 0.321 | *25ep: 0.155* | *60ep: pending* |
+| RF DegT50 R² (5-fold) | — | 0.191 | 0.234 | 0.234 |
+| GBM DegT50 R² (5-fold) | — | 0.211 | 0.208 | 0.208 |
+| **QML DegT50 R² (5-fold)** | 0.258 | 0.258 | *25ep: 0.015* | **-0.141** |
+| RF Koc R² (5-fold) | — | 0.766 | 0.766 | 0.766 |
+| GBM Koc R² (5-fold) | — | 0.780 | 0.780 | 0.780 |
+| **QML Koc R² (5-fold)** | 0.321 | 0.321 | *25ep: 0.155* | **0.412** |
 | CV Epochs | 25 | 25 | 25 | **60** |
+
+> **Analysis (Phase 4d):** Koc shows strong improvement (+167%) from 25→60 epochs, indicating
+> the circuit CAN learn sorption patterns. DegT50 went negative, suggesting the loss landscape
+> for degradation half-life is more complex — likely needs architectural changes (more layers,
+> different entanglement connectivity, or separate circuits for each target) rather than more epochs.
+> Classical RF/GBM still win on both targets. Next steps: hyperparameter sweep, per-target circuits.
 
 ---
 
