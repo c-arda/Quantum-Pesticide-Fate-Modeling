@@ -274,37 +274,37 @@ async function renderScenarios() {
 
 const QUANTUM_APPROACHES = [
   {
-    id: "vqe", abbr: "VQE", full: "Variational Quantum Eigensolver", icon: "⚛️",
+    id: "vqe", abbr: "VQE", full: "Variational Quantum Eigensolver", icon: "◆",
     desc: "Ground state energy calculations for pesticide molecules — predict binding energies and sorption coefficients.",
     readiness: 65, qubits: "100–200", timeline: "2026–2028", status: "NISQ ready",
     hardware: "IBM / IonQ", app: "Koc prediction"
   },
   {
-    id: "qpe", abbr: "QPE", full: "Quantum Phase Estimation", icon: "🔬",
+    id: "qpe", abbr: "QPE", full: "Quantum Phase Estimation", icon: "◇",
     desc: "Reaction pathway barriers for transition state calculations — predict DegT50 without wet-lab experiments.",
     readiness: 35, qubits: "200–500", timeline: "2027–2029", status: "Early research",
     hardware: "IBM / Rigetti", app: "DegT50 prediction"
   },
   {
-    id: "qml", abbr: "QML", full: "Quantum Machine Learning", icon: "🤖",
-    desc: "QSAR-style models with quantum feature maps — exponential feature space for fate parameter prediction. ⚡ ACTIVE in this tool.",
-    readiness: 50, qubits: "50–100", timeline: "2026–2027", status: "ACTIVE ✓",
+    id: "qml", abbr: "QML", full: "Quantum Machine Learning", icon: "◈",
+    desc: "QSAR-style models with quantum feature maps — exponential feature space for fate parameter prediction. ▸ ACTIVE in this tool.",
+    readiness: 50, qubits: "50–100", timeline: "2026–2027", status: "ACTIVE",
     hardware: "PennyLane sim", app: "DegT50 + Koc QSAR"
   },
   {
-    id: "hhl", abbr: "HHL", full: "Harrow-Hassidim-Lloyd Algorithm", icon: "📐",
+    id: "hhl", abbr: "HHL", full: "Harrow-Hassidim-Lloyd Algorithm", icon: "▤",
     desc: "Exponential speedup for linear systems from discretized Richards equation — accelerate soil transport simulations.",
     readiness: 12, qubits: "1000+", timeline: "2030+", status: "Fault-tolerant req.",
     hardware: "Future FT", app: "PDE acceleration"
   },
   {
-    id: "qaoa", abbr: "QAOA", full: "Quantum Approx. Optimization Algorithm", icon: "🧩",
+    id: "qaoa", abbr: "QAOA", full: "Quantum Approx. Optimization Algorithm", icon: "⬢",
     desc: "Combinatorial optimization for parameter fitting — find better optima for model calibration across FOCUS scenarios.",
     readiness: 40, qubits: "50–200", timeline: "2027–2029", status: "Active research",
     hardware: "NISQ", app: "Model calibration"
   },
   {
-    id: "qmc", abbr: "QMC", full: "Quantum Monte Carlo", icon: "🎲",
+    id: "qmc", abbr: "QMC", full: "Quantum Monte Carlo", icon: "◌",
     desc: "Quadratic speedup for probabilistic exposure assessment — uncertainty propagation across parameter space.",
     readiness: 25, qubits: "200–500", timeline: "2028–2030", status: "Theoretical",
     hardware: "Early FT", app: "Uncertainty analysis"
@@ -325,7 +325,7 @@ async function renderQuantumStatus() {
     const isQML = q.id === 'qml';
     const liveInfo = isQML && circuitInfo ? `
       <div style="margin-top:12px;padding:10px;background:rgba(0,240,255,0.06);border-radius:var(--radius-sm);border:1px solid rgba(0,240,255,0.15);font-size:12px;">
-        <div style="font-weight:600;color:var(--accent-cyan);margin-bottom:6px;">⚡ Live Circuit</div>
+        <div style="font-weight:600;color:var(--accent-cyan);margin-bottom:6px;">▸ Live Circuit</div>
         <div style="color:var(--text-secondary)">
           ${circuitInfo.n_qubits} qubits · ${circuitInfo.n_layers} layers · ${circuitInfo.n_parameters} params<br>
           PennyLane ${circuitInfo.framework?.split(' ')[1] || ''} · ${circuitInfo.device?.split('(')[0] || ''}<br>
@@ -558,7 +558,7 @@ function renderResults(data) {
       const degErr = Math.abs(qp.degT50_predicted - qp.degT50_experimental) / Math.max(qp.degT50_experimental, 0.1) * 100;
       const kocErr = Math.abs(qp.koc_predicted - qp.koc_experimental) / Math.max(qp.koc_experimental, 0.1) * 100;
       metaEl.innerHTML = `
-        <div style="font-size:12px;font-weight:600;color:var(--accent-cyan);margin-bottom:6px;">⚡ Quantum ML Predictions Used</div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent-cyan);margin-bottom:6px;">▸ Quantum ML Predictions Used</div>
         <div style="font-size:12px;color:var(--text-secondary);">
           DegT50: ${qp.degT50_predicted?.toFixed(1)} d <span style="color:var(--text-muted)">(exp: ${qp.degT50_experimental} d, err: ${degErr.toFixed(0)}%)</span><br>
           Koc: ${qp.koc_predicted?.toFixed(0)} mL/g <span style="color:var(--text-muted)">(exp: ${qp.koc_experimental?.toLocaleString()}, err: ${kocErr.toFixed(0)}%)</span>
@@ -573,7 +573,7 @@ function renderResults(data) {
       if (cPec < 1e-10 && qPec < 1e-10) {
         metaEl.innerHTML += `
           <div style="margin-top:10px;padding:10px;background:rgba(255,200,50,0.06);border:1px solid rgba(255,200,50,0.15);border-radius:6px;font-size:12px;color:var(--text-secondary);">
-            ⚠️ <strong>No significant leaching predicted.</strong> This substance has very high Koc (>${Math.min(classical.koc_used, quantum?.koc_used || Infinity).toLocaleString()} mL/g), 
+            ▸ <strong>No significant leaching predicted.</strong> This substance has very high Koc (>${Math.min(classical.koc_used, quantum?.koc_used || Infinity).toLocaleString()} mL/g), 
             indicating strong soil sorption in both classical and quantum-predicted scenarios. 
             <em>Try <strong>Atrazine</strong>, <strong>Metribuzin</strong>, or <strong>Isoproturon</strong> for substances that show meaningful leaching differences.</em>
           </div>`;
@@ -640,7 +640,7 @@ async function renderValidation() {
     });
 
     let html = `<div class="glass" style="padding:20px;margin-bottom:20px;">
-      <div class="section-title"><span class="st-icon">🎯</span> Model Performance Summary</div>
+      <div class="section-title"><span class="st-icon">▣</span> Model Performance Summary</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
         <div style="text-align:center;padding:12px;background:rgba(79,140,255,0.06);border-radius:8px;border:1px solid rgba(79,140,255,0.15);">
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Classical</div>
@@ -773,9 +773,9 @@ async function renderComparison() {
     function verdict(qml_r2, best_classical_r2, prop) {
       if (!qml_r2 || qml_r2 === null) return '<span style="color:var(--text-muted)">Awaiting QML CV</span>';
       const diff = qml_r2 - best_classical_r2;
-      if (diff > 0.05) return `<span style="color:#0ff;font-weight:700">✅ QML wins (${prop} +${(diff * 100).toFixed(0)}%)</span>`;
-      if (diff > -0.05) return `<span style="color:#fa0">⚖️ Comparable</span>`;
-      return `<span style="color:#f44">❌ Classical wins</span>`;
+      if (diff > 0.05) return `<span style="color:#0ff;font-weight:700">+ QML wins (${prop} +${(diff * 100).toFixed(0)}%)</span>`;
+      if (diff > -0.05) return `<span style="color:#fa0">≡ Comparable</span>`;
+      return `<span style="color:#f44">– Classical wins</span>`;
     }
 
     const degVerdict = verdict(qml_5f?.deg_r2, Math.max(rf_5f.deg_r2, gb_5f.deg_r2), 'DegT50');
@@ -801,7 +801,7 @@ async function renderComparison() {
     content.innerHTML = `
       <!-- Model Performance Comparison -->
       <div class="glass" style="padding:24px;margin-bottom:24px;">
-        <div class="section-title"><span class="st-icon">🏆</span> Model Performance (5-Fold CV, ${data.n_substances} substances)</div>
+        <div class="section-title"><span class="st-icon">▣</span> Model Performance (5-Fold CV, ${data.n_substances} substances)</div>
         <table style="width:100%;border-collapse:collapse;margin-top:16px;">
           <thead>
             <tr style="border-bottom:1px solid var(--glass-border);">
@@ -814,21 +814,21 @@ async function renderComparison() {
           </thead>
           <tbody>
             <tr style="border-bottom:1px solid var(--glass-border);background:rgba(0,255,255,0.05);">
-              <td style="padding:10px 8px;font-weight:700;color:#0ff;">⚛️ QML 12-Qubit VQC</td>
+              <td style="padding:10px 8px;font-weight:700;color:#0ff;">◆ QML 12-Qubit VQC</td>
               <td style="text-align:center;padding:10px 8px;">${fmtR2(qml_5f?.deg_r2)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtMAE(qml_5f?.deg_mae)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtR2(qml_5f?.koc_r2)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtMAE(qml_5f?.koc_mae)}</td>
             </tr>
             <tr style="border-bottom:1px solid var(--glass-border);">
-              <td style="padding:10px 8px;font-weight:600;color:var(--text-bright);">🌲 Random Forest</td>
+              <td style="padding:10px 8px;font-weight:600;color:var(--text-bright);">▲ Random Forest</td>
               <td style="text-align:center;padding:10px 8px;">${fmtR2(rf_5f.deg_r2)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtMAE(rf_5f.deg_mae)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtR2(rf_5f.koc_r2)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtMAE(rf_5f.koc_mae)}</td>
             </tr>
             <tr style="border-bottom:1px solid var(--glass-border);">
-              <td style="padding:10px 8px;font-weight:600;color:var(--text-bright);">📈 Gradient Boosting</td>
+              <td style="padding:10px 8px;font-weight:600;color:var(--text-bright);">▼ Gradient Boosting</td>
               <td style="text-align:center;padding:10px 8px;">${fmtR2(gb_5f.deg_r2)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtMAE(gb_5f.deg_mae)}</td>
               <td style="text-align:center;padding:10px 8px;">${fmtR2(gb_5f.koc_r2)}</td>
@@ -859,13 +859,13 @@ async function renderComparison() {
       <!-- Feature Importances -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
         <div class="glass" style="padding:20px;">
-          <div class="section-title" style="font-size:14px;"><span class="st-icon">🔬</span> Feature Importance — DegT50</div>
+          <div class="section-title" style="font-size:14px;"><span class="st-icon">◇</span> Feature Importance — DegT50</div>
           <div style="margin-top:12px;">
             ${degImp.map(([n, v]) => impBar(n, v, maxDegImp)).join('')}
           </div>
         </div>
         <div class="glass" style="padding:20px;">
-          <div class="section-title" style="font-size:14px;"><span class="st-icon">🔬</span> Feature Importance — Koc</div>
+          <div class="section-title" style="font-size:14px;"><span class="st-icon">◇</span> Feature Importance — Koc</div>
           <div style="margin-top:12px;">
             ${kocImp.map(([n, v]) => impBar(n, v, maxKocImp)).join('')}
           </div>
@@ -874,7 +874,7 @@ async function renderComparison() {
 
       <!-- Interpretation -->
       <div class="glass" style="padding:20px;">
-        <div class="section-title"><span class="st-icon">💡</span> Interpretation</div>
+        <div class="section-title"><span class="st-icon">▸</span> Interpretation</div>
         <div style="font-size:14px;color:var(--text-dim);line-height:1.7;margin-top:12px;">
           <p><strong style="color:#0ff">DegT50 (soil degradation half-life)</strong> is the harder prediction task.
           Classical models (RF R²=${rf_5f.deg_r2.toFixed(2)}, GBM R²=${gb_5f.deg_r2.toFixed(2)}) struggle because
@@ -917,7 +917,7 @@ async function renderComparison() {
       content.innerHTML += `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;">
           <div class="glass" style="padding:20px;">
-            <div class="section-title" style="font-size:14px;"><span class="st-icon">🔴</span> DegT50 Error by Class (RF LOO)</div>
+            <div class="section-title" style="font-size:14px;"><span class="st-icon">●</span> DegT50 Error by Class (RF LOO)</div>
             <table style="width:100%;border-collapse:collapse;margin-top:12px;">
               <thead><tr style="border-bottom:1px solid var(--glass-border);">
                 <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-muted);text-transform:uppercase">Class</th>
@@ -929,7 +929,7 @@ async function renderComparison() {
             </table>
           </div>
           <div class="glass" style="padding:20px;">
-            <div class="section-title" style="font-size:14px;"><span class="st-icon">🔵</span> Koc Error by Class (RF LOO)</div>
+            <div class="section-title" style="font-size:14px;"><span class="st-icon">○</span> Koc Error by Class (RF LOO)</div>
             <table style="width:100%;border-collapse:collapse;margin-top:12px;">
               <thead><tr style="border-bottom:1px solid var(--glass-border);">
                 <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-muted);text-transform:uppercase">Class</th>
@@ -977,7 +977,7 @@ function updateTrainingBanner(status, done = false) {
 
   if (done) {
     banner.innerHTML = `
-      <span style="font-size:18px;">✅</span>
+      <span style="font-size:18px;color:var(--accent-green);">\u2713</span>
       <div>
         <div style="font-weight:600;color:var(--accent-green);">${status}</div>
       </div>`;
