@@ -56,8 +56,8 @@ SMILES → RDKit descriptors → 17 features → [0, π] scaling
 
 ```bash
 # Clone and set up
-git clone https://github.com/YOUR_USERNAME/qp-fate.git
-cd qp-fate
+git clone https://github.com/unearthlyimprint/Quantum-Pesticide-Fate-Modeling.git
+cd Quantum-Pesticide-Fate-Modeling
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
