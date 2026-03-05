@@ -762,7 +762,7 @@ def get_circuit_info():
 CV_CACHE_FILE = os.path.join(CACHE_DIR, "cv_results.json")
 
 
-def run_cross_validation(n_epochs_cv=25, lr_cv=0.05, k_folds=None):
+def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
     """
     Cross-validation for the QML model.
 
