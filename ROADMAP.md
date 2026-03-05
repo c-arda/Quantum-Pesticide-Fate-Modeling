@@ -88,9 +88,10 @@
 ### Phase 6: Hardware Deployment
 *Goal: Real quantum hardware benchmark*
 
-- [ ] Deploy to IBM Quantum via `pennylane-qiskit` plugin
+- [ ] Deploy to Azure Quantum via `pennylane-ionq` plugin (IonQ Aria / Quantinuum H1)
 - [ ] Noise-aware training with depolarizing + readout error channels
-- [ ] Benchmark: simulator vs IBM Brisbane/Osaka (127-qubit)
+- [ ] Benchmark: simulator vs IonQ Aria-1 (25-qubit trapped ion) / Quantinuum H1 (20-qubit)
+- [ ] Explore Pasqal Cloud integration (reuse VQE Neutral Atom credentials)
 - [ ] Explore PennyLane Lightning GPU for faster simulation
 
 ### Phase 7: Publication & Regulatory

@@ -133,7 +133,7 @@ We can create a **modern data-integration and quantum-acceleration layer** on to
 │  └──────────┘  └─────────────┘  └───────────────┘  │
 ├─────────────────────────────────────────────────────┤
 │  Backend: Qiskit / PennyLane / Cirq                 │
-│  Quantum Hardware: IBM / IonQ / Rigetti / Pasqal    │
+│  Quantum Hardware: IonQ / Quantinuum / Pasqal (Azure)│
 ├─────────────────────────────────────────────────────┤
 │  Classical: GEM / PEARL / PELMO (existing solvers)  │
 └─────────────────────────────────────────────────────┘
