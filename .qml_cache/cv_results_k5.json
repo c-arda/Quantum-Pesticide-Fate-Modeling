@@ -1,0 +1,19 @@
+{
+  "type": "5-fold",
+  "k": 5,
+  "n_substances": 111,
+  "epochs": 60,
+  "timestamp": "2026-03-05T12:30:00",
+  "deg_r2": -0.1407,
+  "deg_mae": null,
+  "koc_r2": 0.4120,
+  "koc_mae": null,
+  "folds": [
+    {"fold": 1, "n_test": 23},
+    {"fold": 2, "n_test": 22},
+    {"fold": 3, "n_test": 22},
+    {"fold": 4, "n_test": 22},
+    {"fold": 5, "n_test": 22}
+  ],
+  "note": "60 epochs, 17 features, 12 qubits, 5 rotation layers. DegT50 negative R2 suggests overfitting or difficult loss landscape. Koc improved significantly from 0.155 (25ep) to 0.412 (60ep)."
+}
