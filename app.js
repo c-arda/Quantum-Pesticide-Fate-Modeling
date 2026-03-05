@@ -742,15 +742,18 @@ async function renderComparison() {
     const gb_loo = data.models.GradientBoosting.loo;
     const gb_5f = data.models.GradientBoosting['5fold'];
 
-    // Try to load QML CV results (may not exist yet)
+    // Try to load QML CV results from cache
     let qml_5f = null;
     let qml_loo = null;
     try {
-      const qStatus = await apiFetch('/quantum/status');
-      // 5-fold from laptop16, LOO from laptop32 — stored in cache
-      qml_5f = { deg_r2: 0.2579, koc_r2: 0.3213, deg_mae: 0.4682, koc_mae: 0.629, deg_rmse: null, koc_rmse: null };
-      // LOO will be filled when available
-    } catch (e) { /* quantum not ready */ }
+      const qmlCV = await apiFetch('/quantum/cv-results');
+      if (qmlCV && qmlCV['5fold']) {
+        qml_5f = qmlCV['5fold'];
+      }
+      if (qmlCV && qmlCV['loo']) {
+        qml_loo = qmlCV['loo'];
+      }
+    } catch (e) { /* QML CV not available yet */ }
 
     function fmtR2(v) {
       if (v === null || v === undefined) return '—';

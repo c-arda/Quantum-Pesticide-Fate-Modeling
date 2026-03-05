@@ -102,6 +102,33 @@ def api_quantum_status():
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 
+@app.route("/api/quantum/cv-results")
+def api_quantum_cv_results():
+    """Return QML cross-validation results from cache files."""
+    import json as _json
+    cache_dir = os.path.join(os.path.dirname(__file__), ".qml_cache")
+    result = {}
+
+    for cv_type, filename in [("5fold", "cv_results_k5.json"), ("loo", "cv_results_loo.json")]:
+        path = os.path.join(cache_dir, filename)
+        if os.path.exists(path):
+            try:
+                with open(path) as f:
+                    data = _json.load(f)
+                result[cv_type] = {
+                    "deg_r2": data.get("deg_r2"),
+                    "koc_r2": data.get("koc_r2"),
+                    "deg_mae": data.get("deg_mae"),
+                    "koc_mae": data.get("koc_mae"),
+                    "n_substances": data.get("n_substances"),
+                    "n_folds": data.get("n_folds"),
+                }
+            except Exception:
+                pass
+
+    return jsonify(result)
+
+
 @app.route("/api/quantum/predict/<name>")
 def api_quantum_predict(name):
     """Predict DegT50 and Koc for a substance using QML."""
