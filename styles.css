@@ -592,7 +592,7 @@ a:hover {
 }
 
 .search-wrapper::before {
-  content: '🔍';
+  content: '\2315';
   position: absolute;
   left: 14px;
   top: 50%;
