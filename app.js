@@ -277,13 +277,13 @@ const QUANTUM_APPROACHES = [
     id: "vqe", abbr: "VQE", full: "Variational Quantum Eigensolver", icon: "◆",
     desc: "Ground state energy calculations for pesticide molecules — predict binding energies and sorption coefficients.",
     readiness: 65, qubits: "100–200", timeline: "2026–2028", status: "NISQ ready",
-    hardware: "IBM / IonQ", app: "Koc prediction"
+    hardware: "IonQ Aria (Azure)", app: "Koc prediction"
   },
   {
     id: "qpe", abbr: "QPE", full: "Quantum Phase Estimation", icon: "◇",
     desc: "Reaction pathway barriers for transition state calculations — predict DegT50 without wet-lab experiments.",
     readiness: 35, qubits: "200–500", timeline: "2027–2029", status: "Early research",
-    hardware: "IBM / Rigetti", app: "DegT50 prediction"
+    hardware: "Quantinuum H1 (Azure)", app: "DegT50 prediction"
   },
   {
     id: "qml", abbr: "QML", full: "Quantum Machine Learning", icon: "◈",
