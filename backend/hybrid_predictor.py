@@ -71,14 +71,14 @@ def _compute_hybrid_weights():
             "hybrid_koc_r2": cl_data["models"]["RandomForest"]["loo"]["koc_r2"],
         }
 
-    # Build QML prediction lookup from per-fold results
+    # Build QML prediction lookup from CV results
+    # LOO CV stores flat results[], K-fold also uses results[]
     qml_pred = {}
-    for fold in qml_data.get("folds", []):
-        for sub in fold.get("test_substances", []):
-            qml_pred[sub["name"]] = {
-                "deg_pred": sub.get("deg_pred"),
-                "koc_pred": sub.get("koc_pred"),
-            }
+    for r in qml_data.get("results", []):
+        qml_pred[r["name"]] = {
+            "deg_pred": r.get("deg_pred"),
+            "koc_pred": r.get("koc_pred"),
+        }
 
     # Find common substances
     common = [name for name in rf_pred if name in qml_pred]
