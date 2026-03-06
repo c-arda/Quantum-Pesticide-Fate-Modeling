@@ -301,6 +301,74 @@ def fig6_aop_coverage():
     print("  Fig 6: AOP coverage ✓")
 
 
+# ═══════════════════════════════════════════════════════════════════
+# Figure 7: VQC Training curves (train vs validation loss)
+# ═══════════════════════════════════════════════════════════════════
+def fig7_training_curves():
+    history_file = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "backend", ".qml_cache", "training_history.json"
+    )
+    if not os.path.exists(history_file):
+        print("  Fig 7: ⚠ No training history cache — run generate_training_curves.py first")
+        return
+
+    with open(history_file) as f:
+        history = json.load(f)
+
+    epochs = np.arange(1, len(history["deg_train"]) + 1)
+
+    fig, axes = plt.subplots(1, 2, figsize=(6.5, 2.8))
+
+    # DegT50
+    ax = axes[0]
+    ax.plot(epochs, history["deg_train"], "-", color="#2563eb", lw=1.2,
+            label=f"Train (n={history['n_train']})")
+    ax.plot(epochs, history["deg_val"], "--", color="#dc2626", lw=1.2,
+            label=f"Validation (n={history['n_val']})")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("MSE (log$_{10}$ scale)")
+    ax.set_title("(a) DegT50 — VQC training curves", fontsize=9)
+    ax.legend(frameon=False)
+    ax.set_xlim(0, len(epochs))
+
+    min_val_epoch = np.argmin(history["deg_val"]) + 1
+    min_val = min(history["deg_val"])
+    ax.axvline(min_val_epoch, color="#9ca3af", ls=":", lw=0.8, alpha=0.7)
+    ax.annotate(f"Best val epoch {min_val_epoch}",
+                xy=(min_val_epoch, min_val), fontsize=6.5,
+                xytext=(min_val_epoch + 8, min_val + 0.05),
+                arrowprops=dict(arrowstyle="->", color="#9ca3af", lw=0.8),
+                color="#6b7280")
+
+    # Koc
+    ax = axes[1]
+    ax.plot(epochs, history["koc_train"], "-", color="#059669", lw=1.2,
+            label=f"Train (n={history['n_train']})")
+    ax.plot(epochs, history["koc_val"], "--", color="#dc2626", lw=1.2,
+            label=f"Validation (n={history['n_val']})")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("MSE (log$_{10}$ scale)")
+    ax.set_title("(b) K$_{oc}$ — VQC training curves", fontsize=9)
+    ax.legend(frameon=False)
+    ax.set_xlim(0, len(epochs))
+
+    min_val_epoch = np.argmin(history["koc_val"]) + 1
+    min_val = min(history["koc_val"])
+    ax.axvline(min_val_epoch, color="#9ca3af", ls=":", lw=0.8, alpha=0.7)
+    ax.annotate(f"Best val epoch {min_val_epoch}",
+                xy=(min_val_epoch, min_val), fontsize=6.5,
+                xytext=(min_val_epoch + 8, min_val + 0.05),
+                arrowprops=dict(arrowstyle="->", color="#9ca3af", lw=0.8),
+                color="#6b7280")
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGDIR, "fig7_training_curves.pdf"))
+    plt.savefig(os.path.join(FIGDIR, "fig7_training_curves.png"))
+    plt.close()
+    print("  Fig 7: Training curves ✓")
+
+
 # ── Run all ─────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("Generating manuscript figures...")
@@ -310,4 +378,6 @@ if __name__ == "__main__":
     fig4_circuit_schematic()
     fig5_model_comparison()
     fig6_aop_coverage()
+    fig7_training_curves()
     print(f"\nAll figures saved to {FIGDIR}/")
+
