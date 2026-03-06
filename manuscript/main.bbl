@@ -1,0 +1,185 @@
+\providecommand{\latin}[1]{#1}
+\makeatletter
+\providecommand{\doi}
+  {\begingroup\let\do\@makeother\dospecials
+  \catcode`\{=1 \catcode`\}=2 \doi@aux}
+\providecommand{\doi@aux}[1]{\endgroup\texttt{#1}}
+\makeatother
+\providecommand*\mcitethebibliography{\thebibliography}
+\csname @ifundefined\endcsname{endmcitethebibliography}
+  {\let\endmcitethebibliography\endthebibliography}{}
+\begin{mcitethebibliography}{18}
+\providecommand*\natexlab[1]{#1}
+\providecommand*\mciteSetBstSublistMode[1]{}
+\providecommand*\mciteSetBstMaxWidthForm[2]{}
+\providecommand*\mciteBstWouldAddEndPuncttrue
+  {\def\EndOfBibitem{\unskip.}}
+\providecommand*\mciteBstWouldAddEndPunctfalse
+  {\let\EndOfBibitem\relax}
+\providecommand*\mciteSetBstMidEndSepPunct[3]{}
+\providecommand*\mciteSetBstSublistLabelBeginEnd[3]{}
+\providecommand*\EndOfBibitem{}
+\mciteSetBstSublistMode{f}
+\mciteSetBstMaxWidthForm{subitem}{(\alph{mcitesubitemcount})}
+\mciteSetBstSublistLabelBeginEnd
+  {\mcitemaxwidthsubitemform\space}
+  {\relax}
+  {\relax}
+
+\bibitem[ec1(2009)]{ec1107_2009}
+Regulation ({EC}) {No} 1107/2009 of the {European Parliament} and of the
+  {Council} concerning the placing of plant protection products on the market.
+  \emph{Official Journal of the European Union} \textbf{2009}, \emph{L 309},
+  1--50, OJ L 309, 24.11.2009\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[foc(2006)]{focus2006}
+\emph{{FOCUS} Groundwater Scenarios in the {EU} Review of Active Substances};
+  2006; Report of the FOCUS Work Group on Groundwater Scenarios, Version
+  2\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[oec(2002)]{oecd307}
+{OECD} Guideline for the Testing of Chemicals, Test No. 307: Aerobic and
+  Anaerobic Transformation in Soil. \textbf{2002}, \relax
+\mciteBstWouldAddEndPunctfalse
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[oec(2000)]{oecd106}
+{OECD} Guideline for the Testing of Chemicals, Test No. 106: Adsorption --
+  Desorption Using a Batch Equilibrium Method. \textbf{2000}, \relax
+\mciteBstWouldAddEndPunctfalse
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Breiman(2001)]{breiman2001}
+Breiman,~L. Random Forests. \emph{Machine Learning} \textbf{2001}, \emph{45},
+  5--32\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Friedman(2001)]{friedman2001}
+Friedman,~J.~H. Greedy function approximation: A gradient boosting machine.
+  \emph{Annals of Statistics} \textbf{2001}, \emph{29}, 1189--1232\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Mansouri \latin{et~al.}(2018)Mansouri, Grulke, Judson, and
+  Williams]{mansouri2018}
+Mansouri,~K.; Grulke,~C.~M.; Judson,~R.~S.; Williams,~A.~J. OPERA models for
+  predicting physicochemical properties and environmental fate endpoints.
+  \emph{Journal of Cheminformatics} \textbf{2018}, \emph{10}\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Cerezo \latin{et~al.}(2021)Cerezo, Arrasmith, Babbush, Benjamin, Endo,
+  Fujii, McClean, Mitarai, Yuan, Cincio, and Coles]{cerezo2021}
+Cerezo,~M.; Arrasmith,~A.; Babbush,~R.; Benjamin,~S.~C.; Endo,~S.; Fujii,~K.;
+  McClean,~J.~R.; Mitarai,~K.; Yuan,~X.; Cincio,~L.; Coles,~P.~J. Variational
+  quantum algorithms. \emph{Nature Reviews Physics} \textbf{2021}, \emph{3},
+  625--644\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Havl{\'i}{\v{c}}ek \latin{et~al.}(2019)Havl{\'i}{\v{c}}ek,
+  C{\'o}rcoles, Temme, Harrow, Kandala, Chow, and Gambetta]{havlicek2019}
+Havl{\'i}{\v{c}}ek,~V.; C{\'o}rcoles,~A.~D.; Temme,~K.; Harrow,~A.~W.;
+  Kandala,~A.; Chow,~J.~M.; Gambetta,~J.~M. Supervised learning with
+  quantum-enhanced feature spaces. \emph{Nature} \textbf{2019}, \emph{567},
+  209--212\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Schuld \latin{et~al.}(2020)Schuld, Bocharov, Svore, and
+  Wiebe]{schuld2019iqp}
+Schuld,~M.; Bocharov,~A.; Svore,~K.~M.; Wiebe,~N. Circuit-centric quantum
+  classifiers. \emph{Physical Review A} \textbf{2020}, \emph{101}, 032308\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[P{\'e}rez-Salinas \latin{et~al.}(2020)P{\'e}rez-Salinas,
+  Cervera-Lierta, Gil-Fuster, and Latorre]{perezslava2020}
+P{\'e}rez-Salinas,~A.; Cervera-Lierta,~A.; Gil-Fuster,~E.; Latorre,~J.~I. Data
+  re-uploading for a universal quantum classifier. \emph{Quantum}
+  \textbf{2020}, \emph{4}, 226\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Schuld \latin{et~al.}(2021)Schuld, Sweke, and Meyer]{schuld2020}
+Schuld,~M.; Sweke,~R.; Meyer,~J.~J. Effect of data encoding on the expressive
+  power of variational quantum machine-learning models. \emph{Physical Review
+  A} \textbf{2021}, \emph{103}, 032430\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Bergholm \latin{et~al.}(2022)Bergholm, Izaac, Schuld, Gogolin, Ahmed,
+  Ajber, Alam, Alonso-Linaje, AkashNarayanan, Asber, \latin{et~al.}
+  others]{pennylane2022}
+Bergholm,~V.; Izaac,~J.; Schuld,~M.; Gogolin,~C.; Ahmed,~S.; Ajber,~V.;
+  Alam,~M.~S.; Alonso-Linaje,~G.; AkashNarayanan,~B.; Asber,~A.; others
+  {PennyLane}: Automatic differentiation of hybrid quantum-classical
+  computations. \emph{arXiv preprint arXiv:1811.04968} \textbf{2022}, \relax
+\mciteBstWouldAddEndPunctfalse
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[eus(2024)]{euspin2024}
+{EU} Substances, Preparations and Indicators Navigator ({EU SPIN}).
+  \url{https://food.ec.europa.eu/plants/pesticides/eu-pesticides-database_en},
+  2024; Accessed: 2025\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Pedregosa \latin{et~al.}(2011)Pedregosa, Varoquaux, Gramfort, Michel,
+  Thirion, Grisel, Blondel, Prettenhofer, Weiss, Dubourg, \latin{et~al.}
+  others]{sklearn2011}
+Pedregosa,~F.; Varoquaux,~G.; Gramfort,~A.; Michel,~V.; Thirion,~B.;
+  Grisel,~O.; Blondel,~M.; Prettenhofer,~P.; Weiss,~R.; Dubourg,~V.; others
+  Scikit-learn: Machine Learning in {Python}. \emph{Journal of Machine Learning
+  Research} \textbf{2011}, \emph{12}, 2825--2830\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[aop(2024)]{aopwiki2024}
+{AOP-Wiki}: Adverse Outcome Pathway Knowledge Base. \url{https://aopwiki.org/},
+  2024; Accessed: 2025\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Villeneuve \latin{et~al.}(2014)Villeneuve, Crump, Garcia-Reyero,
+  Hecker, Hutchinson, LaLone, Landesmann, Lettieri, Munn, Nepelska,
+  \latin{et~al.} others]{villeneuve2014}
+Villeneuve,~D.~L.; Crump,~D.; Garcia-Reyero,~N.; Hecker,~M.; Hutchinson,~T.~H.;
+  LaLone,~C.~A.; Landesmann,~B.; Lettieri,~T.; Munn,~S.; Nepelska,~M.; others
+  Adverse outcome pathway ({AOP}) development {I}: Strategies and principles.
+  \emph{Toxicological Sciences} \textbf{2014}, \emph{142}, 312--320\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[McClean \latin{et~al.}(2018)McClean, Boixo, Smelyanskiy, Babbush, and
+  Neven]{mcclean2018}
+McClean,~J.~R.; Boixo,~S.; Smelyanskiy,~V.~N.; Babbush,~R.; Neven,~H. Barren
+  plateaus in quantum neural network training landscapes. \emph{Nature
+  Communications} \textbf{2018}, \emph{9}, 4812\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\end{mcitethebibliography}

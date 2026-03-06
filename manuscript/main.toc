@@ -1,0 +1,20 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}Materials and Methods}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Dataset}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Molecular Descriptor Features}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Variational Quantum Circuit Architecture}{6}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Training Procedure}{6}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Classical Baselines}{7}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Cross-Validation Strategy}{7}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Hybrid QML+RF Stacking}{7}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Adverse Outcome Pathway Features}{7}{subsection.2.8}%
+\contentsline {section}{\numberline {3}Results}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Classical Baseline Performance}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Variational Quantum Circuit Performance}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Hybrid Stacking Results}{10}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}AOP-Informed Features}{10}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Discussion}{10}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Why Does QML Fail on DegT50?}{10}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}When Might QML Add Value?}{11}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}The Value of Negative Results}{11}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Conclusions}{12}{section.5}%
