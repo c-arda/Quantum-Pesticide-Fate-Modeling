@@ -164,7 +164,7 @@ include:
   \item \degtl{} (soil): laboratory degradation half-life in days,
         range \SIrange{0.5}{1389}{\day} (median \SI{25}{\day},
         mean \SI{75.7}{\day})
-  \item \koc{}: organic carbon adsorption coefficient,
+  \item \koc{}: organic carbon sorption coefficient,
         range \SIrange{25}{1000000}{\milli\litre\per\gram}
         (median \SI{510}{\milli\litre\per\gram})
 \end{itemize}
@@ -365,25 +365,27 @@ classical baselines.
 \begin{table}[htbp]
   \centering
   \caption{Classical baseline performance (leave-one-out and 5-fold CV).
-           All metrics computed on log\textsubscript{10}-scaled targets.}
+           All metrics computed on log\textsubscript{10}-scaled targets.
+           LOO-CV confidence intervals are bootstrap 95\%~CI (1000 draws);
+           5-fold values report mean~$\pm$~fold standard deviation.}
   \label{tab:baselines}
   \small
   \begin{tabular}{lllccc}
     \toprule
     \textbf{Model} & \textbf{Property} & \textbf{CV} &
-      \textbf{\rtwo{}} & \textbf{MAE} & \textbf{RMSE} \\
+      \textbf{\rtwo{} [95\% CI]} & \textbf{MAE} & \textbf{RMSE} \\
     \midrule
     \multirow{4}{*}{Random Forest}
-      & \degtl{} & LOO    & 0.194 & 0.474 & 0.611 \\
-      & \degtl{} & 5-fold & 0.234 & 0.464 & 0.596 \\
-      & \koc{}   & LOO    & 0.766 & 0.304 & 0.502 \\
-      & \koc{}   & 5-fold & 0.766 & 0.299 & 0.502 \\
+      & \degtl{} & LOO    & 0.194 \,[0.006, 0.333] & 0.474 & 0.611 \\
+      & \degtl{} & 5-fold & 0.089 $\pm$ 0.205      & 0.464 & 0.596 \\
+      & \koc{}   & LOO    & 0.766 \,[0.582, 0.902] & 0.304 & 0.502 \\
+      & \koc{}   & 5-fold & 0.775 $\pm$ 0.135      & 0.299 & 0.502 \\
     \midrule
     \multirow{4}{*}{Gradient Boosting}
-      & \degtl{} & LOO    & 0.223 & 0.487 & 0.600 \\
-      & \degtl{} & 5-fold & 0.208 & 0.470 & 0.606 \\
-      & \koc{}   & LOO    & 0.779 & 0.288 & 0.488 \\
-      & \koc{}   & 5-fold & 0.780 & 0.292 & 0.487 \\
+      & \degtl{} & LOO    & 0.223 \,[0.010, 0.369] & 0.487 & 0.600 \\
+      & \degtl{} & 5-fold & 0.034 $\pm$ 0.286      & 0.470 & 0.606 \\
+      & \koc{}   & LOO    & 0.779 \,[0.603, 0.909] & 0.288 & 0.488 \\
+      & \koc{}   & 5-fold & 0.780 $\pm$ 0.128      & 0.292 & 0.487 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -397,6 +399,10 @@ Key observations:
   \item \degtl{} prediction is poor (\rtwo{}~$< 0.25$), reflecting its
         dependence on soil microbial processes not captured by the
         \nfeat{} structural descriptors.
+  \item The fold-level standard deviations for \degtl{} 5-fold CV
+        ($\pm 0.21$--$0.29$) are large relative to the means, confirming
+        high prediction instability. In contrast, \koc{} fold variation
+        ($\pm 0.13$) is modest, indicating a stable signal.
 \end{itemize}
 
 The predicted-vs-experimental plots for RF \loocv{} (\cref{fig:predexp})
@@ -446,10 +452,28 @@ unfavorable parameter-to-data ratio:
   \approx 2.7
 \end{equation}
 
-With nearly three times more trainable parameters than training samples,
-the VQC memorizes training data rather than learning generalizable patterns.
-This is a well-known failure mode of overparameterized models in the
-small-data regime.
+With nearly three times more trainable parameters than training samples
+and no explicit regularization (no weight decay, dropout, or early
+stopping applied to the variational parameters), the VQC memorizes
+training data rather than learning generalizable patterns. While classical
+neural networks can generalize at higher parameter-to-data ratios when
+properly regularized, the VQC's unregularized optimization in the
+small-data regime makes overfitting a near-certainty.
+
+\Cref{fig:training_curves} provides direct empirical evidence: training
+loss decreases steadily while validation loss plateaus or increases,
+confirming that the circuit learns noise rather than signal.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig7_training_curves.pdf}
+  \caption{VQC training curves (80/20 train-validation split, 80~epochs):
+           (a)~\degtl{} and (b)~\koc{}. Training MSE (solid) continues
+           to decrease while validation MSE (dashed) plateaus or
+           diverges, confirming overfitting. The vertical dotted line
+           marks the epoch of minimum validation loss.}
+  \label{fig:training_curves}
+\end{figure}
 
 
 % ── 3.3 Hybrid Stacking ─────────────────────────────────────────

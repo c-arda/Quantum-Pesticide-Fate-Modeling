@@ -66,8 +66,8 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Classical Baseline Performance}{8}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:results_classical}{{3.1}{8}{Classical Baseline Performance}{subsection.3.1}{}}
 \newlabel{sec:results_classical@cref}{{[subsection][1][3]3.1}{[1][8][]8}{}{}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Classical baseline performance (leave-one-out and 5-fold CV). All metrics computed on log\textsubscript  {10}-scaled targets.}}{8}{table.caption.5}\protected@file@percent }
-\newlabel{tab:baselines}{{1}{8}{Classical baseline performance (leave-one-out and 5-fold CV). All metrics computed on log\textsubscript {10}-scaled targets}{table.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Classical baseline performance (leave-one-out and 5-fold CV). All metrics computed on log\textsubscript  {10}-scaled targets. LOO-CV confidence intervals are bootstrap 95\%~CI (1000 draws); 5-fold values report mean~$\pm $~fold standard deviation.}}{8}{table.caption.5}\protected@file@percent }
+\newlabel{tab:baselines}{{1}{8}{Classical baseline performance (leave-one-out and 5-fold CV). All metrics computed on log\textsubscript {10}-scaled targets. LOO-CV confidence intervals are bootstrap 95\%~CI (1000 draws); 5-fold values report mean~$\pm $~fold standard deviation}{table.caption.5}{}}
 \newlabel{tab:baselines@cref}{{[table][1][]1}{[1][8][]8}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Variational Quantum Circuit Performance}{8}{subsection.3.2}\protected@file@percent }
 \newlabel{sec:results_qml}{{3.2}{8}{Variational Quantum Circuit Performance}{subsection.3.2}{}}
@@ -78,33 +78,36 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Model comparison (5-fold CV): (a)~DegT50{} and (b)~K\textsubscript  {oc}{} prediction. The VQC achieves negative R\textsuperscript  {2}{} for DegT50{}, indicating worse-than-mean prediction. Classical baselines significantly outperform the quantum circuit.}}{9}{figure.caption.7}\protected@file@percent }
 \newlabel{fig:comparison}{{5}{9}{Model comparison (5-fold CV): (a)~\degtl {} and (b)~\koc {} prediction. The VQC achieves negative \rtwo {} for \degtl {}, indicating worse-than-mean prediction. Classical baselines significantly outperform the quantum circuit}{figure.caption.7}{}}
 \newlabel{fig:comparison@cref}{{[figure][5][]5}{[1][8][]9}{}{}{}}
-\citation{mcclean2018}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces VQC training curves (80/20 train-validation split, 80~epochs): (a)~DegT50{} and (b)~K\textsubscript  {oc}{}. Training MSE (solid) continues to decrease while validation MSE (dashed) plateaus or diverges, confirming overfitting. The vertical dotted line marks the epoch of minimum validation loss.}}{10}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:training_curves}{{6}{10}{VQC training curves (80/20 train-validation split, 80~epochs): (a)~\degtl {} and (b)~\koc {}. Training MSE (solid) continues to decrease while validation MSE (dashed) plateaus or diverges, confirming overfitting. The vertical dotted line marks the epoch of minimum validation loss}{figure.caption.8}{}}
+\newlabel{fig:training_curves@cref}{{[figure][6][]6}{[1][10][]10}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Hybrid Stacking Results}{10}{subsection.3.3}\protected@file@percent }
 \newlabel{sec:results_hybrid}{{3.3}{10}{Hybrid Stacking Results}{subsection.3.3}{}}
 \newlabel{sec:results_hybrid@cref}{{[subsection][3][3]3.3}{[1][10][]10}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4}AOP-Informed Features}{10}{subsection.3.4}\protected@file@percent }
 \newlabel{sec:results_aop}{{3.4}{10}{AOP-Informed Features}{subsection.3.4}{}}
 \newlabel{sec:results_aop@cref}{{[subsection][4][3]3.4}{[1][10][]10}{}{}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Effect of AOP-derived MoA features on RF LOO-CV{} performance.}}{10}{table.caption.8}\protected@file@percent }
-\newlabel{tab:aop}{{2}{10}{Effect of AOP-derived MoA features on RF \loocv {} performance}{table.caption.8}{}}
-\newlabel{tab:aop@cref}{{[table][2][]2}{[1][10][]10}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Discussion}{10}{section.4}\protected@file@percent }
-\newlabel{sec:discussion}{{4}{10}{Discussion}{section.4}{}}
-\newlabel{sec:discussion@cref}{{[section][4][]4}{[1][10][]10}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Why Does QML Fail on DegT50?}{10}{subsection.4.1}\protected@file@percent }
+\citation{mcclean2018}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Effect of AOP-derived MoA features on RF LOO-CV{} performance.}}{11}{table.caption.9}\protected@file@percent }
+\newlabel{tab:aop}{{2}{11}{Effect of AOP-derived MoA features on RF \loocv {} performance}{table.caption.9}{}}
+\newlabel{tab:aop@cref}{{[table][2][]2}{[1][10][]11}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces AOP-Wiki-derived mechanism-of-action pathway coverage across the 111{} pesticide dataset. 67 substances (60.4\%) map to at least one of 6 pathway categories.}}{11}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:aop}{{7}{11}{AOP-Wiki-derived mechanism-of-action pathway coverage across the \nsub {} pesticide dataset. 67 substances (60.4\%) map to at least one of 6 pathway categories}{figure.caption.10}{}}
+\newlabel{fig:aop@cref}{{[figure][7][]7}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Discussion}{11}{section.4}\protected@file@percent }
+\newlabel{sec:discussion}{{4}{11}{Discussion}{section.4}{}}
+\newlabel{sec:discussion@cref}{{[section][4][]4}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Why Does QML Fail on DegT50?}{11}{subsection.4.1}\protected@file@percent }
 \citation{havlicek2019}
 \citation{cerezo2021}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces AOP-Wiki-derived mechanism-of-action pathway coverage across the 111{} pesticide dataset. 67 substances (60.4\%) map to at least one of 6 pathway categories.}}{11}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:aop}{{6}{11}{AOP-Wiki-derived mechanism-of-action pathway coverage across the \nsub {} pesticide dataset. 67 substances (60.4\%) map to at least one of 6 pathway categories}{figure.caption.9}{}}
-\newlabel{fig:aop@cref}{{[figure][6][]6}{[1][10][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}When Might QML Add Value?}{11}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}The Value of Negative Results}{11}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}When Might QML Add Value?}{12}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}The Value of Negative Results}{12}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusions}{12}{section.5}\protected@file@percent }
+\newlabel{sec:conclusions}{{5}{12}{Conclusions}{section.5}{}}
+\newlabel{sec:conclusions@cref}{{[section][5][]5}{[1][12][]12}{}{}{}}
 \bibstyle{achemso}
 \bibdata{references}
 \bibcite{ec1107_2009}{{1}{2009}{{ec1}}{{}}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusions}{12}{section.5}\protected@file@percent }
-\newlabel{sec:conclusions}{{5}{12}{Conclusions}{section.5}{}}
-\newlabel{sec:conclusions@cref}{{[section][5][]5}{[1][11][]12}{}{}{}}
 \bibcite{focus2006}{{2}{2006}{{foc}}{{}}}
 \bibcite{oecd307}{{3}{2002}{{oec}}{{}}}
 \bibcite{oecd106}{{4}{2000}{{oec}}{{}}}

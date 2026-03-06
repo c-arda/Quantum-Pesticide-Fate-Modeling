@@ -26,6 +26,8 @@
 \usepackage{subcaption}
 \usepackage{enumitem}
 \usepackage{multirow}
+\usepackage{orcidlink}
+\usepackage[blocks]{authblk}
 
 % ── Settings ──────────────────────────────────────────────────────
 \hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!50!black}
@@ -52,12 +54,9 @@
 \title{Variational Quantum Circuits for Pesticide Environmental Fate Prediction:\\
        A Comparative Study with Classical Machine Learning on the EU SPIN Database}
 
-\author{
-  Celal Arda\textsuperscript{1,*}
-  \\[6pt]
-  \textsuperscript{1}Independent Researcher \\
-  \textsuperscript{*}Corresponding author
-}
+\author{Celal Arda \orcidlink{0009-0006-4563-8325}}
+\affil{Independent Researcher}
+\affil{\texttt{celal.arda@outlook.de}}
 
 \date{\today}
 \maketitle
@@ -84,7 +83,7 @@ A hybrid stacking framework blending QML and RF predictions is introduced
 but remains RF-dominated ($\alpha \approx 0$). We also assess adverse
 outcome pathway (AOP) features derived from AOP-Wiki data as additional
 descriptors, finding no improvement over structural features alone. These
-results provide an honest benchmark for near-term quantum machine learning
+results provide a rigorous benchmark for near-term quantum machine learning
 applied to regulatory chemistry and highlight the critical role of dataset
 size in VQC generalization.
 
@@ -140,7 +139,7 @@ expressive power of shallow quantum circuits~\citep{schuld2020}.
 This work investigates whether VQCs, implemented via PennyLane on a
 statevector simulator~\citep{pennylane2022}, can extract predictive signal
 for pesticide fate properties that classical models miss. Rather than
-claiming quantum advantage, we present an honest comparative benchmark
+claiming quantum advantage, we present a systematic comparative benchmark
 that highlights both the potential and the fundamental limitations of
 near-term QML on small regulatory datasets.
 
@@ -165,7 +164,7 @@ include:
   \item \degtl{} (soil): laboratory degradation half-life in days,
         range \SIrange{0.5}{1389}{\day} (median \SI{25}{\day},
         mean \SI{75.7}{\day})
-  \item \koc{}: organic carbon adsorption coefficient,
+  \item \koc{}: organic carbon sorption coefficient,
         range \SIrange{25}{1000000}{\milli\litre\per\gram}
         (median \SI{510}{\milli\litre\per\gram})
 \end{itemize}
@@ -553,8 +552,8 @@ related problems with:
 
 \subsection{The Value of Negative Results}
 
-This study contributes to the growing body of honest QML benchmarks that
-distinguish genuine quantum advantage from hype. Reporting negative results
+This study contributes to the growing body of critical QML benchmarks that
+distinguish genuine quantum advantage from overstatement. Reporting negative results
 is essential for the field's credibility and helps practitioners avoid
 deploying quantum solutions where classical methods
 suffice~\citep{cerezo2021}.
@@ -591,7 +590,7 @@ properties from the EU SPIN database. Key findings:
 \end{enumerate}
 
 These results caution against premature application of near-term QML to
-small regulatory datasets and underscore the need for honest benchmarking
+small regulatory datasets and underscore the need for rigorous benchmarking
 in quantum chemistry applications.
 
 
