@@ -4,17 +4,18 @@
 [![PennyLane](https://img.shields.io/badge/PennyLane-0.39+-purple.svg)](https://pennylane.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Quantum machine learning for predicting pesticide environmental fate properties** — a 12-qubit variational quantum circuit that predicts soil degradation half-life (DegT50) and organic carbon adsorption (Koc) from molecular structure, integrated with FOCUS regulatory fate models.
+**Variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 12-qubit VQC that predicts soil degradation half-life (DegT50) and organic carbon adsorption (Koc) from molecular structure, benchmarked against Random Forest and Gradient Boosting on the EU SPIN database of 111 substances, integrated with FOCUS regulatory fate models.
 
 ## Highlights
 
-- **12-qubit VQC** with data re-uploading and IQP-style entanglement (301 variational parameters)
-- **17 molecular descriptors** including microbial degradation proxies and photolability features
+- **12-qubit VQC** with data re-uploading and IQP-style entanglement (301 trainable parameters)
+- **17 curated molecular descriptors** including microbial degradation proxies and photolability features
 - **111 pesticide substances** from the EU SPIN database with validated SMILES
-- **Classical baselines** (Random Forest + Gradient Boosting) for head-to-head comparison
-- **Hybrid QML+RF stacking** — uses QML for DegT50 (quantum advantage) and RF for Koc
+- **Classical baselines** (Random Forest + Gradient Boosting) for systematic comparison
+- **Hybrid QML+RF stacking** — learned blending weight α per property, optimized via LOO-CV
+- **FOCUS regulatory pipeline** — feeds predictions into PEARL/GEM groundwater models → PEC (µg/L)
 - **Field validation** against published groundwater monitoring data (8 substances)
-- **Web UI** with 7 interactive panels: dashboard, substances, FOCUS scenarios, quantum status, validation, QML vs classical comparison, and simulation
+- **Web dashboard** with 7 interactive panels
 
 ## Architecture
 
@@ -26,7 +27,7 @@ SMILES → RDKit descriptors → 17 features → [0, π] scaling
                               ├─ IQP ZZ entanglement
                               ├─ RY cross-rotation (features 13-17)
                               ├─ Data re-uploading
-                              └─ 5 variational layers (Rot + CNOT)
+                              └─ 8 variational layers (Rot + CNOT)
                                               ↓
                               ⟨Z₀⟩...⟨Z₁₁⟩ → Linear readout
                                               ↓
@@ -86,11 +87,12 @@ python3 -m http.server 8765
 
 *Results with 60-epoch training on 111 substances, 17 features — CV in progress.*
 
-| Model | DegT50 R² | Koc R² |
-|-------|-----------|--------|
-| QML 12-Qubit | *pending* | *pending* |
-| Random Forest (LOO) | 0.194 | 0.766 |
-| Gradient Boosting (LOO) | 0.223 | 0.779 |
+| Model | DegT50 R² | Koc R² | Notes |
+|-------|-----------|--------|-------|
+| QML 12-Qubit (5-fold) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
+| QML 12-Qubit (LOO) | *in progress* | *in progress* | ~March 10, 2026 |
+| Random Forest (LOO) | 0.194 | 0.766 | 200 trees, max depth 10 |
+| Gradient Boosting (LOO) | 0.223 | 0.779 | 200 estimators, lr 0.1 |
 
 ## Project Structure
 
@@ -108,7 +110,13 @@ qp-fate/
 │   ├── spin_database.py    # 111 substances with properties
 │   ├── fate_model.py       # FOCUS PEARL/GEM fate model
 │   ├── field_data.py       # Field validation data
+│   ├── aop_features.py     # AOP-Wiki MoA pathway mapping
 │   └── focus_scenarios.py  # 9 FOCUS groundwater scenarios
+├── manuscript/
+│   ├── main.tex            # LaTeX manuscript
+│   ├── references.bib      # 22 references
+│   ├── generate_figures.py # Publication figure generation
+│   └── figures/            # 6 figures (PDF + PNG)
 ```
 
 ## References
@@ -117,6 +125,10 @@ qp-fate/
 - [FOCUS](https://focus.jrc.ec.europa.eu) — Forum for Co-ordination of pesticide fate models
 - [pesticidemodels.eu](https://pesticidemodels.eu) — EU pesticide fate model hub
 - [SPIN 4.4](https://pesticidemodels.eu/spin/) — Substances Plug-IN database
+
+## Author
+
+Celal Arda — [ORCID 0009-0006-4563-8325](https://orcid.org/0009-0006-4563-8325)
 
 ## License
 
