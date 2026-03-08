@@ -19,3 +19,11 @@ Thumbs.db
 *.log
 nohup.out
 .~lock.*
+
+# Secrets — NEVER commit
+.env
+.env.local
+.env.production
+config.local.*
+*.key
+*.pem
