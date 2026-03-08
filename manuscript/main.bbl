@@ -8,7 +8,7 @@
 \providecommand*\mcitethebibliography{\thebibliography}
 \csname @ifundefined\endcsname{endmcitethebibliography}
   {\let\endmcitethebibliography\endthebibliography}{}
-\begin{mcitethebibliography}{18}
+\begin{mcitethebibliography}{20}
 \providecommand*\natexlab[1]{#1}
 \providecommand*\mciteSetBstSublistMode[1]{}
 \providecommand*\mciteSetBstMaxWidthForm[2]{}
@@ -151,6 +151,22 @@ Pedregosa,~F.; Varoquaux,~G.; Gramfort,~A.; Michel,~V.; Thirion,~B.;
   Grisel,~O.; Blondel,~M.; Prettenhofer,~P.; Weiss,~R.; Dubourg,~V.; others
   Scikit-learn: Machine Learning in {Python}. \emph{Journal of Machine Learning
   Research} \textbf{2011}, \emph{12}, 2825--2830\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Hoerl and Kennard(1970)Hoerl, and Kennard]{hoerl1970}
+Hoerl,~A.~E.; Kennard,~R.~W. Ridge Regression: Biased Estimation for
+  Nonorthogonal Problems. \emph{Technometrics} \textbf{1970}, \emph{12},
+  55--67\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Tibshirani(1996)]{tibshirani1996}
+Tibshirani,~R. Regression Shrinkage and Selection via the Lasso. \emph{Journal
+  of the Royal Statistical Society: Series B} \textbf{1996}, \emph{58},
+  267--288\relax
 \mciteBstWouldAddEndPuncttrue
 \mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
 {\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
