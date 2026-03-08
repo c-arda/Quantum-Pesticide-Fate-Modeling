@@ -14,6 +14,7 @@ import json
 import os
 import hashlib
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import Ridge, Lasso
 from sklearn.model_selection import cross_val_predict, LeaveOneOut, KFold
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
@@ -66,6 +67,8 @@ def train_classical_baseline():
     results = {}
 
     for model_name, ModelClass, params in [
+        ("Ridge", Ridge, {"alpha": 1.0}),
+        ("Lasso", Lasso, {"alpha": 0.1, "max_iter": 10000}),
         ("RandomForest", RandomForestRegressor, {"n_estimators": 200, "max_depth": 10, "random_state": 42}),
         ("GradientBoosting", GradientBoostingRegressor, {"n_estimators": 200, "max_depth": 4, "learning_rate": 0.1, "random_state": 42}),
     ]:
