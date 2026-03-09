@@ -14,7 +14,9 @@ import sys, os, json
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
+from scipy.stats import wilcoxon
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import Ridge, Lasso
 from sklearn.model_selection import KFold, LeaveOneOut
 from sklearn.metrics import r2_score
 
@@ -83,13 +85,21 @@ def compute_5fold_ci(X, y_deg, y_koc):
 
 # ── LOO-CV: bootstrap CI ─────────────────────────────────────────
 def compute_loo_bootstrap_ci(X, y_deg, y_koc, n_bootstrap=1000):
-    """Bootstrap 95% CI on LOO-CV R² from per-substance residuals."""
+    """Bootstrap 95% CI on LOO-CV R² from per-substance residuals.
+    
+    Returns results dict AND per-substance predictions for Wilcoxon tests.
+    """
     results = {}
+    all_preds = {}
 
-    for name, Model, params in [
+    model_specs = [
+        ("Ridge", Ridge, {"alpha": 1.0}),
+        ("LASSO", Lasso, {"alpha": 0.1, "max_iter": 10000}),
         ("RF", RandomForestRegressor, {"n_estimators": 200, "max_depth": 10, "random_state": 42}),
         ("GB", GradientBoostingRegressor, {"n_estimators": 200, "max_depth": 4, "learning_rate": 0.1, "random_state": 42}),
-    ]:
+    ]
+
+    for name, Model, params in model_specs:
         loo = LeaveOneOut()
         n = len(y_deg)
 
@@ -106,6 +116,8 @@ def compute_loo_bootstrap_ci(X, y_deg, y_koc, n_bootstrap=1000):
             model = Model(**params)
             model.fit(X[train_idx], y_koc[train_idx])
             pred_koc[i] = model.predict(X[test_idx])[0]
+
+        all_preds[name] = {"deg": pred_deg, "koc": pred_koc}
 
         # Full R²
         full_r2_deg = _r2(y_deg, pred_deg)
@@ -136,6 +148,38 @@ def compute_loo_bootstrap_ci(X, y_deg, y_koc, n_bootstrap=1000):
               f"[{results[name]['deg_ci_lo']:.3f}, {results[name]['deg_ci_hi']:.3f}]")
         print(f"            Koc    R² = {full_r2_koc:.3f} "
               f"[{results[name]['koc_ci_lo']:.3f}, {results[name]['koc_ci_hi']:.3f}]")
+
+    return results, all_preds
+
+
+# ── Statistical significance tests ────────────────────────────────
+def compute_significance_tests(y_deg, y_koc, all_preds):
+    """Wilcoxon signed-rank test on per-substance squared residuals.
+    
+    Compares model pairs: RF vs GB, Ridge vs RF, Ridge vs GB.
+    Null hypothesis: the two models have the same distribution of
+    per-substance squared errors.
+    """
+    results = {}
+    pairs = [("RF", "GB"), ("Ridge", "RF"), ("Ridge", "GB")]
+
+    for model_a, model_b in pairs:
+        for prop, y in [("deg", y_deg), ("koc", y_koc)]:
+            res_a = (y - all_preds[model_a][prop]) ** 2
+            res_b = (y - all_preds[model_b][prop]) ** 2
+            diff = res_a - res_b
+
+            # Wilcoxon requires at least some non-zero differences
+            if np.all(diff == 0):
+                p_val = 1.0
+            else:
+                _, p_val = wilcoxon(diff, alternative="two-sided")
+
+            key = f"{model_a}_vs_{model_b}_{prop}"
+            results[key] = round(p_val, 4)
+            sig = "***" if p_val < 0.001 else ("**" if p_val < 0.01 else
+                  ("*" if p_val < 0.05 else "ns"))
+            print(f"  {model_a} vs {model_b} ({prop}): p = {p_val:.4f} {sig}")
 
     return results
 
@@ -204,7 +248,10 @@ if __name__ == "__main__":
     fivefold = compute_5fold_ci(X, y_deg, y_koc)
 
     print("\n── LOO-CV (bootstrap 95% CI, 1000 draws) ──")
-    loo = compute_loo_bootstrap_ci(X, y_deg, y_koc)
+    loo, all_preds = compute_loo_bootstrap_ci(X, y_deg, y_koc)
+
+    print("\n── Wilcoxon signed-rank tests (LOO squared residuals) ──")
+    wilcoxon_results = compute_significance_tests(y_deg, y_koc, all_preds)
 
     print("\n── VQC 5-fold ──")
     vqc = compute_vqc_5fold_ci()
@@ -213,6 +260,7 @@ if __name__ == "__main__":
     output = {
         "fivefold_classical": fivefold,
         "loo_classical": loo,
+        "wilcoxon_tests": wilcoxon_results,
         "vqc_5fold": vqc,
     }
 

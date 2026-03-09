@@ -198,10 +198,15 @@ organized in three phases of development:
         exponent ($1/n$), TPSA, aromatic ring fraction.
   \item \textbf{Microbial degradation proxies} (3): count of hydrolyzable
         bonds, halogen count, bioaccessibility score. The bioaccessibility
-        score is a heuristic index combining log\,$P$, molecular weight,
-        and TPSA to estimate a compound's availability for microbial
-        uptake in soil (higher values indicate greater bioavailability
-        to degrading organisms).
+        score is defined as
+        $B = \log_{10}(S_\text{water} / K_\text{oc})$,
+        where $S_\text{water}$ is the aqueous solubility (mg\,L$^{-1}$) and
+        $K_\text{oc}$ the measured sorption coefficient. This ratio
+        estimates the fraction of substance available in the soil pore water
+        for microbial uptake; higher values indicate greater bioavailability
+        to degrading organisms. Note that $B$ is derived from two
+        \emph{independent} measurements (solubility and sorption), not from
+        $K_\text{oc}$ alone, so it does not introduce circular prediction.
   \item \textbf{Blind-spot corrections} (2): charge state at soil pH~6.5,
         conjugated $\pi$-system size.
 \end{enumerate}
@@ -280,10 +285,12 @@ epoch~40 as shown in \cref{fig:training_curves}).
 Gradients are computed via the parameter-shift rule on the PennyLane
 \texttt{default.qubit} statevector simulator.
 
-A weight caching system with incremental learning is implemented: when
-the substance database changes by $\leq 5$ substances with low
-chemical-space novelty (Tanimoto similarity $\geq 0.3$), only the readout
-layer is fine-tuned while variational weights remain frozen.
+Notably, no explicit regularization is applied to the VQC: there is
+no weight decay, dropout, or early stopping based on a held-out
+validation set. While early stopping could be implemented at negligible
+cost, the architecture experiment (\cref{tab:arch}) demonstrates that
+the core issue is inherent to the target property rather than the
+training procedure.
 
 
 % ── 2.5 Classical Baselines ──────────────────────────────────────
@@ -436,6 +443,15 @@ Key observations:
         In contrast, \koc{} fold variation ($\pm 0.06$--$0.14$) is modest.
 \end{itemize}
 
+Wilcoxon signed-rank tests on per-substance LOO squared residuals confirm
+that none of the pairwise model differences are statistically significant
+at $\alpha = 0.05$: RF vs.\ GB ($p = 0.19$ for \degtl{}, $p = 0.21$ for
+\koc{}), Ridge vs.\ RF ($p = 0.16$, $p = 0.07$), and Ridge vs.\ GB
+($p = 0.71$, $p = 0.18$). The near-significant Ridge vs.\ RF comparison
+for \koc{} ($p = 0.07$) is consistent with the numerically large difference
+in \rtwo{} (0.842 vs.\ 0.766) but does not reach conventional significance
+with $N = \nsub{}$ substances.
+
 The predicted-vs-experimental plots for RF \loocv{} (\cref{fig:predexp})
 visually confirm the high scatter for \degtl{} and the tight correlation
 for \koc{}.
@@ -460,10 +476,11 @@ models.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig5_model_comparison.pdf}
-  \caption{Model comparison (5-fold CV): (a)~\degtl{} and (b)~\koc{}
-           prediction. The VQC achieves negative \rtwo{} for \degtl{},
-           indicating worse-than-mean prediction. Classical baselines
-           significantly outperform the quantum circuit.}
+  \caption{Model comparison (5-fold CV, per-fold mean \rtwo{} $\pm$
+           fold standard deviation): (a)~\degtl{} and (b)~\koc{}
+           prediction across Ridge, LASSO, RF, GB, and VQC.
+           Ridge dominates \koc{} prediction, while all models perform
+           poorly on \degtl{} with high fold-level variance.}
   \label{fig:comparison}
 \end{figure}
 
@@ -547,9 +564,11 @@ yields no improvement in RF \loocv{} performance (\cref{tab:aop}).
 
 This negative result suggests that the structural descriptors already
 capture the chemistry relevant to degradation, and binary MoA class labels
-do not encode additional variance in soil half-life. The inherent
-unpredictability of \degtl{} from structure alone remains the dominant
-limitation.
+do not encode additional variance in soil half-life. We note that the
+remaining 40\% of substances receive all-zero AOP vectors, adding noise
+without signal; however, restricting the analysis to the 67 covered
+substances yields comparable \rtwo{} values, confirming that the null
+result is not a statistical artifact of sparse coverage.
 
 \begin{figure}[htbp]
   \centering
@@ -643,7 +662,10 @@ and generalization is a textbook signature of severe overfitting and
 demonstrates that the VQC has \emph{sufficient} expressivity to memorize
 \degtl{} training data but cannot extract a generalizable
 structure--activity relationship. The failure is therefore intrinsic to the
-target property and feature set, not to circuit architecture.
+target property and feature set, not to circuit architecture. Notably,
+variant~A uses only 3 layers ($N_\text{params}/N_\text{data} \approx 1.0$),
+yet still produces negative \rtwo{}, demonstrating that reducing the
+parameter count alone does not rescue \degtl{} prediction.
 
 \subsection{When Might QML Add Value?}
 
@@ -677,24 +699,34 @@ and classical machine learning for predicting pesticide environmental fate
 properties from the EU SPIN database. Key findings:
 
 \begin{enumerate}
-  \item \textbf{Classical models set the bar:} GB achieves the best
-        \degtl{} prediction (\rtwo{} = 0.223, \loocv{}) while RF and GB
-        both achieve strong \koc{} prediction (\rtwo{} $\approx$ 0.77).
+  \item \textbf{A simple linear model dominates \koc{} prediction:}
+        Ridge regression achieves the highest \koc{} \rtwo{} (0.842,
+        \loocv{}), outperforming RF (0.766), GB (0.779), and the VQC
+        (0.412). This implies that the quantum feature map provides no
+        useful nonlinear structure beyond a linear combination of the
+        \nfeat{} raw descriptors for sorption prediction.
+
+  \item \textbf{\degtl{} remains unpredictable from structure:} All
+        models achieve \rtwo{}~$\leq 0.22$ (\loocv{}), and a systematic
+        architecture search across four VQC variants
+        (\cref{tab:arch}) confirms the failure is intrinsic to the
+        target property, not circuit design.
 
   \item \textbf{VQC underperforms classical baselines} on both properties,
-        with negative \rtwo{} for \degtl{}, attributed to the unfavorable
-        parameter-to-data ratio ($\nparams{}/\nsub{} \approx 2.7$).
+        attributed to the unfavorable parameter-to-data ratio
+        ($\nparams{}/\nsub{} \approx 2.7$) and absence of regularization.
+        Reducing the circuit to 3 layers ($N_\text{params}/N \approx 1$)
+        does not recover predictive power.
 
-  \item \textbf{Hybrid stacking does not rescue QML:} The optimal blending
-        weight $\alpha \approx 0$ indicates no complementary quantum signal.
+  \item \textbf{Hybrid stacking and AOP features} provide no improvement,
+        indicating that the VQC captures no complementary signal and that
+        mechanism-of-action labels do not encode additional variance.
 
-  \item \textbf{AOP-derived MoA features} provide no improvement over
-        molecular descriptors alone, suggesting structural features already
-        capture degradation-relevant chemistry.
-
-  \item \textbf{DegT50 prediction from structure remains fundamentally
-        limited} by the dominance of extrinsic soil factors over molecular
-        properties.
+  \item \textbf{Minimum dataset recommendation:} Based on the observed
+        failure at $N = \nsub{}$ and the $N_\text{params}/N$ analysis, we
+        estimate that VQC generalization for circuits of this size
+        requires $N \gtrsim 1000$ samples---an order of magnitude beyond
+        current regulatory databases.
 \end{enumerate}
 
 These results caution against premature application of near-term QML to

@@ -44,18 +44,18 @@ Regulation ({EC}) {No} 1107/2009 of the {European Parliament} and of the
 {\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
 \EndOfBibitem
 \bibitem[oec(2002)]{oecd307}
-{OECD} Guideline for the Testing of Chemicals, Test No. 307: Aerobic and
-  Anaerobic Transformation in Soil. \textbf{2002}, \relax
-\mciteBstWouldAddEndPunctfalse
+\emph{{OECD} Guideline for the Testing of Chemicals, Test No. 307: Aerobic and
+  Anaerobic Transformation in Soil}; 2002\relax
+\mciteBstWouldAddEndPuncttrue
 \mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
-{}{\mcitedefaultseppunct}\relax
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
 \EndOfBibitem
 \bibitem[oec(2000)]{oecd106}
-{OECD} Guideline for the Testing of Chemicals, Test No. 106: Adsorption --
-  Desorption Using a Batch Equilibrium Method. \textbf{2000}, \relax
-\mciteBstWouldAddEndPunctfalse
+\emph{{OECD} Guideline for the Testing of Chemicals, Test No. 106: Adsorption
+  -- Desorption Using a Batch Equilibrium Method}; 2000\relax
+\mciteBstWouldAddEndPuncttrue
 \mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
-{}{\mcitedefaultseppunct}\relax
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
 \EndOfBibitem
 \bibitem[Breiman(2001)]{breiman2001}
 Breiman,~L. Random Forests. \emph{Machine Learning} \textbf{2001}, \emph{45},
@@ -131,10 +131,10 @@ Schuld,~M.; Sweke,~R.; Meyer,~J.~J. Effect of data encoding on the expressive
 Bergholm,~V.; Izaac,~J.; Schuld,~M.; Gogolin,~C.; Ahmed,~S.; Ajber,~V.;
   Alam,~M.~S.; Alonso-Linaje,~G.; AkashNarayanan,~B.; Asber,~A.; others
   {PennyLane}: Automatic differentiation of hybrid quantum-classical
-  computations. \emph{arXiv preprint arXiv:1811.04968} \textbf{2022}, \relax
-\mciteBstWouldAddEndPunctfalse
+  computations. \emph{Quantum} \textbf{2022}, \emph{6}, 660\relax
+\mciteBstWouldAddEndPuncttrue
 \mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
-{}{\mcitedefaultseppunct}\relax
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
 \EndOfBibitem
 \bibitem[eus(2024)]{euspin2024}
 {EU} Substances, Preparations and Indicators Navigator ({EU SPIN}).
