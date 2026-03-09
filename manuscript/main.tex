@@ -74,8 +74,9 @@ classical regressors. We encode \nfeat{} physicochemical descriptors for
 \nsub{} EU-registered pesticides into a \nqubits{}-qubit IQP-style quantum
 circuit with data re-uploading and \nlayers{} variational layers (\nparams{}
 trainable parameters). Leave-one-out cross-validation benchmarks reveal that
-Random Forest (RF) achieves \rtwo{}~=~0.194 for \degtl{} and 0.766 for
-\koc{}, while Gradient Boosting (GB) reaches 0.223 and 0.779, respectively.
+Random Forest (RF) achieves \rtwo{}~=~0.194 for \degtl{} and 0.726 for
+\koc{} (on a circularity-free 16-feature set excluding the bioaccessibility
+proxy), while Gradient Boosting (GB) reaches 0.223 and 0.764, respectively.
 The VQC underperforms classical baselines on \degtl{} (\rtwo{}~$< 0$, 5-fold
 CV), consistent with severe overfitting expected from the unfavorable
 parameter-to-sample ratio ($N_\text{params}/N_\text{data} \approx 2.7$).
@@ -392,7 +393,7 @@ classical baselines.
   \caption{Baseline performance (leave-one-out and 5-fold CV).
            All metrics computed on log\textsubscript{10}-scaled targets.
            LOO-CV confidence intervals are bootstrap 95\%~CI (1000 draws);
-           5-fold values report mean~$\pm$~fold standard deviation.
+           5-fold values report per-fold mean~\rtwo{}.
            \koc{} results are shown both with the full 17-feature set
            (including bioaccessibility $B$) and the fair 16-feature set
            (excluding $B$; see circularity note in \cref{sec:features}).}
