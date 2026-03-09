@@ -405,35 +405,35 @@ classical baselines.
     \midrule
     \multirow{6}{*}{Ridge}
       & \degtl{}         & LOO    & 0.154   & 0.488 & 0.626 \\
-      & \degtl{}         & 5-fold & 0.105   & 0.504 & 0.644 \\
+      & \degtl{}         & 5-fold & $-$0.109 & 0.504 & 0.644 \\
       & \koc{} (17f)     & LOO    & 0.842$^\dagger$ & 0.252 & 0.413 \\
       & \koc{} (16f)     & LOO    & 0.546   & 0.439 & 0.699 \\
       & \koc{} (17f)     & 5-fold & 0.848$^\dagger$ & 0.248 & 0.405 \\
-      & \koc{} (16f)     & 5-fold & 0.547   & 0.441 & 0.698 \\
+      & \koc{} (16f)     & 5-fold & 0.528   & 0.441 & 0.698 \\
     \midrule
     \multirow{6}{*}{LASSO}
       & \degtl{}         & LOO    & 0.101   & 0.518 & 0.645 \\
-      & \degtl{}         & 5-fold & 0.064   & 0.525 & 0.658 \\
+      & \degtl{}         & 5-fold & $-$0.050 & 0.525 & 0.658 \\
       & \koc{} (17f)     & LOO    & 0.747$^\dagger$ & 0.336 & 0.522 \\
       & \koc{} (16f)     & LOO    & 0.535   & 0.476 & 0.708 \\
       & \koc{} (17f)     & 5-fold & 0.740$^\dagger$ & 0.341 & 0.529 \\
-      & \koc{} (16f)     & 5-fold & 0.536   & 0.471 & 0.706 \\
+      & \koc{} (16f)     & 5-fold & 0.528   & 0.471 & 0.706 \\
     \midrule
     \multirow{6}{*}{Random Forest}
       & \degtl{}         & LOO    & 0.194   & 0.474 & 0.611 \\
-      & \degtl{}         & 5-fold & 0.234   & 0.464 & 0.596 \\
+      & \degtl{}         & 5-fold & 0.089   & 0.464 & 0.596 \\
       & \koc{} (17f)     & LOO    & 0.766   & 0.304 & 0.502 \\
       & \koc{} (16f)     & LOO    & 0.726   & 0.341 & 0.543 \\
       & \koc{} (17f)     & 5-fold & 0.766   & 0.299 & 0.502 \\
-      & \koc{} (16f)     & 5-fold & 0.717   & 0.346 & 0.552 \\
+      & \koc{} (16f)     & 5-fold & 0.726   & 0.346 & 0.552 \\
     \midrule
     \multirow{6}{*}{Gradient Boosting}
       & \degtl{}         & LOO    & 0.223   & 0.487 & 0.600 \\
-      & \degtl{}         & 5-fold & 0.208   & 0.470 & 0.606 \\
+      & \degtl{}         & 5-fold & 0.034   & 0.470 & 0.606 \\
       & \koc{} (17f)     & LOO    & 0.779   & 0.288 & 0.488 \\
       & \koc{} (16f)     & LOO    & 0.764   & 0.323 & 0.504 \\
       & \koc{} (17f)     & 5-fold & 0.780   & 0.292 & 0.487 \\
-      & \koc{} (16f)     & 5-fold & 0.727   & 0.341 & 0.542 \\
+      & \koc{} (16f)     & 5-fold & 0.740   & 0.341 & 0.542 \\
     \bottomrule
   \end{tabular}
 
@@ -639,7 +639,8 @@ factors contribute:
         Any function the circuit can express must therefore lie in the
         span of these $N_\text{qubits}$ observables. Given that Ridge
         regression—itself a linear model—already achieves \rtwo{}~=~0.842
-        for \koc{}, it is unclear whether the quantum feature map provides
+        for \koc{} with the 17-feature set (inflated by bioaccessibility
+        circularity; the fair 16-feature \rtwo{} is 0.546), it is unclear whether the quantum feature map provides
         additional expressive power beyond what a linear model over the
         raw descriptors captures.
 \end{enumerate}
