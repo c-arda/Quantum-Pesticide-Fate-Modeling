@@ -215,57 +215,98 @@ def fig5_model_comparison():
     with open("backend/.qml_cache/classical_baseline.json") as f:
         cl = json.load(f)
 
-    # Data for comparison (5-fold CV)
-    models = ["Random\nForest", "Gradient\nBoosting", "VQC\n(QML)"]
+    ci_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "backend", ".qml_cache", "confidence_intervals.json")
+    with open(ci_file) as f:
+        ci = json.load(f)
+
+    # Per-fold mean R² (matching Table 1) for RF and GB
+    rf_ci = ci["fivefold_classical"]["RF"]
+    gb_ci = ci["fivefold_classical"]["GB"]
+
+    # Ridge/LASSO: compute per-fold R² inline
+    from sklearn.linear_model import Ridge, Lasso
+    from sklearn.model_selection import KFold
+    from sklearn.metrics import r2_score
+    from backend.quantum_predictor import extract_features
+    from backend.spin_database import SUBSTANCES
+
+    X = np.array([extract_features(s) for s in SUBSTANCES])
+    y_deg = np.array([np.log10(max(s["degT50_soil"], 0.1)) for s in SUBSTANCES])
+    y_koc = np.array([np.log10(max(s["koc"], 0.1)) for s in SUBSTANCES])
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+    ridge_deg, ridge_koc, lasso_deg, lasso_koc = [], [], [], []
+    for train_idx, test_idx in kf.split(X):
+        for Model, params, deg_list, koc_list in [
+            (Ridge, {"alpha": 1.0}, ridge_deg, ridge_koc),
+            (Lasso, {"alpha": 0.1, "max_iter": 10000}, lasso_deg, lasso_koc),
+        ]:
+            m = Model(**params)
+            m.fit(X[train_idx], y_deg[train_idx])
+            deg_list.append(r2_score(y_deg[test_idx], m.predict(X[test_idx])))
+            m = Model(**params)
+            m.fit(X[train_idx], y_koc[train_idx])
+            koc_list.append(r2_score(y_koc[test_idx], m.predict(X[test_idx])))
+
+    # All models: per-fold mean ± std (consistent with Table 1)
+    models = ["Ridge", "LASSO", "Random\nForest", "Gradient\nBoosting", "VQC\n(QML)"]
     deg_r2 = [
-        cl["models"]["RandomForest"]["5fold"]["deg_r2"],
-        cl["models"]["GradientBoosting"]["5fold"]["deg_r2"],
-        -0.141,  # 5-fold QML result from git log
+        np.mean(ridge_deg), np.mean(lasso_deg),
+        rf_ci["deg_mean"], gb_ci["deg_mean"], -0.141,
+    ]
+    deg_err = [
+        np.std(ridge_deg), np.std(lasso_deg),
+        rf_ci["deg_std"], gb_ci["deg_std"], 0,
     ]
     koc_r2 = [
-        cl["models"]["RandomForest"]["5fold"]["koc_r2"],
-        cl["models"]["GradientBoosting"]["5fold"]["koc_r2"],
-        0.412,  # 5-fold QML result from git log
+        np.mean(ridge_koc), np.mean(lasso_koc),
+        rf_ci["koc_mean"], gb_ci["koc_mean"], 0.412,
+    ]
+    koc_err = [
+        np.std(ridge_koc), np.std(lasso_koc),
+        rf_ci["koc_std"], gb_ci["koc_std"], 0,
     ]
 
-    fig, axes = plt.subplots(1, 2, figsize=(6.5, 3.0))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2))
     x = np.arange(len(models))
     width = 0.5
 
     # DegT50
-    colors_deg = ["#2563eb", "#7c3aed", "#dc2626"]
-    bars = axes[0].bar(x, deg_r2, width, color=colors_deg, alpha=0.85, edgecolor="white")
-    axes[0].set_ylabel("R² (5-fold CV)")
+    colors_deg = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#dc2626"]
+    bars = axes[0].bar(x, deg_r2, width, color=colors_deg, alpha=0.85,
+                       edgecolor="white", yerr=deg_err, capsize=3,
+                       error_kw={"lw": 0.8, "capthick": 0.8})
+    axes[0].set_ylabel("R² (5-fold CV, per-fold mean)")
     axes[0].set_title("(a) DegT50 prediction", fontsize=9)
     axes[0].set_xticks(x)
-    axes[0].set_xticklabels(models, fontsize=8)
+    axes[0].set_xticklabels(models, fontsize=7)
     axes[0].axhline(0, color="black", lw=0.5)
     for bar, val in zip(bars, deg_r2):
-        if val >= 0:
-            y_pos = val + 0.02
-            va = "bottom"
-        else:
-            y_pos = val * 0.5  # inside the bar, halfway down
-            va = "center"
+        y_pos = val + 0.03 if val >= 0 else val * 0.5
+        va = "bottom" if val >= 0 else "center"
         axes[0].text(bar.get_x() + bar.get_width()/2, y_pos, f"{val:.3f}",
-                    ha="center", va=va, fontsize=7, fontweight="bold" if val < 0 else "normal")
+                    ha="center", va=va, fontsize=6.5,
+                    fontweight="bold" if val < 0 else "normal")
 
     # Koc
-    colors_koc = ["#059669", "#7c3aed", "#dc2626"]
-    bars = axes[1].bar(x, koc_r2, width, color=colors_koc, alpha=0.85, edgecolor="white")
-    axes[1].set_ylabel("R² (5-fold CV)")
+    colors_koc = ["#94a3b8", "#94a3b8", "#059669", "#7c3aed", "#dc2626"]
+    bars = axes[1].bar(x, koc_r2, width, color=colors_koc, alpha=0.85,
+                       edgecolor="white", yerr=koc_err, capsize=3,
+                       error_kw={"lw": 0.8, "capthick": 0.8})
+    axes[1].set_ylabel("R² (5-fold CV, per-fold mean)")
     axes[1].set_title("(b) K$_{oc}$ prediction", fontsize=9)
     axes[1].set_xticks(x)
-    axes[1].set_xticklabels(models, fontsize=8)
+    axes[1].set_xticklabels(models, fontsize=7)
     for bar, val in zip(bars, koc_r2):
-        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.02, f"{val:.3f}",
-                    ha="center", va="bottom", fontsize=7)
+        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.03, f"{val:.3f}",
+                    ha="center", va="bottom", fontsize=6.5)
 
     plt.tight_layout()
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.pdf"))
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.png"))
     plt.close()
-    print("  Fig 5: Model comparison ✓")
+    print("  Fig 5: Model comparison ✓ (per-fold mean R², matching Table 1)")
 
 
 # ═══════════════════════════════════════════════════════════════════
