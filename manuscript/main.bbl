@@ -8,7 +8,7 @@
 \providecommand*\mcitethebibliography{\thebibliography}
 \csname @ifundefined\endcsname{endmcitethebibliography}
   {\let\endmcitethebibliography\endthebibliography}{}
-\begin{mcitethebibliography}{20}
+\begin{mcitethebibliography}{21}
 \providecommand*\natexlab[1]{#1}
 \providecommand*\mciteSetBstSublistMode[1]{}
 \providecommand*\mciteSetBstMaxWidthForm[2]{}
@@ -194,6 +194,15 @@ Villeneuve,~D.~L.; Crump,~D.; Garcia-Reyero,~N.; Hecker,~M.; Hutchinson,~T.~H.;
 McClean,~J.~R.; Boixo,~S.; Smelyanskiy,~V.~N.; Babbush,~R.; Neven,~H. Barren
   plateaus in quantum neural network training landscapes. \emph{Nature
   Communications} \textbf{2018}, \emph{9}, 4812\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Arda(2026)]{arda2026nd}
+Arda,~C. A Unified Quantum Descriptor for Electron Correlation from
+  Coupled-Cluster Natural Orbital Occupations. \emph{Manuscript in preparation}
+  \textbf{2026}, Validates the $N_D$ descriptor across molecular systems
+  spanning four orders of magnitude in correlation strength\relax
 \mciteBstWouldAddEndPuncttrue
 \mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
 {\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
