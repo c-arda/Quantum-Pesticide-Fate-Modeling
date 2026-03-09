@@ -12,7 +12,7 @@
 \contentsline {subsection}{\numberline {3.1}Classical Baseline Performance}{8}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Variational Quantum Circuit Performance}{9}{subsection.3.2}%
 \contentsline {subsection}{\numberline {3.3}Hybrid Stacking Results}{10}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}AOP-Informed Features}{11}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.4}AOP-Informed Features}{10}{subsection.3.4}%
 \contentsline {section}{\numberline {4}Discussion}{11}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Why Does QML Fail on DegT50?}{11}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}When Might QML Add Value?}{13}{subsection.4.2}%

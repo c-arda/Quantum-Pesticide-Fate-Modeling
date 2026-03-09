@@ -204,9 +204,15 @@ organized in three phases of development:
         $K_\text{oc}$ the measured sorption coefficient. This ratio
         estimates the fraction of substance available in the soil pore water
         for microbial uptake; higher values indicate greater bioavailability
-        to degrading organisms. Note that $B$ is derived from two
-        \emph{independent} measurements (solubility and sorption), not from
-        $K_\text{oc}$ alone, so it does not introduce circular prediction.
+        to degrading organisms.
+
+        \textbf{Circularity note:} Because $B$ includes the measured
+        $K_\text{oc}$, using it as a feature when \emph{predicting}
+        $K_\text{oc}$ introduces partial data leakage. For \degtl{}
+        prediction this is unproblematic (the target is unrelated to
+        $K_\text{oc}$), but for \koc{} prediction we report all results
+        both with the full 17-feature set and with a 16-feature set that
+        excludes $B$ (\cref{tab:baselines}).
   \item \textbf{Blind-spot corrections} (2): charge state at soil pH~6.5,
         conjugated $\pi$-system size.
 \end{enumerate}
@@ -386,49 +392,73 @@ classical baselines.
   \caption{Baseline performance (leave-one-out and 5-fold CV).
            All metrics computed on log\textsubscript{10}-scaled targets.
            LOO-CV confidence intervals are bootstrap 95\%~CI (1000 draws);
-           5-fold values report mean~$\pm$~fold standard deviation.}
+           5-fold values report mean~$\pm$~fold standard deviation.
+           \koc{} results are shown both with the full 17-feature set
+           (including bioaccessibility $B$) and the fair 16-feature set
+           (excluding $B$; see circularity note in \cref{sec:features}).}
   \label{tab:baselines}
   \small
   \begin{tabular}{lllccc}
     \toprule
     \textbf{Model} & \textbf{Property} & \textbf{CV} &
-      \textbf{\rtwo{} [95\% CI]} & \textbf{MAE} & \textbf{RMSE} \\
+      \textbf{\rtwo{}} & \textbf{MAE} & \textbf{RMSE} \\
     \midrule
-    \multirow{4}{*}{Ridge}
-      & \degtl{} & LOO    & 0.154 \,[$-$0.075, 0.327] & 0.488 & 0.626 \\
-      & \degtl{} & 5-fold & $-$0.109 $\pm$ 0.408     & 0.504 & 0.644 \\
-      & \koc{}   & LOO    & 0.842 \,[0.751, 0.919]   & 0.252 & 0.413 \\
-      & \koc{}   & 5-fold & 0.844 $\pm$ 0.063         & 0.248 & 0.405 \\
+    \multirow{6}{*}{Ridge}
+      & \degtl{}         & LOO    & 0.154   & 0.488 & 0.626 \\
+      & \degtl{}         & 5-fold & 0.105   & 0.504 & 0.644 \\
+      & \koc{} (17f)     & LOO    & 0.842$^\dagger$ & 0.252 & 0.413 \\
+      & \koc{} (16f)     & LOO    & 0.546   & 0.439 & 0.699 \\
+      & \koc{} (17f)     & 5-fold & 0.848$^\dagger$ & 0.248 & 0.405 \\
+      & \koc{} (16f)     & 5-fold & 0.547   & 0.441 & 0.698 \\
     \midrule
-    \multirow{4}{*}{LASSO}
-      & \degtl{} & LOO    & 0.101 \,[0.006, 0.164]   & 0.518 & 0.645 \\
-      & \degtl{} & 5-fold & $-$0.050 $\pm$ 0.102     & 0.525 & 0.658 \\
-      & \koc{}   & LOO    & 0.747 \,[0.556, 0.881]   & 0.336 & 0.522 \\
-      & \koc{}   & 5-fold & 0.746 $\pm$ 0.138         & 0.341 & 0.529 \\
+    \multirow{6}{*}{LASSO}
+      & \degtl{}         & LOO    & 0.101   & 0.518 & 0.645 \\
+      & \degtl{}         & 5-fold & 0.064   & 0.525 & 0.658 \\
+      & \koc{} (17f)     & LOO    & 0.747$^\dagger$ & 0.336 & 0.522 \\
+      & \koc{} (16f)     & LOO    & 0.535   & 0.476 & 0.708 \\
+      & \koc{} (17f)     & 5-fold & 0.740$^\dagger$ & 0.341 & 0.529 \\
+      & \koc{} (16f)     & 5-fold & 0.536   & 0.471 & 0.706 \\
     \midrule
-    \multirow{4}{*}{Random Forest}
-      & \degtl{} & LOO    & 0.194 \,[0.006, 0.333] & 0.474 & 0.611 \\
-      & \degtl{} & 5-fold & 0.089 $\pm$ 0.205      & 0.464 & 0.596 \\
-      & \koc{}   & LOO    & 0.766 \,[0.582, 0.902] & 0.304 & 0.502 \\
-      & \koc{}   & 5-fold & 0.775 $\pm$ 0.135      & 0.299 & 0.502 \\
+    \multirow{6}{*}{Random Forest}
+      & \degtl{}         & LOO    & 0.194   & 0.474 & 0.611 \\
+      & \degtl{}         & 5-fold & 0.234   & 0.464 & 0.596 \\
+      & \koc{} (17f)     & LOO    & 0.766   & 0.304 & 0.502 \\
+      & \koc{} (16f)     & LOO    & 0.726   & 0.341 & 0.543 \\
+      & \koc{} (17f)     & 5-fold & 0.766   & 0.299 & 0.502 \\
+      & \koc{} (16f)     & 5-fold & 0.717   & 0.346 & 0.552 \\
     \midrule
-    \multirow{4}{*}{Gradient Boosting}
-      & \degtl{} & LOO    & 0.223 \,[0.010, 0.369] & 0.487 & 0.600 \\
-      & \degtl{} & 5-fold & 0.034 $\pm$ 0.286      & 0.470 & 0.606 \\
-      & \koc{}   & LOO    & 0.779 \,[0.603, 0.909] & 0.288 & 0.488 \\
-      & \koc{}   & 5-fold & 0.780 $\pm$ 0.128      & 0.292 & 0.487 \\
+    \multirow{6}{*}{Gradient Boosting}
+      & \degtl{}         & LOO    & 0.223   & 0.487 & 0.600 \\
+      & \degtl{}         & 5-fold & 0.208   & 0.470 & 0.606 \\
+      & \koc{} (17f)     & LOO    & 0.779   & 0.288 & 0.488 \\
+      & \koc{} (16f)     & LOO    & 0.764   & 0.323 & 0.504 \\
+      & \koc{} (17f)     & 5-fold & 0.780   & 0.292 & 0.487 \\
+      & \koc{} (16f)     & 5-fold & 0.727   & 0.341 & 0.542 \\
     \bottomrule
   \end{tabular}
+
+  \vspace{4pt}
+  {\footnotesize $^\dagger$Inflated by bioaccessibility circularity:
+  $B = \log_{10}(S/K_\text{oc})$ uses measured \koc{} as input.
+  The 16-feature (16f) rows exclude $B$ and represent the fair comparison.
+  17f = all 17 features including $B$.}
 \end{table}
 
 Key observations:
 \begin{itemize}[nosep]
-  \item \textbf{Linear models are competitive:} Ridge regression achieves
-        the highest \koc{} \rtwo{} (0.842, LOO), surpassing both RF (0.766)
-        and GB (0.779). This confirms that \koc{} prediction is
-        well-described by a linear combination of the \nfeat{} descriptors,
-        consistent with the dominance of log\,$P$ and bioaccessibility in
-        \cref{fig:importance}.
+  \item \textbf{Bioaccessibility inflates linear \koc{} models:} Ridge
+        \rtwo{} drops from 0.842 to 0.546 ($\Delta = -0.30$) when the
+        circular bioaccessibility feature is removed, because $B$ is
+        a near-linear transform of the target. Ensemble models are far
+        more robust: GB loses only 0.015 in \loocv{} \rtwo{} (0.779
+        $\rightarrow$ 0.764), because tree-based methods can derive the
+        same information from log\,$P$ and solubility independently.
+  \item \textbf{GB leads fair \koc{} prediction:} On the circularity-free
+        16-feature set, Gradient Boosting achieves the highest \loocv{}
+        \rtwo{} (0.764), followed by RF (0.726), Ridge (0.546), and
+        LASSO (0.535). The nonlinear advantage of tree-based models is
+        now evident: \koc{} prediction benefits from interaction effects
+        that linear models cannot capture without the $B$ shortcut.
   \item \degtl{} prediction is poor across all models (\rtwo{}~$< 0.25$),
         with linear and nonlinear methods performing comparably. The
         ensemble models' modest advantage (GB 0.223 vs.\ Ridge 0.154)
@@ -436,21 +466,14 @@ Key observations:
         structural descriptors alone.
   \item \textbf{DegT50 instability:} The fold-level standard deviations for
         \degtl{} 5-fold~CV ($\pm 0.10$--$0.41$) are comparable to or
-        exceed the means, confirming high prediction instability. Notably,
-        RF improves from LOO to 5-fold for \degtl{} (lower MAE) while
-        GB degrades, reflecting the sensitivity of \degtl{} predictions
-        to fold composition rather than systematic model differences.
-        In contrast, \koc{} fold variation ($\pm 0.06$--$0.14$) is modest.
+        exceed the means, confirming high prediction instability.
 \end{itemize}
 
-Wilcoxon signed-rank tests on per-substance LOO squared residuals confirm
-that none of the pairwise model differences are statistically significant
-at $\alpha = 0.05$: RF vs.\ GB ($p = 0.19$ for \degtl{}, $p = 0.21$ for
-\koc{}), Ridge vs.\ RF ($p = 0.16$, $p = 0.07$), and Ridge vs.\ GB
-($p = 0.71$, $p = 0.18$). The near-significant Ridge vs.\ RF comparison
-for \koc{} ($p = 0.07$) is consistent with the numerically large difference
-in \rtwo{} (0.842 vs.\ 0.766) but does not reach conventional significance
-with $N = \nsub{}$ substances.
+Wilcoxon signed-rank tests on per-substance LOO squared residuals
+(17-feature set) confirm that none of the pairwise model differences are
+statistically significant at $\alpha = 0.05$: RF vs.\ GB ($p = 0.19$
+for \degtl{}, $p = 0.21$ for \koc{}), Ridge vs.\ RF ($p = 0.16$,
+$p = 0.07$), and Ridge vs.\ GB ($p = 0.71$, $p = 0.18$).
 
 The predicted-vs-experimental plots for RF \loocv{} (\cref{fig:predexp})
 visually confirm the high scatter for \degtl{} and the tight correlation
@@ -479,15 +502,16 @@ models.
   \caption{Model comparison (5-fold CV, per-fold mean \rtwo{} $\pm$
            fold standard deviation): (a)~\degtl{} and (b)~\koc{}
            prediction across Ridge, LASSO, RF, GB, and VQC.
-           Ridge dominates \koc{} prediction, while all models perform
-           poorly on \degtl{} with high fold-level variance.}
+           GB leads \koc{} prediction on the fair 16-feature set;
+           all models perform poorly on \degtl{} with high fold-level
+           variance.}
   \label{fig:comparison}
 \end{figure}
 
 The VQC achieves \rtwo{}~$= -0.141$ for \degtl{} (5-fold CV), indicating
 that the quantum model predicts \emph{worse} than a constant mean
 prediction. For \koc{}, the VQC achieves \rtwo{}~$= 0.412$, substantially
-below the RF baseline of 0.766.
+below the GB baseline of 0.764 (16-feature, circularity-free).
 
 \pending{VQC LOO-CV (111~folds $\times$ 60~epochs) computation in progress
 on dedicated hardware; results will replace this placeholder upon completion
@@ -633,7 +657,7 @@ a reduced learning rate (0.03) and extended training (120~epochs).
   \centering
   \caption{Architecture experiment: DegT50 prediction (5-fold CV) across
            four circuit variants. The current baseline achieves
-           \rtwo{}~$= -0.141$ with 5 layers and 60 epochs.}
+           \rtwo{}~$= -0.141$ with 8 layers and 60 epochs.}
   \label{tab:arch}
   \small
   \begin{tabular}{llcccccc}
@@ -647,7 +671,7 @@ a reduced learning rate (0.03) and extended training (120~epochs).
     C & \texttt{StronglyEntanglingLayers}    & 12 & 5  & 60  & 0.165 & $-$0.146 & 1.3\,h \\
     D & Baseline+, lr$=$0.03                 & 12 & 8  & 120 & 0.009 & $-$0.205 & 4.1\,h \\
     \midrule
-    \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.05)}} & 12 & 5 & 60
+    \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.04)}} & 12 & 8 & 60
       & --- & $-$0.141 & --- \\
     \bottomrule
   \end{tabular}
@@ -705,12 +729,14 @@ and classical machine learning for predicting pesticide environmental fate
 properties from the EU SPIN database. Key findings:
 
 \begin{enumerate}
-  \item \textbf{A simple linear model dominates \koc{} prediction:}
-        Ridge regression achieves the highest \koc{} \rtwo{} (0.842,
-        \loocv{}), outperforming RF (0.766), GB (0.779), and the VQC
-        (0.412). This implies that the quantum feature map provides no
-        useful nonlinear structure beyond a linear combination of the
-        \nfeat{} raw descriptors for sorption prediction.
+  \item \textbf{Gradient Boosting leads \koc{} prediction:} On the
+        circularity-free 16-feature set (excluding bioaccessibility $B$),
+        GB achieves \rtwo{}~$= 0.764$ (\loocv{}), followed by RF (0.726).
+        Linear models (Ridge 0.546, LASSO 0.535) are substantially weaker,
+        indicating that \koc{} benefits from nonlinear feature interactions.
+        Notably, Ridge's previously reported \rtwo{}~$= 0.842$ was
+        inflated by the circular inclusion of $B = \log_{10}(S/K_\text{oc})$,
+        which contains the target variable.
 
   \item \textbf{\degtl{} remains unpredictable from structure:} All
         models achieve \rtwo{}~$\leq 0.22$ (\loocv{}), and a systematic
