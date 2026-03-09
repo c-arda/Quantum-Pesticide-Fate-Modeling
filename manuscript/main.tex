@@ -601,6 +601,50 @@ factors contribute:
         raw descriptors captures.
 \end{enumerate}
 
+To disentangle these hypotheses, we conducted a systematic architecture
+search testing four circuit variants via 5-fold CV on \degtl{} only
+(\cref{tab:arch}): (A)~a shallow-wide circuit (12~qubits, 3~layers,
+all-to-all CZ entanglement, double data re-uploading); (B)~a deep-narrow
+circuit (8~qubits, 12~layers, ring CNOT, triple re-uploading);
+(C)~a hardware-efficient template using PennyLane's
+\texttt{StronglyEntanglingLayers}; and (D)~the baseline architecture with
+a reduced learning rate (0.03) and extended training (120~epochs).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Architecture experiment: DegT50 prediction (5-fold CV) across
+           four circuit variants. The current baseline achieves
+           \rtwo{}~$= -0.141$ with 5 layers and 60 epochs.}
+  \label{tab:arch}
+  \small
+  \begin{tabular}{llcccccc}
+    \toprule
+    \textbf{Variant} & \textbf{Architecture} & \textbf{$N_q$} &
+      \textbf{$L$} & \textbf{Epochs} &
+      \textbf{Train MSE} & \textbf{\rtwo{}} & \textbf{Time} \\
+    \midrule
+    A & All-to-all CZ, 2$\times$ re-upload  & 12 & 3  & 80  & 0.183 & $-$0.157 & 2.1\,h \\
+    B & Ring CNOT, 3$\times$ re-upload       &  8 & 12 & 100 & 0.003 & $-$0.190 & 3.3\,h \\
+    C & \texttt{StronglyEntanglingLayers}    & 12 & 5  & 60  & 0.165 & $-$0.146 & 1.3\,h \\
+    D & Baseline+, lr$=$0.03                 & 12 & 8  & 120 & 0.009 & $-$0.205 & 4.1\,h \\
+    \midrule
+    \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.05)}} & 12 & 5 & 60
+      & --- & $-$0.141 & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+No variant improves upon the baseline. Remarkably, the two variants that
+achieve near-zero training MSE---variant~B (0.003) and variant~D
+(0.009)---produce the \emph{worst} test \rtwo{} ($-0.190$ and $-0.205$,
+respectively), while the underfit variants~A and~C (training MSE $\sim$0.17)
+perform marginally better. This anti-correlation between training fitness
+and generalization is a textbook signature of severe overfitting and
+demonstrates that the VQC has \emph{sufficient} expressivity to memorize
+\degtl{} training data but cannot extract a generalizable
+structure--activity relationship. The failure is therefore intrinsic to the
+target property and feature set, not to circuit architecture.
+
 \subsection{When Might QML Add Value?}
 
 Despite the negative results on this dataset, QML may offer advantages in
