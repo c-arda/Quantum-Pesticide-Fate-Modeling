@@ -125,7 +125,16 @@ def fig3_pred_vs_exp():
     deg_exp = [r["deg_exp"] for r in rf_results]
     deg_pred = [r["deg_pred"] for r in rf_results]
     koc_exp = [r["koc_exp"] for r in rf_results]
-    koc_pred = [r["koc_pred"] for r in rf_results]
+    # Use 16-feature predictions (without bioaccessibility) — the fair comparison
+    koc_pred = [r["koc_pred_no_B"] for r in rf_results]
+
+    # Compute R² for 16-feature Koc from predictions (cache top-level stores 17-feat value)
+    import numpy as np
+    koc_exp_arr = np.array(koc_exp)
+    koc_pred_arr = np.array(koc_pred)
+    ss_res = np.sum((koc_exp_arr - koc_pred_arr) ** 2)
+    ss_tot = np.sum((koc_exp_arr - np.mean(koc_exp_arr)) ** 2)
+    koc_r2_16 = 1 - ss_res / ss_tot
 
     fig, axes = plt.subplots(1, 2, figsize=(6.5, 3.0))
 
@@ -140,7 +149,7 @@ def fig3_pred_vs_exp():
     ax.set_title(f"(a) DegT50 — RF LOO (R² = {cl['models']['RandomForest']['loo']['deg_r2']:.3f})", fontsize=9)
     ax.set_aspect("equal")
 
-    # Koc
+    # Koc — 16-feature (no bioaccessibility)
     ax = axes[1]
     ax.scatter(koc_exp, koc_pred, c="#059669", s=15, alpha=0.6, edgecolors="none")
     lims = [min(min(koc_exp), min(koc_pred)) - 0.2, max(max(koc_exp), max(koc_pred)) + 0.2]
@@ -148,14 +157,14 @@ def fig3_pred_vs_exp():
     ax.set_xlim(lims); ax.set_ylim(lims)
     ax.set_xlabel("Experimental log$_{10}$(K$_{oc}$)")
     ax.set_ylabel("Predicted log$_{10}$(K$_{oc}$)")
-    ax.set_title(f"(b) K$_{{oc}}$ — RF LOO (R² = {cl['models']['RandomForest']['loo']['koc_r2']:.3f})", fontsize=9)
+    ax.set_title(f"(b) K$_{{oc}}$ — RF LOO (R² = {koc_r2_16:.3f})", fontsize=9)
     ax.set_aspect("equal")
 
     plt.tight_layout()
     plt.savefig(os.path.join(FIGDIR, "fig3_pred_vs_exp.pdf"))
     plt.savefig(os.path.join(FIGDIR, "fig3_pred_vs_exp.png"))
     plt.close()
-    print("  Fig 3: Predicted vs experimental ✓")
+    print(f"  Fig 3: Predicted vs experimental ✓ (Koc R²={koc_r2_16:.3f}, 16-feat)")
 
 
 # ═══════════════════════════════════════════════════════════════════
