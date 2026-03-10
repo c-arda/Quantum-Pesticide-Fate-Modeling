@@ -80,8 +80,9 @@ proxy), while Gradient Boosting (GB) reaches 0.223 and 0.764, respectively.
 The VQC underperforms classical baselines on \degtl{} (\rtwo{}~$< 0$, 5-fold
 CV), consistent with severe overfitting expected from the unfavorable
 parameter-to-sample ratio ($N_\text{params}/N_\text{data} \approx 2.7$).
-A hybrid stacking framework blending QML and RF predictions is introduced
-but remains RF-dominated ($\alpha \approx 0$). We also assess adverse
+A hybrid stacking framework blending QML and RF predictions yields
+$\alpha = 0.20$, but the resulting R\textsuperscript{2} improvement
+(+0.02) is not statistically significant. We also assess adverse
 outcome pathway (AOP) features derived from AOP-Wiki data as additional
 descriptors, finding no improvement over structural features alone. These
 results provide a rigorous benchmark for near-term quantum machine learning
@@ -285,7 +286,7 @@ variational plus 13 readout = \nparams{}.
 Separate circuits are trained for \degtl{} and \koc{} prediction.
 Variational parameters are initialized uniformly in $[-0.5, 0.5]$ with
 a fixed random seed (42) for reproducibility. Optimization uses the Adam
-optimizer~\citep{pennylane2022} with learning rate 0.04 and 80 training
+optimizer~\citep{kingma2015} with learning rate 0.04 and 80 training
 epochs on the full dataset (60 epochs for cross-validation folds, reduced
 to limit computational cost given that validation loss plateaus by
 epoch~40 as shown in \cref{fig:training_curves}).
@@ -391,8 +392,7 @@ classical baselines.
 \begin{table}[htbp]
   \centering
   \caption{Baseline performance (leave-one-out and 5-fold CV).
-           All metrics computed on log\textsubscript{10}-scaled targets.
-           LOO-CV confidence intervals are bootstrap 95\%~CI (1000 draws);
+           All metrics computed on log\textsubscript{10}-scaled targets;
            5-fold values report per-fold mean~\rtwo{}.
            \koc{} results are shown both with the full 17-feature set
            (including bioaccessibility $B$) and the fair 16-feature set
@@ -556,14 +556,23 @@ confirming that the circuit learns noise rather than signal.
 \label{sec:results_hybrid}
 
 The hybrid stacker optimizes $\alpha$ via grid search (step 0.05) over
-the QML and RF \loocv{} predictions for 110 common substances. The
-optimized weights are $\alpha_\text{DegT50} = 0.20$ and
-$\alpha_{K_\text{oc}} = 0.20$, yielding hybrid \rtwo{}
-of 0.213 for \degtl{} (+0.019 over RF alone) and 0.783 for \koc{}
-(+0.017 over RF alone, 17-feature set). The QML component thus
-contributes a marginal complementary signal; however, the improvement
-is not statistically significant (well within bootstrap CI of the RF
-baseline) and comes at $\sim$100$\times$ the computational cost.
+the QML and RF \loocv{} predictions. Of the 111~VQC folds, one substance
+(Difenoconazole) appears twice in the checkpoint due to a resumption
+overlap; after deduplication, 110 common substances are used for
+blending. The optimized weight is $\alpha = 0.20$ for both properties,
+yielding hybrid \loocv{} \rtwo{} of 0.213 for \degtl{} (+0.019 over RF
+alone) and 0.783 for \koc{} (+0.017 over RF's 0.766 on the same 110
+substances).
+
+\textbf{Circularity caveat:} Because the VQC was trained on all
+\nfeat{} features (including bioaccessibility~$B$), the hybrid \koc{}
+result of 0.783 inherits the circular contribution of~$B$. The fair
+16-feature RF baseline (excluding~$B$) achieves \rtwo{}~$= 0.726$
+(\cref{tab:baselines}); a strictly circularity-free hybrid comparison
+would require retraining the VQC without~$B$, which was not performed.
+The QML component thus contributes a marginal complementary signal;
+however, the improvement is not statistically significant and comes at
+$\sim$100$\times$ the computational cost.
 
 
 % ── 3.4 AOP Features ────────────────────────────────────────────
