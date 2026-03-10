@@ -512,7 +512,7 @@ models.
 The VQC achieves \rtwo{}~$= -0.141$ for \degtl{} (5-fold CV), indicating
 that the quantum model predicts \emph{worse} than a constant mean
 prediction. For \koc{}, the VQC achieves \rtwo{}~$= 0.412$, substantially
-below the GB baseline of 0.764 (16-feature, circularity-free).
+below the GB 5-fold baseline of 0.740 (16-feature, circularity-free).
 
 The full VQC \loocv{} (111~folds $\times$ 60~epochs) confirms these trends:
 \rtwo{}~$= -0.035$ for \degtl{} and \rtwo{}~$= 0.533$ for \koc{}
@@ -739,7 +739,7 @@ suffice~\citep{cerezo2021}.
 \label{sec:conclusions}
 % ══════════════════════════════════════════════════════════════════
 
-We presented QP-FATE, a comparative study of variational quantum circuits
+We presented a comparative study of variational quantum circuits
 and classical machine learning for predicting pesticide environmental fate
 properties from the EU SPIN database. Key findings:
 
@@ -754,7 +754,7 @@ properties from the EU SPIN database. Key findings:
         which contains the target variable.
 
   \item \textbf{\degtl{} remains unpredictable from structure:} All
-        models achieve \rtwo{}~$\leq 0.22$ (\loocv{}), and a systematic
+        models achieve \rtwo{}~$\leq 0.23$ (\loocv{}), and a systematic
         architecture search across four VQC variants
         (\cref{tab:arch}) confirms the failure is intrinsic to the
         target property, not circuit design.
