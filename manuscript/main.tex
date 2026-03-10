@@ -514,9 +514,11 @@ that the quantum model predicts \emph{worse} than a constant mean
 prediction. For \koc{}, the VQC achieves \rtwo{}~$= 0.412$, substantially
 below the GB baseline of 0.764 (16-feature, circularity-free).
 
-\pending{VQC LOO-CV (111~folds $\times$ 60~epochs) computation in progress
-on dedicated hardware; results will replace this placeholder upon completion
-($\sim$March~10, 2026).}
+The full VQC \loocv{} (111~folds $\times$ 60~epochs) confirms these trends:
+\rtwo{}~$= -0.035$ for \degtl{} and \rtwo{}~$= 0.533$ for \koc{}
+(MAE~$= 0.571$ and $0.533$, RMSE~$= 0.692$ and $0.709$, respectively).
+The \koc{} \loocv{} \rtwo{} is comparable to Ridge regression (0.546) but
+substantially below RF (0.726) and GB (0.764) on the 16-feature set.
 
 These results are consistent with the expected overfitting from the
 unfavorable parameter-to-data ratio:
@@ -553,13 +555,15 @@ confirming that the circuit learns noise rather than signal.
 \subsection{Hybrid Stacking Results}
 \label{sec:results_hybrid}
 
-The hybrid stacker optimizes $\alpha$ using the QML and RF \loocv{}
-predictions. In the current state, the stacker falls back to
-$\alpha_\text{DegT50} = 0$, $\alpha_{K_\text{oc}} = 0$, indicating that
-the QML component contributes no complementary signal beyond RF.
-
-\pending{Hybrid stacking weights will be re-optimized once VQC LOO-CV
-predictions become available ($\sim$March~10, 2026).}
+The hybrid stacker optimizes $\alpha$ via grid search (step 0.05) over
+the QML and RF \loocv{} predictions for 110 common substances. The
+optimized weights are $\alpha_\text{DegT50} = 0.20$ and
+$\alpha_{K_\text{oc}} = 0.20$, yielding hybrid \rtwo{}
+of 0.213 for \degtl{} (+0.019 over RF alone) and 0.783 for \koc{}
+(+0.017 over RF alone, 17-feature set). The QML component thus
+contributes a marginal complementary signal; however, the improvement
+is not statistically significant (well within bootstrap CI of the RF
+baseline) and comes at $\sim$100$\times$ the computational cost.
 
 
 % ── 3.4 AOP Features ────────────────────────────────────────────
@@ -752,9 +756,12 @@ properties from the EU SPIN database. Key findings:
         Reducing the circuit to 3 layers ($N_\text{params}/N \approx 1$)
         does not recover predictive power.
 
-  \item \textbf{Hybrid stacking and AOP features} provide no improvement,
-        indicating that the VQC captures no complementary signal and that
-        mechanism-of-action labels do not encode additional variance.
+  \item \textbf{Hybrid stacking yields marginal gains;} the optimized
+        blending weight $\alpha = 0.20$ improves RF \rtwo{} by $\sim$0.02,
+        but the improvement is not statistically significant and comes at
+        $\sim$100$\times$ computational cost. AOP-derived MoA features
+        provide no improvement, indicating that mechanism-of-action labels
+        do not encode additional variance beyond structural descriptors.
 
   \item \textbf{Minimum dataset recommendation:} Based on the observed
         failure at $N = \nsub{}$ and the $N_\text{params}/N$ analysis, we
