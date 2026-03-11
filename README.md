@@ -85,12 +85,12 @@ python3 -m http.server 8765
 
 ## Cross-Validation Results
 
-*Results with 60-epoch training on 111 substances, 17 features — CV in progress.*
+*Results with 60-epoch training on 111 substances, 17 features.*
 
 | Model | DegT50 R² | Koc R² | Notes |
 |-------|-----------|--------|-------|
 | QML 12-Qubit (5-fold) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
-| QML 12-Qubit (LOO) | *in progress* | *in progress* | ~March 10, 2026 |
+| QML 12-Qubit (LOO) | −0.035 | 0.533 | 111 folds × 60 epochs |
 | Random Forest (LOO) | 0.194 | 0.766 | 200 trees, max depth 10 |
 | Gradient Boosting (LOO) | 0.223 | 0.779 | 200 estimators, lr 0.1 |
 
