@@ -32,8 +32,17 @@ from backend.quantum_predictor import (
     run_cross_validation
 )
 
-app = Flask(__name__)
+# Serve static frontend from the project root directory
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app = Flask(__name__, static_folder=PROJECT_ROOT, static_url_path='')
 CORS(app)
+
+
+# ── Serve frontend index.html at root ──────────────────────────────
+
+@app.route('/')
+def serve_index():
+    return app.send_static_file('index.html')
 
 
 # ── Health check ────────────────────────────────────────────────────
