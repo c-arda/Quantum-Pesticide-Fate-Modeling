@@ -1,5 +1,9 @@
+# Agent internal config (not project code)
+.agents/
+
 # QML weight cache
 backend/.qml_cache/
+.qml_cache/
 
 # Python
 __pycache__/
