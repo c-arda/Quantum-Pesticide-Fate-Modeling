@@ -11,13 +11,14 @@
 [![ChemRxiv](https://img.shields.io/badge/ChemRxiv-10.26434/chemrxiv.15000799-B31B1B.svg)](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000799/v1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 12-qubit VQC that predicts soil degradation half-life (DegT50) and organic carbon adsorption (Koc) from molecular structure, benchmarked against Random Forest and Gradient Boosting on the EU SPIN database of 111 substances, integrated with FOCUS regulatory fate models.
+**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 6-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances from the EU SPIN database with early stopping, benchmarked against Random Forest and Gradient Boosting, integrated with FOCUS regulatory fate models.
 
 ## Highlights
 
-- **12-qubit VQC** with data re-uploading and IQP-style entanglement (301 trainable parameters)
+- **Per-target VQCs** — 6-qubit/5-layer for DegT50 (97 params) + 12-qubit/8-layer for Koc (301 params)
+- **Early stopping** with patience=10 epochs to prevent overtraining
 - **17 curated molecular descriptors** including microbial degradation proxies and photolability features
-- **111 pesticide substances** from the EU SPIN database with validated SMILES
+- **110 pesticide substances** from the EU SPIN database (SQLite-backed, validated SMILES)
 - **Classical baselines** (Random Forest + Gradient Boosting) for systematic comparison
 - **Hybrid QML+RF stacking** — learned blending weight α per property, optimized via LOO-CV
 - **FOCUS regulatory pipeline** — feeds predictions into PEARL/GEM groundwater models → PEC (µg/L)
@@ -29,14 +30,16 @@
 ```
 SMILES → RDKit descriptors → 17 features → [0, π] scaling
                                               ↓
-                              12-qubit VQC (PennyLane)
-                              ├─ Hadamard + RZ encoding
-                              ├─ IQP ZZ entanglement
-                              ├─ RY cross-rotation (features 13-17)
-                              ├─ Data re-uploading
-                              └─ 8 variational layers (Rot + CNOT)
-                                              ↓
-                              ⟨Z₀⟩...⟨Z₁₁⟩ → Linear readout
+                    ┌─────────────── Per-target VQC (PennyLane) ──────────────┐
+                    │                                                         │
+                    │  DegT50 circuit (6q/5L)      Koc circuit (12q/8L)      │
+                    │  ├─ Hadamard + RZ encoding   ├─ Hadamard + RZ encoding │
+                    │  ├─ IQP ZZ entanglement      ├─ IQP ZZ entanglement   │
+                    │  ├─ Data re-uploading         ├─ RY cross-rotation     │
+                    │  └─ 5 variational layers      ├─ Data re-uploading     │
+                    │                               └─ 8 variational layers  │
+                    │  ⟨Z₀⟩...⟨Z₅⟩ → readout       ⟨Z₀⟩...⟨Z₁₁⟩ → readout │
+                    └─────────────────────────────────────────────────────────┘
                                               ↓
                               log₁₀(DegT50), log₁₀(Koc)
                                               ↓
@@ -64,12 +67,12 @@ SMILES → RDKit descriptors → 17 features → [0, π] scaling
 
 ```bash
 # Clone and set up
-git clone https://github.com/unearthlyimprint/Quantum-Pesticide-Fate-Modeling.git
+git clone https://github.com/c-arda/Quantum-Pesticide-Fate-Modeling.git
 cd Quantum-Pesticide-Fate-Modeling
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Start the backend (trains QML model on first run, ~15-20 min)
+# Start the backend (trains per-target QML models on first run, ~40 min)
 python backend/server.py
 
 # Open the web UI
@@ -82,8 +85,8 @@ python3 -m http.server 8765
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/health` | Backend health check |
-| GET | `/api/substances` | List all 111 substances |
-| GET | `/api/quantum/status` | QML model info (qubits, params, gate count) |
+| GET | `/api/substances` | List all 110 substances |
+| GET | `/api/quantum/status` | Per-target circuit info (6q DegT50, 12q Koc) |
 | GET | `/api/quantum/predict/<name>` | Predict DegT50/Koc for a substance |
 | GET | `/api/classical-baseline` | RF + GBM cross-validation results |
 | GET | `/api/error-analysis` | Prediction errors by chemical class |
@@ -92,12 +95,12 @@ python3 -m http.server 8765
 
 ## Cross-Validation Results
 
-*Results with 60-epoch training on 111 substances, 17 features.*
+*Results with 60-epoch training on 110 unique substances, 17 features.*
 
 | Model | DegT50 R² | Koc R² | Notes |
 |-------|-----------|--------|-------|
-| QML 12-Qubit (5-fold) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
-| QML 12-Qubit (LOO) | −0.035 | 0.533 | 111 folds × 60 epochs |
+| QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
+| QML 6q+12q (Phase 5a) | *pending* | *pending* | Per-target circuits, early stopping |
 | Random Forest (LOO) | 0.194 | 0.766 | 200 trees, max depth 10 |
 | Gradient Boosting (LOO) | 0.223 | 0.779 | 200 estimators, lr 0.1 |
 
@@ -111,10 +114,12 @@ qp-fate/
 ├── requirements.txt        # Python dependencies
 ├── backend/
 │   ├── server.py           # Flask API server
-│   ├── quantum_predictor.py # 12-qubit VQC (PennyLane)
+│   ├── quantum_predictor.py # Per-target VQC (6q DegT50 + 12q Koc)
 │   ├── classical_predictor.py # RF + GBM baselines
 │   ├── hybrid_predictor.py # QML+RF stacking
-│   ├── spin_database.py    # 111 substances with properties
+│   ├── spin_database.py    # SQLite loader (110 substances)
+│   ├── substances.db       # SQLite database
+│   ├── migrate_to_sqlite.py # Dict → SQLite migration
 │   ├── fate_model.py       # FOCUS PEARL/GEM fate model
 │   ├── field_data.py       # Field validation data
 │   ├── aop_features.py     # AOP-Wiki MoA pathway mapping
@@ -123,7 +128,7 @@ qp-fate/
 │   ├── main.tex            # LaTeX manuscript
 │   ├── references.bib      # 22 references
 │   ├── generate_figures.py # Publication figure generation
-│   └── figures/            # 6 figures (PDF + PNG)
+│   └── figures/            # 8 figures (PDF + PNG)
 ```
 
 ## References
