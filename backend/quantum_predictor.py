@@ -1,21 +1,25 @@
 """
-Quantum ML Predictor — PennyLane QML Circuit (v2)
+Quantum ML Predictor — PennyLane QML Circuit (v3)
 ====================================================
-Upgraded variational quantum circuit for predicting pesticide
+Per-target variational quantum circuits for predicting pesticide
 environmental fate properties (DegT50 and Koc) from molecular descriptors.
 
+v3 Upgrades (Phase 5a):
+  - Per-target circuits: 6-qubit for DegT50, 12-qubit for Koc
+  - Early stopping with patience to prevent overtraining
+  - Reduced DegT50 overfitting (params/data: 2.7 → 0.87)
+
 v2 Upgrades:
-  - 10 qubits (was 6) → larger Hilbert space
+  - 12 qubits (was 6) → larger Hilbert space
   - 8 variational layers (was 4) → more expressivity
   - Gradient-based Adam optimizer (was stochastic perturbation)
   - Improved feature encoding with IQP-style entangling
   - Log-space prediction for better dynamic range coverage
-  - Proper train/validation split reporting
 
 Architecture:
-  - 10 features → angle encoding into 10 qubits
+  - DegT50: 6 qubits × 5 layers = 97 params (regularized)
+  - Koc:   12 qubits × 8 layers = 301 params (expressive)
   - IQP-style feature-entangled encoding (ZZ interactions)
-  - 8 layers of strongly-entangling variational gates
   - Measurement: PauliZ expectations → linear readout
 """
 
@@ -23,10 +27,22 @@ import numpy as np
 import pennylane as qml
 from pennylane import numpy as pnp
 
-# ── Device setup ────────────────────────────────────────────────────
-N_QUBITS = 12
-N_LAYERS = 8
-dev = qml.device("default.qubit", wires=N_QUBITS)
+# ── Circuit configurations ──────────────────────────────────────────
+# DegT50: smaller circuit to reduce overfitting (97 params / 111 samples = 0.87)
+N_QUBITS_DEG = 6
+N_LAYERS_DEG = 5
+dev_deg = qml.device("default.qubit", wires=N_QUBITS_DEG)
+
+# Koc: larger circuit — already showing R²=0.412, benefits from expressivity
+N_QUBITS_KOC = 12
+N_LAYERS_KOC = 8
+dev_koc = qml.device("default.qubit", wires=N_QUBITS_KOC)
+
+# Backward-compat aliases (used by cache system, server.py references)
+N_QUBITS = N_QUBITS_KOC
+N_LAYERS = N_LAYERS_KOC
+
+EARLY_STOP_PATIENCE = 10  # stop if no improvement for this many epochs
 
 
 # ── Feature engineering ─────────────────────────────────────────────
@@ -172,87 +188,88 @@ def extract_features(substance):
     return scaled
 
 
-# ── Quantum circuit ─────────────────────────────────────────────────
+# ── Quantum circuits ────────────────────────────────────────────────
+# Two circuit sizes: 6-qubit (DegT50) and 12-qubit (Koc)
 
-@qml.qnode(dev, interface="autograd")
-def quantum_circuit(features, weights):
-    """
-    Variational quantum circuit with IQP-style feature encoding.
-
-    Parameters
-    ----------
-    features : array(10,)
-        Normalized molecular descriptor features.
-    weights : array(N_LAYERS, N_QUBITS, 3)
-        Variational parameters.
-
-    Returns
-    -------
-    array(N_QUBITS,)
-        Expectation values of PauliZ on each qubit.
-    """
-    # ── Layer 1: Angle encoding (first N_QUBITS features) ──
+def _build_circuit_body(features, weights, n_qubits, n_layers):
+    """Shared circuit body: IQP encoding + variational layers."""
     n_feat = len(features)
-    for i in range(N_QUBITS):
+    # Layer 1: Angle encoding
+    for i in range(n_qubits):
         qml.Hadamard(wires=i)
         qml.RZ(features[i % n_feat], wires=i)
 
-    # ── Layer 2: IQP-style feature entanglement ──
-    # Encode feature-feature interactions via ZZ gates
-    for i in range(N_QUBITS - 1):
+    # Layer 2: IQP-style feature entanglement (ZZ gates)
+    for i in range(n_qubits - 1):
         qml.CNOT(wires=[i, i + 1])
         qml.RZ(features[i % n_feat] * features[(i + 1) % n_feat], wires=i + 1)
         qml.CNOT(wires=[i, i + 1])
 
-    # ── Layer 2b: Encode remaining features (>N_QUBITS) via cross-rotation ──
-    for j in range(N_QUBITS, n_feat):
-        wire = j % N_QUBITS
+    # Layer 2b: Encode remaining features (>n_qubits) via cross-rotation
+    for j in range(n_qubits, n_feat):
+        wire = j % n_qubits
         qml.RY(features[j], wires=wire)
 
-    # ── Layer 3: Second angle encoding for re-uploading ──
-    for i in range(N_QUBITS):
+    # Layer 3: Second angle encoding for re-uploading
+    for i in range(n_qubits):
         qml.RY(features[i % n_feat], wires=i)
 
-    # ── Variational layers ──
-    for layer in range(N_LAYERS):
-        # Single-qubit rotations
-        for i in range(N_QUBITS):
+    # Variational layers
+    for layer in range(n_layers):
+        for i in range(n_qubits):
             qml.Rot(weights[layer, i, 0],
                      weights[layer, i, 1],
                      weights[layer, i, 2], wires=i)
-
-        # Entangling: nearest-neighbor CNOT ladder
-        for i in range(0, N_QUBITS - 1, 2):
+        for i in range(0, n_qubits - 1, 2):
             qml.CNOT(wires=[i, i + 1])
-
-        # Offset entangling on even layers
         if layer % 2 == 0:
-            for i in range(1, N_QUBITS - 1, 2):
+            for i in range(1, n_qubits - 1, 2):
                 qml.CNOT(wires=[i, i + 1])
-            # Wrap-around
-            qml.CNOT(wires=[N_QUBITS - 1, 0])
+            qml.CNOT(wires=[n_qubits - 1, 0])
 
-    return [qml.expval(qml.PauliZ(i)) for i in range(N_QUBITS)]
+    return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
+
+
+@qml.qnode(dev_deg, interface="autograd")
+def quantum_circuit_deg(features, weights):
+    """6-qubit circuit for DegT50 prediction (97 params, reduced overfitting)."""
+    return _build_circuit_body(features, weights, N_QUBITS_DEG, N_LAYERS_DEG)
+
+
+@qml.qnode(dev_koc, interface="autograd")
+def quantum_circuit_koc(features, weights):
+    """12-qubit circuit for Koc prediction (301 params, more expressive)."""
+    return _build_circuit_body(features, weights, N_QUBITS_KOC, N_LAYERS_KOC)
+
+
+# Backward-compat alias — existing code referencing quantum_circuit uses 12q
+quantum_circuit = quantum_circuit_koc
 
 
 # ── Linear readout ──────────────────────────────────────────────────
 
-def circuit_predict(features, weights, readout_weights):
+def circuit_predict(features, weights, readout_weights, circuit_fn=None, n_q=None):
     """
     Get prediction from circuit output.
-    readout_weights: array(N_QUBITS + 1,) — linear weights + bias
+    readout_weights: array(n_q + 1,) — linear weights + bias
+    circuit_fn: which circuit to use (default: 12-qubit)
     """
-    expvals = pnp.array(quantum_circuit(features, weights))
-    # Linear combination of expectations + bias
-    pred = pnp.dot(readout_weights[:N_QUBITS], expvals) + readout_weights[N_QUBITS]
+    if circuit_fn is None:
+        circuit_fn = quantum_circuit_koc
+    if n_q is None:
+        n_q = N_QUBITS_KOC
+    expvals = pnp.array(circuit_fn(features, weights))
+    pred = pnp.dot(readout_weights[:n_q], expvals) + readout_weights[n_q]
     return pred
 
 
 # ── Training ────────────────────────────────────────────────────────
 
-def _train_model(features_list, targets, n_epochs=80, lr=0.05):
+def _train_model(features_list, targets, n_epochs=80, lr=0.05,
+                 n_qubits=None, n_layers=None, circuit_fn=None, seed=42):
     """
-    Train the quantum circuit + linear readout using Adam optimizer.
+    Train a quantum circuit + linear readout using Adam optimizer
+    with early stopping.
 
     Parameters
     ----------
@@ -261,22 +278,37 @@ def _train_model(features_list, targets, n_epochs=80, lr=0.05):
     targets : array
         Log10-transformed target values.
     n_epochs : int
-        Number of training epochs.
+        Maximum number of training epochs.
     lr : float
         Learning rate.
+    n_qubits : int
+        Number of qubits (default: N_QUBITS_KOC=12).
+    n_layers : int
+        Number of variational layers (default: N_LAYERS_KOC=8).
+    circuit_fn : callable
+        QNode to use (default: quantum_circuit_koc).
+    seed : int
+        Random seed for reproducibility.
 
     Returns
     -------
     weights, readout_weights, final_loss
     """
+    if n_qubits is None:
+        n_qubits = N_QUBITS_KOC
+    if n_layers is None:
+        n_layers = N_LAYERS_KOC
+    if circuit_fn is None:
+        circuit_fn = quantum_circuit_koc
+
     # Initialize parameters
-    np.random.seed(42)
+    np.random.seed(seed)
     weights = pnp.array(
-        np.random.uniform(-0.5, 0.5, (N_LAYERS, N_QUBITS, 3)),
+        np.random.uniform(-0.5, 0.5, (n_layers, n_qubits, 3)),
         requires_grad=True
     )
     readout_weights = pnp.array(
-        np.random.uniform(-0.5, 0.5, N_QUBITS + 1),
+        np.random.uniform(-0.5, 0.5, n_qubits + 1),
         requires_grad=True
     )
 
@@ -285,13 +317,14 @@ def _train_model(features_list, targets, n_epochs=80, lr=0.05):
     def cost_fn(weights, readout_weights):
         total_loss = pnp.array(0.0)
         for feat, target in zip(features_list, targets):
-            pred = circuit_predict(feat, weights, readout_weights)
+            pred = circuit_predict(feat, weights, readout_weights, circuit_fn, n_qubits)
             total_loss = total_loss + (pred - target) ** 2
         return total_loss / len(features_list)
 
     best_loss = float('inf')
     best_weights = weights.copy()
     best_readout = readout_weights.copy()
+    patience_counter = 0
 
     for epoch in range(n_epochs):
         (weights, readout_weights), loss = opt.step_and_cost(
@@ -303,20 +336,29 @@ def _train_model(features_list, targets, n_epochs=80, lr=0.05):
             best_loss = loss_val
             best_weights = weights.copy()
             best_readout = readout_weights.copy()
+            patience_counter = 0
+        else:
+            patience_counter += 1
 
         if epoch % 20 == 0 or epoch == n_epochs - 1:
             print(f"    Epoch {epoch:3d}/{n_epochs}: MSE = {loss_val:.4f}")
+
+        # Early stopping
+        if patience_counter >= EARLY_STOP_PATIENCE:
+            print(f"    Early stopping at epoch {epoch} (no improvement for {EARLY_STOP_PATIENCE} epochs)")
+            break
 
     return best_weights, best_readout, best_loss
 
 
 def _init_pretrained_weights():
     """
-    Train both DegT50 and Koc models on the substance database.
+    Train per-target models on the substance database.
+    DegT50 → 6-qubit circuit (reduced overfitting)
+    Koc    → 12-qubit circuit (more expressive)
     """
     from backend.spin_database import SUBSTANCES
 
-    # Prepare training data
     features_list = []
     targets_deg = []
     targets_koc = []
@@ -327,15 +369,27 @@ def _init_pretrained_weights():
         targets_deg.append(pnp.array(np.log10(max(sub["degT50_soil"], 0.1)), requires_grad=False))
         targets_koc.append(pnp.array(np.log10(max(sub["koc"], 0.1)), requires_grad=False))
 
-    print(f"  Training on {len(SUBSTANCES)} substances, {N_QUBITS} qubits, {N_LAYERS} layers")
+    n_var_deg = N_LAYERS_DEG * N_QUBITS_DEG * 3
+    n_var_koc = N_LAYERS_KOC * N_QUBITS_KOC * 3
+    print(f"  Training on {len(SUBSTANCES)} substances")
+    print(f"  DegT50 circuit: {N_QUBITS_DEG}q × {N_LAYERS_DEG}L = {n_var_deg} var params (ratio: {(n_var_deg + N_QUBITS_DEG + 1) / len(SUBSTANCES):.2f})")
+    print(f"  Koc circuit:    {N_QUBITS_KOC}q × {N_LAYERS_KOC}L = {n_var_koc} var params (ratio: {(n_var_koc + N_QUBITS_KOC + 1) / len(SUBSTANCES):.2f})")
     print(f"  DegT50 range: {min(s['degT50_soil'] for s in SUBSTANCES):.1f} – {max(s['degT50_soil'] for s in SUBSTANCES):.0f} days")
     print(f"  Koc range:    {min(s['koc'] for s in SUBSTANCES):.0f} – {max(s['koc'] for s in SUBSTANCES):,.0f} mL/g")
 
-    print("\n  Training DegT50 model...")
-    w_deg, r_deg, l_deg = _train_model(features_list, targets_deg, n_epochs=80, lr=0.04)
+    print(f"\n  Training DegT50 model ({N_QUBITS_DEG}-qubit circuit)...")
+    w_deg, r_deg, l_deg = _train_model(
+        features_list, targets_deg, n_epochs=80, lr=0.04,
+        n_qubits=N_QUBITS_DEG, n_layers=N_LAYERS_DEG,
+        circuit_fn=quantum_circuit_deg
+    )
 
-    print("\n  Training Koc model...")
-    w_koc, r_koc, l_koc = _train_model(features_list, targets_koc, n_epochs=80, lr=0.04)
+    print(f"\n  Training Koc model ({N_QUBITS_KOC}-qubit circuit)...")
+    w_koc, r_koc, l_koc = _train_model(
+        features_list, targets_koc, n_epochs=80, lr=0.04,
+        n_qubits=N_QUBITS_KOC, n_layers=N_LAYERS_KOC,
+        circuit_fn=quantum_circuit_koc
+    )
 
     return w_deg, r_deg, w_koc, r_koc, l_deg, l_koc
 
