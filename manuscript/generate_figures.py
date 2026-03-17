@@ -412,6 +412,86 @@ def fig7_training_curves():
     print("  Fig 7: Training curves ✓")
 
 
+# ═══════════════════════════════════════════════════════════════════
+# Figure 8: Phase 5a — Per-target circuit rightsizing comparison
+# ═══════════════════════════════════════════════════════════════════
+def fig8_circuit_comparison():
+    """
+    Before/after comparison of circuit rightsizing.
+    Reads from cv_phase5a_results.json if available (from laptop16 run).
+    """
+    # Phase 4d baselines (hardcoded — known results)
+    phase4d = {"deg_r2": -0.141, "koc_r2": 0.412}
+
+    # Phase 5a results — try loading from CV run
+    cv_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "cv_phase5a_results.json")
+    if os.path.exists(cv_file):
+        with open(cv_file) as f:
+            phase5a = json.load(f)
+        print(f"  Fig 8: Loading Phase 5a results from {cv_file}")
+    else:
+        # Placeholder — will be updated when CV completes
+        phase5a = {"deg_r2": None, "koc_r2": None}
+        print(f"  Fig 8: Phase 5a CV results not yet available — generating placeholder")
+
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.5))
+
+    # ── Panel (a): DegT50 circuit comparison ──
+    labels = ["Phase 4d\n12q × 8L\n(301 params)", "Phase 5a\n6q × 5L\n(97 params)"]
+    vals = [phase4d["deg_r2"], phase5a["deg_r2"] or 0]
+    colors = ["#dc2626", "#059669" if phase5a["deg_r2"] and phase5a["deg_r2"] > 0 else "#f59e0b"]
+
+    bars = axes[0].bar([0, 1], vals, 0.5, color=colors, alpha=0.85, edgecolor="white")
+    axes[0].set_ylabel("R² (5-fold CV)")
+    axes[0].set_title("(a) DegT50 — Circuit Rightsizing", fontsize=9)
+    axes[0].set_xticks([0, 1])
+    axes[0].set_xticklabels(labels, fontsize=7)
+    axes[0].axhline(0, color="black", lw=0.5)
+
+    for bar, val in zip(bars, vals):
+        y_pos = val + 0.03 if val >= 0 else val - 0.05
+        va = "bottom" if val >= 0 else "top"
+        label = f"{val:.3f}" if val != 0 or phase5a["deg_r2"] is not None else "pending..."
+        axes[0].text(bar.get_x() + bar.get_width()/2, y_pos, label,
+                    ha="center", va=va, fontsize=7, fontweight="bold")
+
+    # Arrow annotation
+    if phase5a["deg_r2"] is not None:
+        delta = phase5a["deg_r2"] - phase4d["deg_r2"]
+        sign = "+" if delta > 0 else ""
+        axes[0].annotate(f"{sign}{delta:.3f}",
+                        xy=(1, phase5a["deg_r2"]),
+                        xytext=(0.5, max(phase5a["deg_r2"], 0) + 0.15),
+                        fontsize=8, fontweight="bold", color="#059669",
+                        arrowprops=dict(arrowstyle="->", color="#059669"),
+                        ha="center")
+
+    # ── Panel (b): Koc comparison ──
+    labels_koc = ["Phase 4d\n12q × 8L", "Phase 5a\n12q × 8L\n(same)"]
+    vals_koc = [phase4d["koc_r2"], phase5a["koc_r2"] or 0]
+    colors_koc = ["#2563eb", "#059669"]
+
+    bars = axes[1].bar([0, 1], vals_koc, 0.5, color=colors_koc, alpha=0.85, edgecolor="white")
+    axes[1].set_ylabel("R² (5-fold CV)")
+    axes[1].set_title("(b) Koc — Same Circuit", fontsize=9)
+    axes[1].set_xticks([0, 1])
+    axes[1].set_xticklabels(labels_koc, fontsize=7)
+    axes[1].set_ylim(0, max(vals_koc) * 1.3 + 0.1)
+
+    for bar, val in zip(bars, vals_koc):
+        label = f"{val:.3f}" if val != 0 or phase5a["koc_r2"] is not None else "pending..."
+        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.02, label,
+                    ha="center", va="bottom", fontsize=7, fontweight="bold")
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGDIR, "fig8_circuit_comparison.pdf"))
+    plt.savefig(os.path.join(FIGDIR, "fig8_circuit_comparison.png"))
+    plt.close()
+    status = "with results" if phase5a["deg_r2"] is not None else "placeholder"
+    print(f"  Fig 8: Circuit comparison ({status}) ✓")
+
+
 # ── Run all ─────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("Generating manuscript figures...")
@@ -422,5 +502,6 @@ if __name__ == "__main__":
     fig5_model_comparison()
     fig6_aop_coverage()
     fig7_training_curves()
+    fig8_circuit_comparison()
     print(f"\nAll figures saved to {FIGDIR}/")
 
