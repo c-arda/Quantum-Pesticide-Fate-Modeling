@@ -63,14 +63,24 @@
 
 ## In Progress 🔄
 
-### Phase 4d: 60-Epoch QML Validation
+### Phase 5a: Per-Target Circuit Rightsizing
+*Milestone: DegT50 R² > 0 with reduced-parameter circuit*
+
+- [x] Split into per-target circuits (6q DegT50, 12q Koc)
+- [x] Add early stopping (patience=10)
+- [x] Update dashboard roadmap and footer
+- [ ] Clear old cache and retrain with new architecture
+- [ ] Run 5-fold CV comparison (6q vs 12q DegT50)
+- [ ] Update metrics tracker with Phase 5a results
+
+### Phase 4d: 60-Epoch QML Validation ✔️
 *Milestone: Confirmed QML convergence with 17 features*
 
-- [ ] 5-fold CV with 60 epochs — laptop16 (est. ~12:30 today)
-- [ ] LOO CV with 60 epochs — laptop32 (est. ~tomorrow morning)
-- [ ] Compare QML R² vs classical baselines with new features
+- [x] 5-fold CV with 60 epochs
+- [x] LOO CV with 60 epochs
+- [x] Compare QML R² vs classical baselines with new features
 - [ ] Activate hybrid stacking (optimize α weight)
-- [ ] Push validated results to GitHub
+- [x] Push validated results to GitHub
 
 ---
 
