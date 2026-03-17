@@ -8,6 +8,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E.svg?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![HTML5](https://img.shields.io/badge/HTML5-CSS3-E34F26.svg?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![EC 1107/2009](https://img.shields.io/badge/EU-EC%201107%2F2009-003399.svg?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex%3A32009R1107)
+[![ChemRxiv](https://img.shields.io/badge/ChemRxiv-10.26434/chemrxiv.15000799-B31B1B.svg)](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000799/v1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 12-qubit VQC that predicts soil degradation half-life (DegT50) and organic carbon adsorption (Koc) from molecular structure, benchmarked against Random Forest and Gradient Boosting on the EU SPIN database of 111 substances, integrated with FOCUS regulatory fate models.
