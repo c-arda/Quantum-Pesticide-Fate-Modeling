@@ -1,0 +1,13 @@
+{
+  "phase": "5a",
+  "cv_type": "5-fold",
+  "deg_r2": -0.0043,
+  "koc_r2": 0.3262,
+  "deg_rmse": 0.682,
+  "koc_rmse": 0.8514,
+  "deg_mae": 0.5377,
+  "koc_mae": 0.6079,
+  "elapsed_min": 196.5,
+  "host": "c-latitude551016GB",
+  "timestamp": "2026-03-17T17:20:30"
+}

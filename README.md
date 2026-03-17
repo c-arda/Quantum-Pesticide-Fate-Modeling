@@ -100,7 +100,7 @@ python3 -m http.server 8765
 | Model | DegT50 R² | Koc R² | Notes |
 |-------|-----------|--------|-------|
 | QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
-| QML 6q+12q (Phase 5a) | *pending* | *pending* | Per-target circuits, early stopping |
+| QML 6q+12q (Phase 5a) | −0.004 | 0.326 | Per-target circuits, early stopping |
 | Random Forest (LOO) | 0.194 | 0.766 | 200 trees, max depth 10 |
 | Gradient Boosting (LOO) | 0.223 | 0.779 | 200 estimators, lr 0.1 |
 
