@@ -597,10 +597,11 @@ def _train_weights():
     global _cached_weights
     from backend.spin_database import SUBSTANCES
 
-    n_var = N_LAYERS * N_QUBITS * 3
-    n_readout = N_QUBITS + 1
-    print(f"[QML v2] Initializing quantum ML predictor...")
-    print(f"  Circuit: {N_QUBITS} qubits × {N_LAYERS} layers = {n_var} variational + {n_readout} readout params")
+    n_var_deg = N_LAYERS_DEG * N_QUBITS_DEG * 3
+    n_var_koc = N_LAYERS_KOC * N_QUBITS_KOC * 3
+    print(f"[QML v3] Initializing quantum ML predictor (per-target circuits)...")
+    print(f"  DegT50: {N_QUBITS_DEG}q × {N_LAYERS_DEG}L = {n_var_deg + N_QUBITS_DEG + 1} params")
+    print(f"  Koc:    {N_QUBITS_KOC}q × {N_LAYERS_KOC}L = {n_var_koc + N_QUBITS_KOC + 1} params")
 
     current_hash = _compute_db_hash()
     current_n = len(SUBSTANCES)
@@ -613,7 +614,7 @@ def _train_weights():
             _cached_weights = cached
             print(f"  Loaded cached weights ({meta['n_substances']} substances)")
             print(f"  DegT50 MSE={cached['loss_deg']:.4f}, Koc MSE={cached['loss_koc']:.4f}")
-            print("[QML v2] Ready! (loaded from cache, no training needed)\n")
+            print("[QML v3] Ready! (loaded from cache, no training needed)\n")
             return
 
     # ── Case 2: Hash differs — check if incremental or full retrain
@@ -661,7 +662,7 @@ def _train_weights():
                 "loss_deg": l_deg, "loss_koc": l_koc,
             }
             _save_weights(_cached_weights, current_hash, current_n)
-            print(f"\n[QML v2] Incremental training complete!")
+            print(f"\n[QML v3] Incremental training complete!")
             print(f"  Final MSE — DegT50: {l_deg:.4f}, Koc: {l_koc:.4f}")
             return
 
@@ -680,7 +681,7 @@ def _train_weights():
     }
     _save_weights(_cached_weights, current_hash, current_n)
 
-    print(f"\n[QML v2] Training complete!")
+    print(f"\n[QML v3] Training complete!")
     print(f"  Final MSE — DegT50: {l_deg:.4f}, Koc: {l_koc:.4f}")
     print(f"  (MSE is on log10 scale: 0.5 ≈ factor-of-3 error, 0.1 ≈ 25% error)")
 
@@ -700,13 +701,13 @@ def _ensure_initialized():
 # ── Prediction functions ────────────────────────────────────────────
 
 def predict_degtl50(substance):
-    """Predict DegT50 (soil half-life in days) using the trained quantum circuit."""
+    """Predict DegT50 (soil half-life in days) using the 6-qubit circuit."""
     weights = _get_weights()
     features = extract_features(substance)
 
-    expvals = quantum_circuit(features, weights["weights_deg"])
+    expvals = quantum_circuit_deg(features, weights["weights_deg"])
     expvals_arr = pnp.array(expvals)
-    log_pred = float(pnp.dot(weights["readout_deg"][:N_QUBITS], expvals_arr) + weights["readout_deg"][N_QUBITS])
+    log_pred = float(pnp.dot(weights["readout_deg"][:N_QUBITS_DEG], expvals_arr) + weights["readout_deg"][N_QUBITS_DEG])
 
     predicted = 10 ** log_pred
     experimental = substance["degT50_soil"]
@@ -719,21 +720,21 @@ def predict_degtl50(substance):
         "error_pct": round(abs(predicted - experimental) / max(experimental, 0.1) * 100, 1),
         "log10_predicted": round(log_pred, 3),
         "log10_experimental": round(np.log10(max(experimental, 0.1)), 3),
-        "n_qubits": N_QUBITS,
-        "n_layers": N_LAYERS,
-        "circuit_depth": N_LAYERS * 3 + 4,
+        "n_qubits": N_QUBITS_DEG,
+        "n_layers": N_LAYERS_DEG,
+        "circuit_depth": N_LAYERS_DEG * 3 + 4,
         "expectation_values": [float(e) for e in expvals],
     }
 
 
 def predict_koc(substance):
-    """Predict Koc (organic carbon adsorption coefficient) using the trained quantum circuit."""
+    """Predict Koc (organic carbon adsorption coefficient) using the 12-qubit circuit."""
     weights = _get_weights()
     features = extract_features(substance)
 
-    expvals = quantum_circuit(features, weights["weights_koc"])
+    expvals = quantum_circuit_koc(features, weights["weights_koc"])
     expvals_arr = pnp.array(expvals)
-    log_pred = float(pnp.dot(weights["readout_koc"][:N_QUBITS], expvals_arr) + weights["readout_koc"][N_QUBITS])
+    log_pred = float(pnp.dot(weights["readout_koc"][:N_QUBITS_KOC], expvals_arr) + weights["readout_koc"][N_QUBITS_KOC])
 
     predicted = 10 ** log_pred
     experimental = substance["koc"]
@@ -746,9 +747,9 @@ def predict_koc(substance):
         "error_pct": round(abs(predicted - experimental) / max(experimental, 0.1) * 100, 1),
         "log10_predicted": round(log_pred, 3),
         "log10_experimental": round(np.log10(max(experimental, 0.1)), 3),
-        "n_qubits": N_QUBITS,
-        "n_layers": N_LAYERS,
-        "circuit_depth": N_LAYERS * 3 + 4,
+        "n_qubits": N_QUBITS_KOC,
+        "n_layers": N_LAYERS_KOC,
+        "circuit_depth": N_LAYERS_KOC * 3 + 4,
         "expectation_values": [float(e) for e in expvals],
     }
 
@@ -787,27 +788,47 @@ def batch_predict(substances):
 
 
 def get_circuit_info():
-    """Return information about the quantum circuit architecture."""
+    """Return information about both per-target quantum circuit architectures."""
     weights = _get_weights()
-    n_var = N_LAYERS * N_QUBITS * 3
-    n_readout = N_QUBITS + 1
+    n_var_deg = N_LAYERS_DEG * N_QUBITS_DEG * 3
+    n_var_koc = N_LAYERS_KOC * N_QUBITS_KOC * 3
     return {
-        "n_qubits": N_QUBITS,
-        "n_layers": N_LAYERS,
-        "variational_params": n_var,
-        "readout_params": n_readout,
-        "total_params": n_var + n_readout,
-        "n_parameters": n_var + n_readout,  # backward compat
-        "gate_count": N_QUBITS * 3 + (N_QUBITS - 1) * 3 + N_QUBITS + N_LAYERS * (N_QUBITS * 3 + N_QUBITS),
-        "circuit_depth": N_LAYERS * 3 + 4,
+        # Per-target circuit info
+        "degt50_circuit": {
+            "n_qubits": N_QUBITS_DEG,
+            "n_layers": N_LAYERS_DEG,
+            "variational_params": n_var_deg,
+            "readout_params": N_QUBITS_DEG + 1,
+            "total_params": n_var_deg + N_QUBITS_DEG + 1,
+            "params_per_sample": round((n_var_deg + N_QUBITS_DEG + 1) / 111, 2),
+        },
+        "koc_circuit": {
+            "n_qubits": N_QUBITS_KOC,
+            "n_layers": N_LAYERS_KOC,
+            "variational_params": n_var_koc,
+            "readout_params": N_QUBITS_KOC + 1,
+            "total_params": n_var_koc + N_QUBITS_KOC + 1,
+            "params_per_sample": round((n_var_koc + N_QUBITS_KOC + 1) / 111, 2),
+        },
+        # Backward compat (aggregate)
+        "n_qubits": N_QUBITS_KOC,
+        "n_layers": N_LAYERS_KOC,
+        "variational_params": n_var_koc,
+        "readout_params": N_QUBITS_KOC + 1,
+        "total_params": n_var_koc + N_QUBITS_KOC + 1,
+        "n_parameters": n_var_koc + N_QUBITS_KOC + 1,
+        "gate_count": N_QUBITS_KOC * 3 + (N_QUBITS_KOC - 1) * 3 + N_QUBITS_KOC + N_LAYERS_KOC * (N_QUBITS_KOC * 3 + N_QUBITS_KOC),
+        "circuit_depth": N_LAYERS_KOC * 3 + 4,
         "feature_count": len(FEATURE_NAMES),
         "feature_names": FEATURE_NAMES,
         "training_loss_degtl50": float(weights["loss_deg"]),
         "training_loss_koc": float(weights["loss_koc"]),
         "encoding": "IQP-style angle + ZZ entangling + data re-uploading",
         "optimizer": "Adam (gradient-based, parameter-shift rule)",
+        "early_stopping": f"patience={EARLY_STOP_PATIENCE}",
         "device": "default.qubit (statevector simulator)",
         "framework": f"PennyLane {qml.__version__}",
+        "architecture": "Per-target: 6q/5L (DegT50) + 12q/8L (Koc)",
     }
 
 

@@ -74,7 +74,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        v0.4.0 · Phase 4b · EC 1107/2009<br>
+        v0.5.0 · Phase 5a · EC 1107/2009<br>
         © 2026 QP-FATE Project
       </div>
     </aside>
@@ -121,34 +121,34 @@
         </div>
         <div class="roadmap">
           <div class="roadmap-item glass completed">
-            <div class="rm-phase">Phase 1 — Complete ✓</div>
-            <div class="rm-title">Data Integration Tool</div>
-            <div class="rm-desc">Flask API + SPIN DB (50 substances) + FOCUS scenarios + 1D fate solver</div>
-            <span class="rm-time">Classical · Python</span>
+            <div class="rm-phase">Phase 1–2 — Complete ✓</div>
+            <div class="rm-title">Data Infrastructure + Quantum ML Core</div>
+            <div class="rm-desc">Flask API + SPIN DB (111 substances) + 12-qubit VQC (PennyLane) + FOCUS scenarios</div>
+            <span class="rm-time">Python · PennyLane</span>
           </div>
           <div class="roadmap-item glass completed">
-            <div class="rm-phase">Phase 2 — Active ✓</div>
-            <div class="rm-title">QML-Based QSAR for DegT50 / Koc</div>
-            <div class="rm-desc">PennyLane 6-qubit VQC · Trained on 50 substances · Predicts DegT50 + Koc</div>
-            <span class="rm-time">PennyLane simulator</span>
+            <div class="rm-phase">Phase 3–4 — Complete ✓</div>
+            <div class="rm-title">Classical Baselines + Feature Engineering</div>
+            <div class="rm-desc">RF + GBM baselines · 17 molecular descriptors · Field validation · Hybrid stacking</div>
+            <span class="rm-time">scikit-learn · RDKit</span>
+          </div>
+          <div class="roadmap-item glass active">
+            <div class="rm-phase">Phase 5a — Active</div>
+            <div class="rm-title">Circuit Rightsizing (Per-Target)</div>
+            <div class="rm-desc">6-qubit DegT50 circuit (97 params) + 12-qubit Koc circuit (301 params) · Early stopping</div>
+            <span class="rm-time">Fixing overfitting</span>
           </div>
           <div class="roadmap-item glass">
-            <div class="rm-phase">Phase 3 — 2026–2028</div>
-            <div class="rm-title">VQE for Small-Molecule Properties</div>
-            <div class="rm-desc">Ground state energy calculation for binding and sorption · 100–200 qubits</div>
+            <div class="rm-phase">Phase 6 — Planned</div>
+            <div class="rm-title">Quantum Hardware Deployment</div>
+            <div class="rm-desc">IonQ Aria / Quantinuum H1 via Azure Quantum · Noise-aware training</div>
             <span class="rm-time">NISQ hardware</span>
           </div>
           <div class="roadmap-item glass">
-            <div class="rm-phase">Phase 4 — 2028–2030</div>
-            <div class="rm-title">Quantum Monte Carlo for Exposure</div>
-            <div class="rm-desc">Quadratic speedup for probabilistic assessment · early fault-tolerant</div>
-            <span class="rm-time">Early FT</span>
-          </div>
-          <div class="roadmap-item glass">
-            <div class="rm-phase">Phase 5 — 2030+</div>
-            <div class="rm-title">HHL PDE Solvers for Richards Equation</div>
-            <div class="rm-desc">Exponential speedup for 20-year soil transport · 1000+ logical qubits</div>
-            <span class="rm-time">Fault-tolerant</span>
+            <div class="rm-phase">Phase 7–8 — Planned</div>
+            <div class="rm-title">Publication + Ecotoxicology (3R/Bf3R)</div>
+            <div class="rm-desc">Peer-reviewed paper · Ecotox endpoints (LC50, LD50) · Read-across</div>
+            <span class="rm-time">2026–2027</span>
           </div>
         </div>
       </section>
