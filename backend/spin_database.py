@@ -1,14 +1,93 @@
 """
 SPIN-Compatible Substance Database
 ===================================
-50+ pesticide active substances with literature-sourced properties
+110 pesticide active substances with literature-sourced properties
 from official EU dossiers and PPDB (Pesticide Properties Database).
+
+Data source priority:
+  1. SQLite database (backend/substances.db) — if present
+  2. Hardcoded Python list below — fallback
 
 Each substance includes: identifiers, physicochemical properties,
 environmental fate parameters, molecular descriptors, and regulatory status.
 """
 
-SUBSTANCES = [
+import os
+import sqlite3
+
+
+# ── SQLite helpers ──────────────────────────────────────────────────
+
+_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "substances.db")
+
+
+def _load_from_sqlite():
+    """Load substances from SQLite, returning list of dicts (same format as legacy)."""
+    if not os.path.exists(_DB_PATH):
+        return None
+    try:
+        conn = sqlite3.connect(_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * FROM substances ORDER BY id")
+        rows = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        # Remove SQLite-only fields to match legacy format
+        for row in rows:
+            row.pop("id", None)
+            row.pop("created_at", None)
+            row.pop("updated_at", None)
+        return rows
+    except Exception as e:
+        print(f"  [spin_database] SQLite load failed ({e}), falling back to hardcoded list")
+        return None
+
+
+def add_substance(substance_dict):
+    """Add or update a substance in the SQLite database."""
+    if not os.path.exists(_DB_PATH):
+        raise FileNotFoundError("substances.db not found. Run migrate_to_sqlite.py first.")
+    conn = sqlite3.connect(_DB_PATH)
+    cols = [k for k in substance_dict.keys() if k not in ("id", "created_at", "updated_at")]
+    placeholders = ", ".join(["?"] * len(cols))
+    col_names = ", ".join(cols)
+    values = [substance_dict[c] for c in cols]
+    conn.execute(
+        f"INSERT OR REPLACE INTO substances ({col_names}) VALUES ({placeholders})",
+        values
+    )
+    conn.commit()
+    conn.close()
+    # Reload the global list
+    _reload_substances()
+
+
+def _reload_substances():
+    """Reload SUBSTANCES from SQLite (or fallback)."""
+    global SUBSTANCES
+    loaded = _load_from_sqlite()
+    if loaded is not None:
+        SUBSTANCES = loaded
+        return
+    # Otherwise keep the hardcoded list below
+
+
+# ── Try loading from SQLite first ────────────────────────────────
+_sqlite_data = _load_from_sqlite()
+if _sqlite_data is not None:
+    SUBSTANCES = _sqlite_data
+    _source = f"SQLite ({_DB_PATH}, {len(_sqlite_data)} substances)"
+else:
+    _source = "hardcoded Python list"
+    # SUBSTANCES will be defined below as the legacy fallback
+
+# Print source on import (visible in server startup logs)
+print(f"  [spin_database] Loaded from: {_source}")
+
+
+# ── Legacy hardcoded fallback (only used if SQLite DB missing) ──
+# If already loaded from SQLite, this list is ignored.
+if _sqlite_data is None:
+    SUBSTANCES = [
     # ─── Organophosphates ──────────────────────────────────────────────
     {
         "name": "Chlorpyrifos", "cas": "2921-88-2", "formula": "C9H11Cl3NO3PS",
