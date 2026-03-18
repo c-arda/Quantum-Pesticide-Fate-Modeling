@@ -11,7 +11,7 @@
 [![ChemRxiv](https://img.shields.io/badge/ChemRxiv-10.26434/chemrxiv.15000799-B31B1B.svg)](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000799/v1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 6-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances from the EU SPIN database with early stopping, benchmarked against Random Forest and Gradient Boosting, integrated with FOCUS regulatory fate models.
+**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 6-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances with 21 molecular descriptors from the EU SPIN database, benchmarked against Random Forest and Gradient Boosting, integrated with FOCUS regulatory fate models.
 
 ## Highlights
 
@@ -48,7 +48,7 @@ SMILES → RDKit descriptors → 17 features → [0, π] scaling
                               PEC groundwater (µg/L)
 ```
 
-## Molecular Features (17)
+## Molecular Features (21)
 
 | # | Feature | Type | Purpose |
 |---|---------|------|---------|
@@ -62,6 +62,10 @@ SMILES → RDKit descriptors → 17 features → [0, π] scaling
 | 15 | bioaccessibility | Microbial proxy | Microbial availability |
 | 16 | charge_state | Blind-spot fix | pKa-based cationic correction |
 | 17 | conjugated_pi_size | Blind-spot fix | Photolability proxy |
+| 18 | heteroatom_ratio | DegT50-targeted | N/O/S/P density → microbial targeting |
+| 19 | sp3_fraction | DegT50-targeted | Molecular shape → soil binding |
+| 20 | henry_volatility | DegT50-targeted | Volatilization pathway proxy |
+| 21 | oxidation_susceptibility | DegT50-targeted | P450 metabolic lability sites |
 
 ## Quick Start
 
