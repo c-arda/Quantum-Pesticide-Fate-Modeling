@@ -63,15 +63,27 @@
 
 ## In Progress 🔄
 
-### Phase 5a: Per-Target Circuit Rightsizing
-*Milestone: DegT50 R² > 0 with reduced-parameter circuit*
+### Phase 5b: Hybrid Stacking Re-optimization
+*Milestone: Re-optimize QML+RF blend weight α for per-target circuits*
+
+- [ ] Re-run α optimization with 6q DegT50 + 12q Koc predictions
+- [ ] Compare hybrid R² vs standalone QML and RF
+- [ ] Update hybrid_results.json
+
+---
+
+## Recently Completed ✅
+
+### Phase 5a: Per-Target Circuit Rightsizing ✔️
+*Result: DegT50 R² −0.141 → −0.004 (+0.137), Koc R² 0.412 → 0.326*
 
 - [x] Split into per-target circuits (6q DegT50, 12q Koc)
 - [x] Add early stopping (patience=10)
 - [x] Update dashboard roadmap and footer
-- [ ] Clear old cache and retrain with new architecture
-- [ ] Run 5-fold CV comparison (6q vs 12q DegT50)
-- [ ] Update metrics tracker with Phase 5a results
+- [x] Clear old cache and retrain with new architecture
+- [x] Run 5-fold CV on laptop16 (196 min)
+- [x] Update README and Figure 8 with results
+- **Conclusion**: Overfitting eliminated; remaining R²≈0 indicates data/feature bottleneck
 
 ### Phase 4d: 60-Epoch QML Validation ✔️
 *Milestone: Confirmed QML convergence with 17 features*
@@ -79,20 +91,20 @@
 - [x] 5-fold CV with 60 epochs
 - [x] LOO CV with 60 epochs
 - [x] Compare QML R² vs classical baselines with new features
-- [ ] Activate hybrid stacking (optimize α weight)
+- [ ] Activate hybrid stacking (optimize α weight) → moved to Phase 5b
 - [x] Push validated results to GitHub
 
 ---
 
 ## Planned
 
-### Phase 5: Model Optimization
-*Goal: Maximize DegT50 R² and establish quantum advantage*
+### Phase 5c: Feature Engineering for DegT50
+*Goal: Improve DegT50 R² beyond 0 via better features*
 
-- [ ] Hyperparameter sweep (learning rate: 0.01–0.1, layers: 3–8, epochs: 40–100)
-- [ ] Uncertainty quantification via ensemble of 5 independently seeded circuits
+- [ ] Add soil-type descriptors (clay %, organic matter %)
+- [ ] Add photolysis/hydrolysis rate constants
 - [ ] Neural network baseline (MLPRegressor) for 3-way comparison
-- [ ] Expand database to 150+ substances (add organophosphates, pyrethroids)
+- [ ] Expand database to 150+ substances
 - [ ] Residual analysis: cluster errors by chemical class, identify new blind spots
 
 ### Phase 6: Hardware Deployment
