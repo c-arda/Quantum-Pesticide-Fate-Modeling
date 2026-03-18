@@ -103,11 +103,12 @@ python3 -m http.server 8765
 
 | Model | DegT50 R² | Koc R² | Notes |
 |-------|-----------|--------|-------|
-| QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
-| QML 8q+12q (Phase 5c) | −0.028 | 0.269 | Per-target, 17+21 features |
 | Random Forest (LOO) | 0.287 | 0.759 | 200 trees, 21 features |
-| Gradient Boosting (LOO) | 0.223 | 0.779 | 200 estimators, lr 0.1 |
-| **Hybrid QML+RF (α=0.30)** | **0.231** | **0.765** | **Best DegT50: 30% QML + 70% RF** |
+| Gradient Boosting (LOO) | 0.283 | 0.752 | 200 estimators, 21 features |
+| **Hybrid QML+RF (α=0.30)** | **0.231** | **0.765** | **30% QML + 70% RF** |
+| MLP Neural Network (LOO) | 0.075 | 0.497 | 64-32 hidden, 21 features |
+| QML 8q+12q (5-fold) | −0.028 | 0.269 | Per-target, 17+21 features |
+| QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting baseline |
 
 ## Project Structure
 
