@@ -1,13 +1,13 @@
 {
-  "phase": "5a",
+  "phase": "5c",
   "cv_type": "5-fold",
-  "deg_r2": -0.0043,
-  "koc_r2": 0.3262,
-  "deg_rmse": 0.682,
-  "koc_rmse": 0.8514,
-  "deg_mae": 0.5377,
-  "koc_mae": 0.6079,
-  "elapsed_min": 196.5,
+  "deg_r2": -0.028,
+  "koc_r2": 0.2692,
+  "deg_rmse": 0.6907,
+  "koc_rmse": 0.8886,
+  "deg_mae": 0.5552,
+  "koc_mae": 0.5693,
+  "elapsed_min": 142.4,
   "host": "c-latitude551016GB",
-  "timestamp": "2026-03-17T17:20:30"
+  "timestamp": "2026-03-18T11:23:17"
 }

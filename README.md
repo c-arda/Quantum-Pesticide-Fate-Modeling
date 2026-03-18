@@ -99,14 +99,15 @@ python3 -m http.server 8765
 
 ## Cross-Validation Results
 
-*Results with 60-epoch training on 110 unique substances, 17 features.*
+*Results with 60-epoch training on 110 unique substances.*
 
 | Model | DegT50 R² | Koc R² | Notes |
 |-------|-----------|--------|-------|
 | QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting (params/data ≈ 2.7) |
-| QML 6q+12q (Phase 5a) | −0.004 | 0.326 | Per-target circuits, early stopping |
-| Random Forest (LOO) | 0.194 | 0.766 | 200 trees, max depth 10 |
+| QML 8q+12q (Phase 5c) | −0.028 | 0.269 | Per-target, 17+21 features |
+| Random Forest (LOO) | 0.287 | 0.759 | 200 trees, 21 features |
 | Gradient Boosting (LOO) | 0.223 | 0.779 | 200 estimators, lr 0.1 |
+| **Hybrid QML+RF (α=0.30)** | **0.231** | **0.765** | **Best DegT50: 30% QML + 70% RF** |
 
 ## Project Structure
 
