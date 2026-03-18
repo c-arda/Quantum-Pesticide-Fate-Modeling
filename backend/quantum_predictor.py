@@ -55,8 +55,11 @@ FEATURE_NAMES = [
     "n_hydrolyzable", "n_halogens", "bioaccessibility",
     # Phase 4b: blind-spot corrections
     "charge_state", "conjugated_pi_size",
+    # Phase 5c: DegT50-targeted features
+    "heteroatom_ratio", "sp3_fraction",
+    "henry_volatility", "oxidation_susceptibility",
 ]
-N_FEATURES = len(FEATURE_NAMES)  # 17
+N_FEATURES = len(FEATURE_NAMES)  # 21
 
 
 def extract_features(substance):
@@ -156,6 +159,63 @@ def extract_features(substance):
         except Exception:
             pass
 
+    # ── Phase 5c: DegT50-targeted features ──
+    # 6. Heteroatom ratio — N,O,S density drives microbial targeting
+    #    High ratio → more enzymatic attack sites → faster degradation
+    #    (Neonicotinoids have high N count but are persistent due to molecular rigidity)
+    heteroatom_ratio = 0.0
+    if smiles:
+        try:
+            from rdkit import Chem
+            mol = Chem.MolFromSmiles(smiles)
+            if mol:
+                heteroatoms = sum(1 for a in mol.GetAtoms() if a.GetSymbol() in ('N', 'O', 'S', 'P'))
+                total = mol.GetNumHeavyAtoms()
+                heteroatom_ratio = heteroatoms / max(total, 1)
+        except Exception:
+            pass
+
+    # 7. sp3 fraction — molecular shape and flexibility
+    #    High sp3 → flexible, exposed → easier degradation
+    #    Low sp3 → planar, aromatic → persistent
+    sp3_fraction = 0.5  # default
+    if smiles:
+        try:
+            from rdkit import Chem
+            mol = Chem.MolFromSmiles(smiles)
+            if mol:
+                sp3_atoms = sum(1 for a in mol.GetAtoms()
+                              if a.GetHybridization() == Chem.rdchem.HybridizationType.SP3)
+                sp3_fraction = sp3_atoms / max(mol.GetNumHeavyAtoms(), 1)
+        except Exception:
+            pass
+
+    # 8. Henry-to-solubility ratio — volatilization as degradation pathway
+    #    High Henry const + low solubility → volatile loss from soil
+    henry = substance.get("henry_const", 1e-5)
+    henry_volatility = np.log10(max(henry, 1e-15)) - np.log10(max(sol, 1e-6))
+
+    # 9. Oxidation susceptibility — electron-rich sites for cytochrome P450
+    #    Tertiary C, allylic/benzylic, thioethers → metabolic lability
+    oxidation_susceptibility = 0
+    if smiles:
+        try:
+            from rdkit import Chem
+            mol = Chem.MolFromSmiles(smiles)
+            if mol:
+                ox_patterns = [
+                    Chem.MolFromSmarts("[CH0]([C])([C])[C]"),  # tertiary C-H
+                    Chem.MolFromSmarts("[CH2]c"),               # benzylic
+                    Chem.MolFromSmarts("[CH2]C=C"),             # allylic
+                    Chem.MolFromSmarts("[#16X2]"),              # thioether
+                    Chem.MolFromSmarts("[NH]"),                 # secondary amine
+                ]
+                for pat in ox_patterns:
+                    if pat:
+                        oxidation_susceptibility += len(mol.GetSubstructMatches(pat))
+        except Exception:
+            pass
+
     raw = pnp.array([
         substance.get("mw", 300),
         substance.get("logP", 2.0),
@@ -176,11 +236,24 @@ def extract_features(substance):
         # Phase 4b blind-spot corrections
         charge_state,
         conjugated_pi_size,
+        # Phase 5c DegT50-targeted
+        heteroatom_ratio,
+        sp3_fraction,
+        henry_volatility,
+        oxidation_susceptibility,
     ], dtype=float, requires_grad=False)
 
     # Min-max scaling to [0, π] based on dataset statistics
-    mins = pnp.array([150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80, 0.0, 0.0,  0, 0, -8.0,  -0.5, 0], dtype=float, requires_grad=False)
-    maxs = pnp.array([731.9,  7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00, 150.0, 3.0, 5, 6,  2.0,  1.0, 30], dtype=float, requires_grad=False)
+    mins = pnp.array([
+        150.8, -4.6, 6, 0, 2, 0, 0, -3.7, -12.0, 0.80,
+        0.0, 0.0, 0, 0, -8.0, -0.5, 0,
+        0.0, 0.0, -15.0, 0,  # Phase 5c
+    ], dtype=float, requires_grad=False)
+    maxs = pnp.array([
+        731.9, 7.0, 52, 4, 10, 5, 10, 6.1, -1.0, 1.00,
+        150.0, 3.0, 5, 6, 2.0, 1.0, 30,
+        0.7, 1.0, 5.0, 10,  # Phase 5c
+    ], dtype=float, requires_grad=False)
 
     scaled = (raw - mins) / (maxs - mins + 1e-8)
     scaled = pnp.clip(scaled, 0.0, 1.0) * np.pi
