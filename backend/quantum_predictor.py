@@ -28,9 +28,9 @@ import pennylane as qml
 from pennylane import numpy as pnp
 
 # ── Circuit configurations ──────────────────────────────────────────
-# DegT50: smaller circuit to reduce overfitting (97 params / 111 samples = 0.87)
-N_QUBITS_DEG = 6
-N_LAYERS_DEG = 5
+# DegT50: 8-qubit circuit (Phase 5c: bumped from 6q to accommodate features)
+N_QUBITS_DEG = 8
+N_LAYERS_DEG = 6
 dev_deg = qml.device("default.qubit", wires=N_QUBITS_DEG)
 
 # Koc: larger circuit — already showing R²=0.412, benefits from expressivity
@@ -55,11 +55,18 @@ FEATURE_NAMES = [
     "n_hydrolyzable", "n_halogens", "bioaccessibility",
     # Phase 4b: blind-spot corrections
     "charge_state", "conjugated_pi_size",
-    # Phase 5c: DegT50-targeted features
+    # Phase 5c: DegT50-targeted features (RF only — not used by QML DegT50)
     "heteroatom_ratio", "sp3_fraction",
     "henry_volatility", "oxidation_susceptibility",
 ]
 N_FEATURES = len(FEATURE_NAMES)  # 21
+
+# Per-model feature selection:
+# QML DegT50 uses only the proven 17-feature core (indices 0–16)
+# QML Koc uses all 21 features
+# RF/classical models use all 21 features
+QML_DEG_FEATURE_INDICES = list(range(17))   # first 17 features only
+QML_DEG_N_FEATURES = len(QML_DEG_FEATURE_INDICES)  # 17
 
 
 def extract_features(substance):
@@ -305,7 +312,7 @@ def _build_circuit_body(features, weights, n_qubits, n_layers):
 
 @qml.qnode(dev_deg, interface="autograd")
 def quantum_circuit_deg(features, weights):
-    """6-qubit circuit for DegT50 prediction (97 params, reduced overfitting)."""
+    """8-qubit circuit for DegT50 prediction (uses 17-feature core set)."""
     return _build_circuit_body(features, weights, N_QUBITS_DEG, N_LAYERS_DEG)
 
 
@@ -427,39 +434,41 @@ def _train_model(features_list, targets, n_epochs=80, lr=0.05,
 def _init_pretrained_weights():
     """
     Train per-target models on the substance database.
-    DegT50 → 6-qubit circuit (reduced overfitting)
-    Koc    → 12-qubit circuit (more expressive)
+    DegT50 → 8-qubit circuit with 17-feature core set
+    Koc    → 12-qubit circuit with all 21 features
     """
     from backend.spin_database import SUBSTANCES
 
-    features_list = []
+    features_list_full = []   # all 21 features (for Koc)
+    features_list_deg = []    # 17-feature subset (for DegT50 QML)
     targets_deg = []
     targets_koc = []
 
     for sub in SUBSTANCES:
         feat = extract_features(sub)
-        features_list.append(feat)
+        features_list_full.append(feat)
+        features_list_deg.append(feat[QML_DEG_FEATURE_INDICES])
         targets_deg.append(pnp.array(np.log10(max(sub["degT50_soil"], 0.1)), requires_grad=False))
         targets_koc.append(pnp.array(np.log10(max(sub["koc"], 0.1)), requires_grad=False))
 
     n_var_deg = N_LAYERS_DEG * N_QUBITS_DEG * 3
     n_var_koc = N_LAYERS_KOC * N_QUBITS_KOC * 3
     print(f"  Training on {len(SUBSTANCES)} substances")
-    print(f"  DegT50 circuit: {N_QUBITS_DEG}q × {N_LAYERS_DEG}L = {n_var_deg} var params (ratio: {(n_var_deg + N_QUBITS_DEG + 1) / len(SUBSTANCES):.2f})")
-    print(f"  Koc circuit:    {N_QUBITS_KOC}q × {N_LAYERS_KOC}L = {n_var_koc} var params (ratio: {(n_var_koc + N_QUBITS_KOC + 1) / len(SUBSTANCES):.2f})")
+    print(f"  DegT50 circuit: {N_QUBITS_DEG}q × {N_LAYERS_DEG}L = {n_var_deg} var params, {QML_DEG_N_FEATURES} features (ratio: {(n_var_deg + N_QUBITS_DEG + 1) / len(SUBSTANCES):.2f})")
+    print(f"  Koc circuit:    {N_QUBITS_KOC}q × {N_LAYERS_KOC}L = {n_var_koc} var params, {N_FEATURES} features (ratio: {(n_var_koc + N_QUBITS_KOC + 1) / len(SUBSTANCES):.2f})")
     print(f"  DegT50 range: {min(s['degT50_soil'] for s in SUBSTANCES):.1f} – {max(s['degT50_soil'] for s in SUBSTANCES):.0f} days")
     print(f"  Koc range:    {min(s['koc'] for s in SUBSTANCES):.0f} – {max(s['koc'] for s in SUBSTANCES):,.0f} mL/g")
 
-    print(f"\n  Training DegT50 model ({N_QUBITS_DEG}-qubit circuit)...")
+    print(f"\n  Training DegT50 model ({N_QUBITS_DEG}-qubit, {QML_DEG_N_FEATURES} features)...")
     w_deg, r_deg, l_deg = _train_model(
-        features_list, targets_deg, n_epochs=80, lr=0.04,
+        features_list_deg, targets_deg, n_epochs=80, lr=0.04,
         n_qubits=N_QUBITS_DEG, n_layers=N_LAYERS_DEG,
         circuit_fn=quantum_circuit_deg
     )
 
-    print(f"\n  Training Koc model ({N_QUBITS_KOC}-qubit circuit)...")
+    print(f"\n  Training Koc model ({N_QUBITS_KOC}-qubit, {N_FEATURES} features)...")
     w_koc, r_koc, l_koc = _train_model(
-        features_list, targets_koc, n_epochs=80, lr=0.04,
+        features_list_full, targets_koc, n_epochs=80, lr=0.04,
         n_qubits=N_QUBITS_KOC, n_layers=N_LAYERS_KOC,
         circuit_fn=quantum_circuit_koc
     )
@@ -774,11 +783,12 @@ def _ensure_initialized():
 # ── Prediction functions ────────────────────────────────────────────
 
 def predict_degtl50(substance):
-    """Predict DegT50 (soil half-life in days) using the 6-qubit circuit."""
+    """Predict DegT50 (soil half-life in days) using the 8-qubit circuit with 17-feature core."""
     weights = _get_weights()
     features = extract_features(substance)
+    features_deg = features[QML_DEG_FEATURE_INDICES]  # 17-feature subset for QML
 
-    expvals = quantum_circuit_deg(features, weights["weights_deg"])
+    expvals = quantum_circuit_deg(features_deg, weights["weights_deg"])
     expvals_arr = pnp.array(expvals)
     log_pred = float(pnp.dot(weights["readout_deg"][:N_QUBITS_DEG], expvals_arr) + weights["readout_deg"][N_QUBITS_DEG])
 
@@ -941,6 +951,7 @@ def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
 
     print(f"[CV] Running {cv_type} cross-validation ({actual_folds} folds, {n} substances)...")
     all_features = [extract_features(sub) for sub in SUBSTANCES]
+    all_features_deg = [f[QML_DEG_FEATURE_INDICES] for f in all_features]  # 17-feature subset for DegT50
     all_deg = [pnp.array(np.log10(max(s["degT50_soil"], 0.1)), requires_grad=False) for s in SUBSTANCES]
     all_koc = [pnp.array(np.log10(max(s["koc"], 0.1)), requires_grad=False) for s in SUBSTANCES]
 
@@ -961,19 +972,35 @@ def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
         for fold_idx, test_indices in enumerate(folds):
             train_indices = [i for i in indices if i not in test_indices]
 
-            train_feat = [all_features[i] for i in train_indices]
+            # Per-target training with appropriate features and circuits
+            train_feat_deg = [all_features_deg[i] for i in train_indices]
+            train_feat_full = [all_features[i] for i in train_indices]
             train_deg = [all_deg[i] for i in train_indices]
             train_koc = [all_koc[i] for i in train_indices]
 
-            w_deg, r_deg, _ = _train_model(train_feat, train_deg, n_epochs=n_epochs_cv, lr=lr_cv)
-            w_koc, r_koc, _ = _train_model(train_feat, train_koc, n_epochs=n_epochs_cv, lr=lr_cv)
+            # DegT50: 8q circuit with 17 features
+            w_deg, r_deg, _ = _train_model(
+                train_feat_deg, train_deg, n_epochs=n_epochs_cv, lr=lr_cv,
+                n_qubits=N_QUBITS_DEG, n_layers=N_LAYERS_DEG,
+                circuit_fn=quantum_circuit_deg
+            )
+            # Koc: 12q circuit with all 21 features
+            w_koc, r_koc, _ = _train_model(
+                train_feat_full, train_koc, n_epochs=n_epochs_cv, lr=lr_cv,
+                n_qubits=N_QUBITS_KOC, n_layers=N_LAYERS_KOC,
+                circuit_fn=quantum_circuit_koc
+            )
 
             for i in test_indices:
-                feat = all_features[i]
-                exp_deg = quantum_circuit(feat, w_deg)
-                exp_koc = quantum_circuit(feat, w_koc)
-                pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS]), pnp.array(exp_deg)) + r_deg[N_QUBITS])
-                pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS]), pnp.array(exp_koc)) + r_koc[N_QUBITS])
+                # DegT50 prediction with 17 features → 8q circuit
+                feat_deg = all_features_deg[i]
+                exp_deg = quantum_circuit_deg(feat_deg, w_deg)
+                pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS_DEG]), pnp.array(exp_deg)) + r_deg[N_QUBITS_DEG])
+
+                # Koc prediction with 21 features → 12q circuit
+                feat_koc = all_features[i]
+                exp_koc = quantum_circuit_koc(feat_koc, w_koc)
+                pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS_KOC]), pnp.array(exp_koc)) + r_koc[N_QUBITS_KOC])
 
                 sub = SUBSTANCES[i]
                 results.append({
