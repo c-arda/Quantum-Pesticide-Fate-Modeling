@@ -277,11 +277,11 @@ def fig5_model_comparison():
         fold_results["MLP"]["koc"].append(r2_score(y_koc[test_idx], mlp.predict(Xte)))
 
     # 7 models: Ridge, LASSO, RF, GB, MLP, VQC (per-target), Hybrid
-    labels = ["Ridge", "LASSO", "RF", "GB", "MLP", "VQC\n(8q/12q)", "Hybrid\n(α=0.30)"]
+    labels = ["Ridge", "LASSO", "RF", "GB", "MLP", "VQC\n(8q/12q)", "Hybrid\n(α=0.20)"]
     all_names = ["Ridge", "LASSO", "RF", "GB", "MLP"]
-    deg_r2 = [np.mean(fold_results[n]["deg"]) for n in all_names] + [-0.028, 0.231]
+    deg_r2 = [np.mean(fold_results[n]["deg"]) for n in all_names] + [-0.028, 0.288]
     deg_err = [np.std(fold_results[n]["deg"]) for n in all_names] + [0, 0]
-    koc_r2 = [np.mean(fold_results[n]["koc"]) for n in all_names] + [0.269, 0.765]
+    koc_r2 = [np.mean(fold_results[n]["koc"]) for n in all_names] + [0.269, 0.750]
     koc_err = [np.std(fold_results[n]["koc"]) for n in all_names] + [0, 0]
 
     print("  Fig 5 computed per-fold means:")
