@@ -90,7 +90,7 @@ python3 -m http.server 8765
 |--------|----------|-------------|
 | GET | `/api/health` | Backend health check |
 | GET | `/api/substances` | List all 110 substances |
-| GET | `/api/quantum/status` | Per-target circuit info (6q DegT50, 12q Koc) |
+| GET | `/api/quantum/status` | Per-target circuit info (8q DegT50, 12q Koc) |
 | GET | `/api/quantum/predict/<name>` | Predict DegT50/Koc for a substance |
 | GET | `/api/classical-baseline` | RF + GBM cross-validation results |
 | GET | `/api/error-analysis` | Prediction errors by chemical class |
@@ -99,16 +99,18 @@ python3 -m http.server 8765
 
 ## Cross-Validation Results
 
-*Results with 60-epoch training on 110 unique substances.*
+*Results with 60-epoch training on 110 unique substances, 21 features.*
 
 | Model | DegT50 R² | Koc R² | Notes |
 |-------|-----------|--------|-------|
-| Random Forest (LOO) | 0.287 | 0.759 | 200 trees, 21 features |
+| Random Forest (LOO) | **0.287** | **0.759** | 200 trees, 21 features |
 | Gradient Boosting (LOO) | 0.283 | 0.752 | 200 estimators, 21 features |
-| **Hybrid QML+RF (α=0.30)** | **0.231** | **0.765** | **30% QML + 70% RF** |
+| Hybrid QML+RF (nested CV) | 0.288 | 0.750 | α=0.20±0.02, ΔR²=+0.001 |
 | MLP Neural Network (LOO) | 0.075 | 0.497 | 64-32 hidden, 21 features |
 | QML 8q+12q (5-fold) | −0.028 | 0.269 | Per-target, 17+21 features |
 | QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting baseline |
+
+**Key finding:** The VQC does not outperform properly feature-engineered Random Forest. The hybrid adds ΔR²=+0.001 — negligible and not statistically significant.
 
 ## Project Structure
 
