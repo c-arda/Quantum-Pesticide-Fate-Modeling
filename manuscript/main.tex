@@ -230,6 +230,15 @@ organized in four phases of development:
         secondary amine substructures). These four features were added
         based on residual error analysis of the worst-predicted
         substances.
+
+        \textbf{Feature selection caveat:} Because these descriptors
+        were selected after inspecting model errors on the full dataset,
+        there is a risk of positive bias in cross-validation scores for
+        models using all~21 features. The classical baselines reported
+        in \cref{tab:baselines} should therefore be interpreted as
+        optimistic upper bounds. This does not affect the QML comparison,
+        as the VQC \degtl{} circuit uses only 17 features
+        (excluding these four descriptors).
 \end{enumerate}
 
 All features are min--max scaled to $[0, \pi]$ based on dataset statistics,
@@ -315,9 +324,16 @@ Gradients are computed via the parameter-shift rule on the PennyLane
 Critically, the \degtl{} QML circuit receives only the 17 core features
 (indices 0--16), while the \koc{} circuit receives all 21 features.
 This per-model feature selection was motivated by empirical observation
-that the four additional features improve RF performance but degrade
-QML performance due to the increased information compression into
-limited qubit capacity.
+that the four additional descriptors degrade QML performance
+when compressed into limited qubit capacity (8 qubits). Although
+these features were designed to target DegT50 prediction, including them
+forces 21 features into 8 qubits, increasing the information compression
+ratio and worsening overfitting. The classical RF, with its implicit
+regularization via bagging and feature subsampling, handles the additional
+features without penalty. This asymmetry is a limitation: the VQC's
+inability to exploit DegT50-targeted features highlights the fundamental
+scaling challenge of encoding high-dimensional classical data into
+shallow quantum circuits.
 
 
 % ── 2.5 Classical Baselines ──────────────────────────────────────
@@ -394,7 +410,7 @@ chemical class to its primary toxicological pathway:
   \item Cell division inhibition (benzimidazoles; 6 substances)
 \end{enumerate}
 
-Coverage: 67/\nsub{} substances (60.4\%) are assigned to at least one
+Coverage: 67/\nsub{} substances (60.9\%) are assigned to at least one
 pathway category (\cref{fig:aop}).
 
 
@@ -413,8 +429,7 @@ classical baselines.
 \begin{table}[htbp]
   \centering
   \caption{Baseline performance (leave-one-out and 5-fold CV).
-           All metrics computed on log\textsubscript{10}-scaled targets;
-           5-fold values report per-fold mean~\rtwo{}.
+           All metrics computed on log\textsubscript{10}-scaled targets.
            \koc{} results are shown both with the full 21-feature set
            (including bioaccessibility $B$) and the fair 20-feature set
            (excluding $B$; see circularity note in \cref{sec:features}).}
@@ -618,8 +633,8 @@ yields no improvement in RF \loocv{} performance (\cref{tab:aop}).
     \textbf{Feature Set} & \textbf{$N_\text{features}$} &
       \textbf{\degtl{} \rtwo{}} & \textbf{\koc{} \rtwo{}} \\
     \midrule
-    Molecular descriptors only     & 17 & 0.194 & 0.766 \\
-    + AOP MoA pathways             & 23 & 0.190 & 0.765 \\
+    Molecular descriptors only     & 21 & 0.287 & 0.759 \\
+    + AOP MoA pathways             & 27 & 0.283 & 0.758 \\
     \midrule
     $\Delta$\rtwo{}                & +6 & $-0.004$ & $-0.001$ \\
     \bottomrule
@@ -638,7 +653,7 @@ result is not a statistical artifact of sparse coverage.
   \centering
   \includegraphics[width=0.8\textwidth]{fig6_aop_coverage.pdf}
   \caption{AOP-Wiki-derived mechanism-of-action pathway coverage across
-           the \nsub{} pesticide dataset. 67 substances (60.4\%) map to
+           the \nsub{} pesticide dataset. 67 substances (60.9\%) map to
            at least one of 6 pathway categories.}
   \label{fig:aop}
 \end{figure}
@@ -657,10 +672,14 @@ applying a 153--301-parameter model to \nsub{} data points. Several
 factors contribute:
 
 \begin{enumerate}
-  \item \textbf{Overfitting:} The $N_\text{params}/N_\text{data}$ ratio of
-        2.7 virtually guarantees memorization of training data. Classical
-        models with far fewer effective parameters (RF uses bagging and
-        feature subsampling as implicit regularization) are more robust.
+  \item \textbf{Overfitting:} Despite the improved
+        $N_\text{params}/N_\text{data}$ ratio of 1.39 for the 8-qubit
+        \degtl{} circuit (vs.\ 2.74 for the original 12-qubit circuit),
+        the VQC still produces negative \rtwo{}. Even near-unity ratios
+        appear insufficient for generalization with $N = 110$ samples.
+        Classical models with far fewer effective parameters (RF uses
+        bagging and feature subsampling as implicit regularization) are
+        more robust.
 
   \item \textbf{Barren plateaus:} With 8--12 qubits and 6--8
         layers, the VQC may suffer from vanishing gradients in portions of
@@ -678,9 +697,10 @@ factors contribute:
         linear combination of $\langle Z_i \rangle$ expectation values.
         Any function the circuit can express must therefore lie in the
         span of these $N_\text{qubits}$ observables. Given that Ridge
-        regression—itself a linear model—already achieves \rtwo{}~=~0.842
-        for \koc{} with the 17-feature set (inflated by bioaccessibility
-        circularity; the fair 16-feature \rtwo{} is 0.546), it is unclear whether the quantum feature map provides
+        regression---itself a linear model---already achieves \rtwo{}~=~0.825
+        for \koc{} with the 21-feature set (inflated by bioaccessibility
+        circularity; the fair 20-feature \rtwo{} is 0.532),
+        it is unclear whether the quantum feature map provides
         additional expressive power beyond what a linear model over the
         raw descriptors captures.
 \end{enumerate}
