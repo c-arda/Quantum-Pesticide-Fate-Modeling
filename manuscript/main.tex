@@ -247,8 +247,10 @@ molecular features are computed from SMILES via RDKit; otherwise, lookup
 values from the substance database are used.
 
 The Random Forest feature importances (\cref{fig:importance}) reveal that
-\degtl{} prediction relies on a distributed set of features (aromatic ring
-fraction 16.3\%, Freundlich $1/n$ 13.2\%, log\,$P$ 8.7\%), while \koc{} is
+\degtl{} prediction relies on a distributed set of features, led by
+heteroatom ratio (14.1\%), Freundlich $1/n$ (11.7\%), and aromatic ring
+fraction (11.4\%), with the four DegT50-targeted descriptors now capturing
+the top two positions. \koc{} is
 dominated by bioaccessibility (52.3\%) and log\,$P$ (19.7\%).
 
 \begin{figure}[htbp]
@@ -370,10 +372,12 @@ Each fold trains the model on $N-1$ substances and predicts the held-out
 substance. 5-fold CV with stratified random splits is used as a faster
 supplementary benchmark.
 
-For the VQC, \loocv{} requires \nsub{} $\times$ 2 (two properties) full
-training runs, each with 60 epochs of gradient optimization over 153--301
-parameters. Fold-level checkpointing saves results after each fold to a
-JSON file, enabling crash-resilient resumption.
+For the VQC, \loocv{} would require \nsub{} $\times$ 2 (two properties)
+full training runs, each with 60 epochs of gradient optimization over
+153--301 parameters---prohibitively expensive for a statevector simulator.
+Therefore, 5-fold~CV is used for VQC evaluation. Fold-level checkpointing
+saves results after each fold to a JSON file, enabling crash-resilient
+resumption.
 
 
 % ── 2.7 Hybrid Stacking ─────────────────────────────────────────
@@ -386,8 +390,11 @@ a learned stacking predictor:
   \hat{y}_\text{hybrid} = \alpha \cdot \hat{y}_\text{QML} +
                            (1 - \alpha) \cdot \hat{y}_\text{RF}
 \end{equation}
-where $\alpha \in [0, 1]$ is optimized via grid search (step 0.05) to
-minimize the \loocv{} mean squared error. If $\alpha = 0$, the QML
+where $\alpha \in [0, 1]$ is optimized via nested cross-validation:
+for each held-out substance, $\alpha$ is selected by grid search
+(step 0.05) on the remaining $N-1$ samples to minimize the inner
+\loocv{} mean squared error. This prevents leakage of test information
+into the stacking weight. If $\alpha = 0$, the QML
 component adds no value; if $\alpha > 0$, the VQC captures complementary
 information.
 
@@ -527,8 +534,8 @@ for \koc{}.
 \subsection{Variational Quantum Circuit Performance}
 \label{sec:results_qml}
 
-\Cref{fig:comparison} compares 5-fold CV performance across all three
-models.
+\Cref{fig:comparison} compares cross-validation performance across all
+evaluated models.
 
 \begin{figure}[htbp]
   \centering
@@ -548,8 +555,8 @@ models.
 The per-target VQC achieves \rtwo{}~$= -0.028$ for \degtl{} (5-fold CV,
 8-qubit circuit with 17 features), a substantial improvement over the
 initial 12-qubit single-circuit baseline (\rtwo{}~$= -0.141$). The
-near-zero \rtwo{} indicates that circuit rightsizing eliminated overfitting
-but did not unlock predictive power---the remaining bottleneck is the
+near-zero \rtwo{} indicates that circuit rightsizing reduced the parameter
+count but failed to eliminate overfitting---the remaining bottleneck is the
 target property itself, not the circuit architecture.
 For \koc{}, the 12-qubit VQC achieves \rtwo{}~$= 0.269$ (5-fold CV, 21
 features), below the GB baseline of 0.752.

@@ -279,11 +279,17 @@ def fig5_model_comparison():
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(labels, fontsize=6.5)
     axes[0].axhline(0, color="black", lw=0.5)
+    # Smart label placement to avoid overlap for close values
+    prev_y = None
     for bar, val in zip(bars, deg_r2):
-        y_pos = val + 0.02 if val >= 0 else val - 0.04
+        y_pos = val + 0.015 if val >= 0 else val - 0.035
         va = "bottom" if val >= 0 else "top"
+        # Nudge up if too close to previous label
+        if prev_y is not None and abs(y_pos - prev_y) < 0.025 and val >= 0:
+            y_pos = prev_y + 0.025
+        prev_y = y_pos
         axes[0].text(bar.get_x() + bar.get_width()/2, y_pos, f"{val:.3f}",
-                    ha="center", va=va, fontsize=6,
+                    ha="center", va=va, fontsize=5.5,
                     fontweight="bold" if val < 0 else "normal")
 
     # Koc (21 features, incl. bioaccessibility — see circularity note)
