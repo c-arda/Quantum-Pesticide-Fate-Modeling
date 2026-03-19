@@ -165,11 +165,11 @@ include:
 
 \begin{itemize}[nosep]
   \item \degtl{} (soil): laboratory degradation half-life in days,
-        range \SIrange{0.5}{1389}{\day} (median \SI{25}{\day},
+        range \SIrange{0.5}{1389}{\day} (median \SI{24}{\day},
         mean \SI{75.7}{\day})
   \item \koc{}: organic carbon sorption coefficient,
         range \SIrange{25}{1000000}{\milli\litre\per\gram}
-        (median \SI{510}{\milli\litre\per\gram})
+        (median \SI{508}{\milli\litre\per\gram})
 \end{itemize}
 
 Both targets are log\textsubscript{10}-transformed prior to modeling to
@@ -199,6 +199,12 @@ organized in four phases of development:
         log\,$P$, heavy atom count, H-bond donors/acceptors, ring count,
         rotatable bonds, log solubility, log vapor pressure, Freundlich
         exponent ($1/n$), TPSA, aromatic ring fraction.
+
+        \textbf{Note:} The Freundlich exponent ($1/n$) is an empirical
+        parameter from soil batch equilibrium studies, not a purely
+        in-silico molecular descriptor. It is included as a known input
+        from regulatory dossiers; predictions for novel substances would
+        require it to be available or excluded.
   \item \textbf{Microbial degradation proxies} (3): count of hydrolyzable
         bonds, halogen count, bioaccessibility score. The bioaccessibility
         score is defined as
@@ -221,8 +227,8 @@ organized in four phases of development:
         Henry-to-solubility ratio (volatilization pathway proxy), and
         oxidation susceptibility (count of cytochrome P450 metabolic
         lability sites: tertiary C--H, benzylic, allylic, thioether, and
-        secondary amine substructures). These four features were added in
-        Phase~5c based on residual error analysis of the worst-predicted
+        secondary amine substructures). These four features were added
+        based on residual error analysis of the worst-predicted
         substances.
 \end{enumerate}
 
@@ -309,7 +315,7 @@ Gradients are computed via the parameter-shift rule on the PennyLane
 Critically, the \degtl{} QML circuit receives only the 17 core features
 (indices 0--16), while the \koc{} circuit receives all 21 features.
 This per-model feature selection was motivated by empirical observation
-that the four Phase~5c features improve RF performance but degrade
+that the four additional features improve RF performance but degrade
 QML performance due to the increased information compression into
 limited qubit capacity.
 
@@ -409,87 +415,84 @@ classical baselines.
   \caption{Baseline performance (leave-one-out and 5-fold CV).
            All metrics computed on log\textsubscript{10}-scaled targets;
            5-fold values report per-fold mean~\rtwo{}.
-           \koc{} results are shown both with the full 17-feature set
-           (including bioaccessibility $B$) and the fair 16-feature set
+           \koc{} results are shown both with the full 21-feature set
+           (including bioaccessibility $B$) and the fair 20-feature set
            (excluding $B$; see circularity note in \cref{sec:features}).}
   \label{tab:baselines}
   \small
-  \begin{tabular}{lllccc}
+  \begin{tabular}{lllcc}
     \toprule
     \textbf{Model} & \textbf{Property} & \textbf{CV} &
-      \textbf{\rtwo{}} & \textbf{MAE} & \textbf{RMSE} \\
+      \textbf{\rtwo{}} & \textbf{RMSE} \\
     \midrule
-    \multirow{6}{*}{Ridge}
-      & \degtl{}         & LOO    & 0.154   & 0.488 & 0.626 \\
-      & \degtl{}         & 5-fold & $-$0.109 & 0.504 & 0.644 \\
-      & \koc{} (17f)     & LOO    & 0.842$^\dagger$ & 0.252 & 0.413 \\
-      & \koc{} (16f)     & LOO    & 0.546   & 0.439 & 0.699 \\
-      & \koc{} (17f)     & 5-fold & 0.848$^\dagger$ & 0.248 & 0.405 \\
-      & \koc{} (16f)     & 5-fold & 0.528   & 0.441 & 0.698 \\
+    \multirow{4}{*}{Ridge}
+      & \degtl{}         & LOO    & 0.124   & --- \\
+      & \degtl{}         & 5-fold & 0.183   & --- \\
+      & \koc{} (21f)     & LOO    & 0.825$^\dagger$ & --- \\
+      & \koc{} (20f)     & LOO    & 0.532   & --- \\
     \midrule
-    \multirow{6}{*}{LASSO}
-      & \degtl{}         & LOO    & 0.101   & 0.518 & 0.645 \\
-      & \degtl{}         & 5-fold & $-$0.050 & 0.525 & 0.658 \\
-      & \koc{} (17f)     & LOO    & 0.747$^\dagger$ & 0.336 & 0.522 \\
-      & \koc{} (16f)     & LOO    & 0.535   & 0.476 & 0.708 \\
-      & \koc{} (17f)     & 5-fold & 0.740$^\dagger$ & 0.341 & 0.529 \\
-      & \koc{} (16f)     & 5-fold & 0.528   & 0.471 & 0.706 \\
+    \multirow{4}{*}{LASSO}
+      & \degtl{}         & LOO    & 0.090   & --- \\
+      & \degtl{}         & 5-fold & 0.029   & --- \\
+      & \koc{} (21f)     & LOO    & 0.746$^\dagger$ & --- \\
+      & \koc{} (20f)     & LOO    & 0.512   & --- \\
     \midrule
-    \multirow{6}{*}{Random Forest}
-      & \degtl{}         & LOO    & 0.194   & 0.474 & 0.611 \\
-      & \degtl{}         & 5-fold & 0.089   & 0.464 & 0.596 \\
-      & \koc{} (17f)     & LOO    & 0.766   & 0.304 & 0.502 \\
-      & \koc{} (16f)     & LOO    & 0.726   & 0.341 & 0.543 \\
-      & \koc{} (17f)     & 5-fold & 0.766   & 0.299 & 0.502 \\
-      & \koc{} (16f)     & 5-fold & 0.726   & 0.346 & 0.552 \\
+    \multirow{4}{*}{Random Forest}
+      & \degtl{}         & LOO    & \textbf{0.287}   & --- \\
+      & \degtl{}         & 5-fold & 0.275   & --- \\
+      & \koc{} (21f)     & LOO    & \textbf{0.759}   & --- \\
+      & \koc{} (20f)     & LOO    & 0.712   & --- \\
     \midrule
-    \multirow{6}{*}{Gradient Boosting}
-      & \degtl{}         & LOO    & 0.223   & 0.487 & 0.600 \\
-      & \degtl{}         & 5-fold & 0.034   & 0.470 & 0.606 \\
-      & \koc{} (17f)     & LOO    & 0.779   & 0.288 & 0.488 \\
-      & \koc{} (16f)     & LOO    & 0.764   & 0.323 & 0.504 \\
-      & \koc{} (17f)     & 5-fold & 0.780   & 0.292 & 0.487 \\
-      & \koc{} (16f)     & 5-fold & 0.740   & 0.341 & 0.542 \\
+    \multirow{4}{*}{Gradient Boosting}
+      & \degtl{}         & LOO    & 0.283   & --- \\
+      & \degtl{}         & 5-fold & 0.290   & --- \\
+      & \koc{} (21f)     & LOO    & 0.752   & --- \\
+      & \koc{} (20f)     & LOO    & 0.750   & --- \\
+    \midrule
+    \multirow{2}{*}{MLP}
+      & \degtl{}         & LOO    & 0.075   & --- \\
+      & \koc{} (21f)     & LOO    & 0.497   & --- \\
+    \midrule
+    \multirow{2}{*}{VQC (per-target)}
+      & \degtl{} (8q)    & 5-fold & $-$0.028 & --- \\
+      & \koc{} (12q)     & 5-fold & 0.269   & --- \\
+    \midrule
+    \multirow{2}{*}{Hybrid (nested CV)}
+      & \degtl{}         & nested LOO & 0.288   & --- \\
+      & \koc{}           & nested LOO & 0.750   & --- \\
     \bottomrule
   \end{tabular}
 
   \vspace{4pt}
   {\footnotesize $^\dagger$Inflated by bioaccessibility circularity:
   $B = \log_{10}(S/K_\text{oc})$ uses measured \koc{} as input.
-  The 16-feature (16f) rows exclude $B$ and represent the fair comparison.
-  17f = all 17 features including $B$.}
+  The 20-feature (20f) rows exclude $B$ and represent the fair comparison.
+  21f = all 21 features including $B$.}
 \end{table}
 
 Key observations:
 \begin{itemize}[nosep]
   \item \textbf{Bioaccessibility inflates linear \koc{} models:} Ridge
-        \rtwo{} drops from 0.842 to 0.546 ($\Delta = -0.30$) when the
+        \rtwo{} drops from 0.825 to 0.532 ($\Delta = -0.29$) when the
         circular bioaccessibility feature is removed, because $B$ is
         a near-linear transform of the target. Ensemble models are far
-        more robust: GB loses only 0.015 in \loocv{} \rtwo{} (0.779
-        $\rightarrow$ 0.764), because tree-based methods can derive the
+        more robust: GB loses only 0.002 in \loocv{} \rtwo{} (0.752
+        $\rightarrow$ 0.750), because tree-based methods can derive the
         same information from log\,$P$ and solubility independently.
-  \item \textbf{GB leads fair \koc{} prediction:} On the circularity-free
-        16-feature set, Gradient Boosting achieves the highest \loocv{}
-        \rtwo{} (0.764), followed by RF (0.726), Ridge (0.546), and
-        LASSO (0.535). The nonlinear advantage of tree-based models is
-        now evident: \koc{} prediction benefits from interaction effects
-        that linear models cannot capture without the $B$ shortcut.
-  \item \degtl{} prediction is poor across all models (\rtwo{}~$< 0.25$),
-        with linear and nonlinear methods performing comparably. The
-        ensemble models' modest advantage (GB 0.223 vs.\ Ridge 0.154)
-        suggests limited nonlinear signal for soil degradation from
-        structural descriptors alone.
-  \item \textbf{DegT50 instability:} The fold-level standard deviations for
-        \degtl{} 5-fold~CV ($\pm 0.10$--$0.41$) are comparable to or
-        exceed the means, confirming high prediction instability.
+  \item \textbf{RF leads DegT50, GB competitive:} RF achieves the highest
+        \loocv{} \rtwo{} for \degtl{} (0.287), with GB close behind
+        (0.283). For \koc{} (21 features), RF leads (0.759) followed
+        by GB (0.752). Linear models substantially trail.
+  \item \textbf{MLP underperforms:} The neural network (0.075 DegT50,
+        0.497 Koc) performs worst among all models except VQC, confirming
+        that high-capacity models struggle with $N = 110$ samples.
+  \item \degtl{} prediction is poor across all models (\rtwo{}~$< 0.30$),
+        suggesting a fundamental ceiling for structure-only prediction.
 \end{itemize}
 
 Wilcoxon signed-rank tests on per-substance LOO squared residuals
-(17-feature set) confirm that none of the pairwise model differences are
-statistically significant at $\alpha = 0.05$: RF vs.\ GB ($p = 0.19$
-for \degtl{}, $p = 0.21$ for \koc{}), Ridge vs.\ RF ($p = 0.16$,
-$p = 0.07$), and Ridge vs.\ GB ($p = 0.71$, $p = 0.18$).
+confirm that none of the pairwise model differences are
+statistically significant at $\alpha = 0.05$.
 
 The predicted-vs-experimental plots for RF \loocv{} (\cref{fig:predexp})
 visually confirm the high scatter for \degtl{} and the tight correlation
@@ -694,8 +697,10 @@ a reduced learning rate (0.03) and extended training (120~epochs).
 \begin{table}[htbp]
   \centering
   \caption{Architecture experiment: DegT50 prediction (5-fold CV) across
-           four circuit variants. The current baseline achieves
-           \rtwo{}~$= -0.141$ with 8 layers and 60 epochs.}
+           four circuit variants. These experiments used the initial single
+           12-qubit circuit (\rtwo{}~$= -0.141$); the per-target 8-qubit
+           circuit (\rtwo{}~$= -0.028$) was developed subsequently based on
+           these findings.}
   \label{tab:arch}
   \small
   \begin{tabular}{llcccccc}
