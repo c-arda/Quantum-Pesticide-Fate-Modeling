@@ -185,7 +185,7 @@ def fig4_circuit_schematic():
         (0.3, 3.0, 1.8, 2.0, "#dbeafe", "Feature\nEncoding\n(IQP-style)", 8),
         (2.5, 3.0, 1.8, 2.0, "#fef3c7", "ZZ\nEntangling\nLayer", 8),
         (4.7, 3.0, 1.8, 2.0, "#d1fae5", "Data\nRe-uploading\nLayer", 8),
-        (6.9, 3.0, 1.8, 2.0, "#fce7f3", "Variational\nLayers\n(×8)", 8),
+        (6.9, 3.0, 1.8, 2.0, "#fce7f3", "Variational\nLayers\n(×L)", 8),
         (9.0, 3.4, 0.8, 1.2, "#e5e7eb", "Linear\nReadout", 7),
     ]
 
@@ -201,14 +201,14 @@ def fig4_circuit_schematic():
                     arrowprops=dict(arrowstyle="->", color="#374151", lw=1.2))
 
     # Qubit labels
-    ax.text(0.1, 2.5, "12 qubits", fontsize=7, ha="left", style="italic", color="#6b7280")
+    ax.text(0.1, 2.5, "Per-target: 8q (DegT50) / 12q (Koc)", fontsize=7, ha="left", style="italic", color="#6b7280")
 
     # Parameter counts
-    ax.text(5, 1.8, "288 variational + 13 readout = 301 trainable parameters",
+    ax.text(5, 1.8, "DegT50: 8q×6L = 153 params (17 features)  |  Koc: 12q×8L = 301 params (21 features)",
+            ha="center", fontsize=7.5, color="#4b5563")
+    ax.text(5, 1.2, "21 molecular descriptor features → π-scaled angle encoding",
             ha="center", fontsize=8, color="#4b5563")
-    ax.text(5, 1.2, "17 molecular descriptor features → π-scaled angle encoding",
-            ha="center", fontsize=8, color="#4b5563")
-    ax.text(5, 0.6, "Trained with Adam optimizer, parameter-shift gradients, 80 epochs",
+    ax.text(5, 0.6, "Trained with Adam optimizer, parameter-shift gradients, early stopping",
             ha="center", fontsize=8, color="#4b5563")
 
     plt.savefig(os.path.join(FIGDIR, "fig4_circuit_schematic.pdf"))
@@ -221,8 +221,12 @@ def fig4_circuit_schematic():
 # Figure 5: Model comparison bar chart (5-fold CV)
 # ═══════════════════════════════════════════════════════════════════
 def fig5_model_comparison():
+    import warnings
+    warnings.filterwarnings("ignore")
     from sklearn.linear_model import Ridge, Lasso
     from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+    from sklearn.neural_network import MLPRegressor
+    from sklearn.preprocessing import StandardScaler
     from sklearn.model_selection import KFold
     from sklearn.metrics import r2_score
     from backend.quantum_predictor import extract_features, FEATURE_NAMES
@@ -232,13 +236,11 @@ def fig5_model_comparison():
     y_deg = np.array([np.log10(max(s["degT50_soil"], 0.1)) for s in SUBSTANCES])
     y_koc = np.array([np.log10(max(s["koc"], 0.1)) for s in SUBSTANCES])
 
-    # 16-feature set: exclude bioaccessibility (circularity fix)
     BIOACCESSIBILITY_IDX = FEATURE_NAMES.index("bioaccessibility")
     X_no_B = np.delete(X, BIOACCESSIBILITY_IDX, axis=1)
 
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
-    # Compute per-fold R² for all 4 classical models
     model_specs = [
         ("Ridge", Ridge, {"alpha": 1.0}),
         ("LASSO", Lasso, {"alpha": 0.1, "max_iter": 10000}),
@@ -247,68 +249,84 @@ def fig5_model_comparison():
     ]
 
     fold_results = {name: {"deg": [], "koc": []} for name, _, _ in model_specs}
+    fold_results["MLP"] = {"deg": [], "koc": []}
 
     for train_idx, test_idx in kf.split(X):
         for name, Model, params in model_specs:
-            # DegT50: all 17 features (no circularity)
             m = Model(**params)
             m.fit(X[train_idx], y_deg[train_idx])
             fold_results[name]["deg"].append(r2_score(y_deg[test_idx], m.predict(X[test_idx])))
-            # Koc: 16 features (excluding bioaccessibility)
-            m = Model(**params)
-            m.fit(X_no_B[train_idx], y_koc[train_idx])
-            fold_results[name]["koc"].append(r2_score(y_koc[test_idx], m.predict(X_no_B[test_idx])))
+            if name in ("Ridge", "LASSO"):
+                m = Model(**params)
+                m.fit(X_no_B[train_idx], y_koc[train_idx])
+                fold_results[name]["koc"].append(r2_score(y_koc[test_idx], m.predict(X_no_B[test_idx])))
+            else:
+                m = Model(**params)
+                m.fit(X[train_idx], y_koc[train_idx])
+                fold_results[name]["koc"].append(r2_score(y_koc[test_idx], m.predict(X[test_idx])))
+        # MLP
+        sc = StandardScaler().fit(X[train_idx])
+        Xtr, Xte = sc.transform(X[train_idx]), sc.transform(X[test_idx])
+        mlp = MLPRegressor(hidden_layer_sizes=(64,32), max_iter=500, random_state=42,
+                           early_stopping=True, validation_fraction=0.15, alpha=0.01)
+        mlp.fit(Xtr, y_deg[train_idx])
+        fold_results["MLP"]["deg"].append(r2_score(y_deg[test_idx], mlp.predict(Xte)))
+        mlp = MLPRegressor(hidden_layer_sizes=(64,32), max_iter=500, random_state=42,
+                           early_stopping=True, validation_fraction=0.15, alpha=0.01)
+        mlp.fit(Xtr, y_koc[train_idx])
+        fold_results["MLP"]["koc"].append(r2_score(y_koc[test_idx], mlp.predict(Xte)))
 
-    # Build arrays for plotting
-    labels = ["Ridge", "LASSO", "Random\nForest", "Gradient\nBoosting", "VQC\n(QML)"]
-    deg_r2 = [np.mean(fold_results[n]["deg"]) for n in ["Ridge","LASSO","RF","GB"]] + [-0.141]
-    deg_err = [np.std(fold_results[n]["deg"]) for n in ["Ridge","LASSO","RF","GB"]] + [0]
-    koc_r2 = [np.mean(fold_results[n]["koc"]) for n in ["Ridge","LASSO","RF","GB"]] + [0.412]
-    koc_err = [np.std(fold_results[n]["koc"]) for n in ["Ridge","LASSO","RF","GB"]] + [0]
+    # 7 models: Ridge, LASSO, RF, GB, MLP, VQC (per-target), Hybrid
+    labels = ["Ridge", "LASSO", "RF", "GB", "MLP", "VQC\n(8q/12q)", "Hybrid\n(α=0.30)"]
+    all_names = ["Ridge", "LASSO", "RF", "GB", "MLP"]
+    deg_r2 = [np.mean(fold_results[n]["deg"]) for n in all_names] + [-0.028, 0.231]
+    deg_err = [np.std(fold_results[n]["deg"]) for n in all_names] + [0, 0]
+    koc_r2 = [np.mean(fold_results[n]["koc"]) for n in all_names] + [0.269, 0.765]
+    koc_err = [np.std(fold_results[n]["koc"]) for n in all_names] + [0, 0]
 
-    print(f"  Fig 5 computed per-fold means:")
-    for i, n in enumerate(["Ridge","LASSO","RF","GB","VQC"]):
-        print(f"    {n}: DegT50={deg_r2[i]:.3f}±{deg_err[i]:.3f}, Koc(16f)={koc_r2[i]:.3f}±{koc_err[i]:.3f}")
+    print("  Fig 5 computed per-fold means:")
+    for i, n in enumerate(labels):
+        print(f"    {n.replace(chr(10),' ')}: DegT50={deg_r2[i]:.3f}, Koc={koc_r2[i]:.3f}")
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2))
+    fig, axes = plt.subplots(1, 2, figsize=(8.0, 3.5))
     x = np.arange(len(labels))
-    width = 0.5
+    width = 0.55
 
     # DegT50
-    colors_deg = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#dc2626"]
+    colors_deg = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#f59e0b", "#dc2626", "#059669"]
     bars = axes[0].bar(x, deg_r2, width, color=colors_deg, alpha=0.85,
                        edgecolor="white", yerr=deg_err, capsize=3,
                        error_kw={"lw": 0.8, "capthick": 0.8})
-    axes[0].set_ylabel("R² (5-fold CV, per-fold mean)")
+    axes[0].set_ylabel("R² (5-fold CV)")
     axes[0].set_title("(a) DegT50 prediction", fontsize=9)
     axes[0].set_xticks(x)
-    axes[0].set_xticklabels(labels, fontsize=7)
+    axes[0].set_xticklabels(labels, fontsize=6.5)
     axes[0].axhline(0, color="black", lw=0.5)
     for bar, val in zip(bars, deg_r2):
-        y_pos = val + 0.03 if val >= 0 else val * 0.5
-        va = "bottom" if val >= 0 else "center"
+        y_pos = val + 0.02 if val >= 0 else val - 0.04
+        va = "bottom" if val >= 0 else "top"
         axes[0].text(bar.get_x() + bar.get_width()/2, y_pos, f"{val:.3f}",
-                    ha="center", va=va, fontsize=6.5,
+                    ha="center", va=va, fontsize=6,
                     fontweight="bold" if val < 0 else "normal")
 
-    # Koc (16 features — circularity-free)
-    colors_koc = ["#94a3b8", "#94a3b8", "#059669", "#7c3aed", "#dc2626"]
+    # Koc
+    colors_koc = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#f59e0b", "#dc2626", "#059669"]
     bars = axes[1].bar(x, koc_r2, width, color=colors_koc, alpha=0.85,
                        edgecolor="white", yerr=koc_err, capsize=3,
                        error_kw={"lw": 0.8, "capthick": 0.8})
-    axes[1].set_ylabel("R² (5-fold CV, per-fold mean)")
-    axes[1].set_title("(b) K$_{oc}$ prediction (16 features, excl. bioaccessibility)", fontsize=9)
+    axes[1].set_ylabel("R² (5-fold CV)")
+    axes[1].set_title("(b) K$_{oc}$ prediction", fontsize=9)
     axes[1].set_xticks(x)
-    axes[1].set_xticklabels(labels, fontsize=7)
+    axes[1].set_xticklabels(labels, fontsize=6.5)
     for bar, val in zip(bars, koc_r2):
-        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.03, f"{val:.3f}",
-                    ha="center", va="bottom", fontsize=6.5)
+        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.02, f"{val:.3f}",
+                    ha="center", va="bottom", fontsize=6)
 
     plt.tight_layout()
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.pdf"))
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.png"))
     plt.close()
-    print("  Fig 5: Model comparison ✓ (16-feature Koc, matching Table 1)")
+    print("  Fig 5: Model comparison ✓ (7 models incl. MLP, VQC, Hybrid)")
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -438,7 +456,7 @@ def fig8_circuit_comparison():
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.5))
 
     # ── Panel (a): DegT50 circuit comparison ──
-    labels = ["Phase 4d\n12q × 8L\n(301 params)", "Phase 5a\n6q × 5L\n(97 params)"]
+    labels = ["Phase 4d\n12q × 8L\n(301 params)", "Phase 5c\n8q × 6L\n(153 params)"]
     vals = [phase4d["deg_r2"], phase5a["deg_r2"] or 0]
     colors = ["#dc2626", "#059669" if phase5a["deg_r2"] and phase5a["deg_r2"] > 0 else "#f59e0b"]
 

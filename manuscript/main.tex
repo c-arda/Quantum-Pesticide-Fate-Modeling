@@ -347,7 +347,7 @@ substance. 5-fold CV with stratified random splits is used as a faster
 supplementary benchmark.
 
 For the VQC, \loocv{} requires \nsub{} $\times$ 2 (two properties) full
-training runs, each with 60 epochs of gradient optimization over \nparams{}
+training runs, each with 60 epochs of gradient optimization over 153--301
 parameters. Fold-level checkpointing saves results after each fold to a
 JSON file, enabling crash-resilient resumption.
 
@@ -641,7 +641,7 @@ result is not a statistical artifact of sparse coverage.
 
 The negative \rtwo{} of the VQC for \degtl{} prediction is not a failure
 of quantum computing per se, but rather a predictable consequence of
-applying a \nparams{}-parameter model to \nsub{} data points. Several
+applying a 153--301-parameter model to \nsub{} data points. Several
 factors contribute:
 
 \begin{enumerate}
@@ -650,7 +650,7 @@ factors contribute:
         models with far fewer effective parameters (RF uses bagging and
         feature subsampling as implicit regularization) are more robust.
 
-  \item \textbf{Barren plateaus:} With \nqubits{} qubits and \nlayers{}
+  \item \textbf{Barren plateaus:} With 8--12 qubits and 6--8
         layers, the VQC may suffer from vanishing gradients in portions of
         the parameter landscape~\citep{mcclean2018}, making optimization
         unreliable with limited training data for validation.
