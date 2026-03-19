@@ -250,13 +250,16 @@ def fig5_model_comparison():
         -0.028,   # VQC per-target 5-fold
         0.288,    # Hybrid nested CV
     ]
+    # Koc: all models use 21 features (incl. bioaccessibility) because
+    # VQC and Hybrid were trained with B. Plotting 20-feature classical
+    # vs 21-feature QML would create a misleading visual gap.
     koc_r2 = [
-        koc_noB["Ridge"]["loo"]["koc_r2"],
-        koc_noB["Lasso"]["loo"]["koc_r2"],
-        koc_noB["RandomForest"]["loo"]["koc_r2"],
-        koc_noB["GradientBoosting"]["loo"]["koc_r2"],
-        0.497,    # MLP
-        0.269,    # VQC per-target 5-fold
+        models["Ridge"]["loo"]["koc_r2"],
+        models["Lasso"]["loo"]["koc_r2"],
+        models["RandomForest"]["loo"]["koc_r2"],
+        models["GradientBoosting"]["loo"]["koc_r2"],
+        0.497,    # MLP (21 features)
+        0.269,    # VQC per-target 5-fold (12q, 21 features)
         0.750,    # Hybrid nested CV
     ]
 
@@ -268,7 +271,7 @@ def fig5_model_comparison():
     x = np.arange(len(labels))
     width = 0.55
 
-    # DegT50
+    # DegT50 (21 features)
     colors_deg = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#f59e0b", "#dc2626", "#059669"]
     bars = axes[0].bar(x, deg_r2, width, color=colors_deg, alpha=0.85, edgecolor="white")
     axes[0].set_ylabel("R² (LOO CV)")
@@ -283,11 +286,11 @@ def fig5_model_comparison():
                     ha="center", va=va, fontsize=6,
                     fontweight="bold" if val < 0 else "normal")
 
-    # Koc (20 features, excl. bioaccessibility)
+    # Koc (21 features, incl. bioaccessibility — see circularity note)
     colors_koc = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#f59e0b", "#dc2626", "#059669"]
     bars = axes[1].bar(x, koc_r2, width, color=colors_koc, alpha=0.85, edgecolor="white")
     axes[1].set_ylabel("R² (LOO CV)")
-    axes[1].set_title("(b) K$_{oc}$ prediction (20 features, excl. B)", fontsize=9)
+    axes[1].set_title("(b) K$_{oc}$ prediction (21 features, incl. B$^†$)", fontsize=9)
     axes[1].set_xticks(x)
     axes[1].set_xticklabels(labels, fontsize=6.5)
     for bar, val in zip(bars, koc_r2):
@@ -298,7 +301,7 @@ def fig5_model_comparison():
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.pdf"))
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.png"))
     plt.close()
-    print("  Fig 5: Model comparison ✓ (LOO R², matching Table 1)")
+    print("  Fig 5: Model comparison ✓ (LOO R², 21 features for both targets)")
 
 
 # ═══════════════════════════════════════════════════════════════════
