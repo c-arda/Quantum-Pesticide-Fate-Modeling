@@ -435,10 +435,10 @@ classical baselines.
            (excluding $B$; see circularity note in \cref{sec:features}).}
   \label{tab:baselines}
   \small
-  \begin{tabular}{lllcc}
+  \begin{tabular}{lllc}
     \toprule
     \textbf{Model} & \textbf{Property} & \textbf{CV} &
-      \textbf{\rtwo{}} & \textbf{RMSE} \\
+      \textbf{\rtwo{}} \\
     \midrule
     \multirow{4}{*}{Ridge}
       & \degtl{}         & LOO    & 0.124   \\
@@ -533,12 +533,14 @@ models.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig5_model_comparison.pdf}
-  \caption{Model comparison (5-fold CV, per-fold mean \rtwo{} $\pm$
-           fold standard deviation): (a)~\degtl{} and (b)~\koc{}
-           prediction across Ridge, LASSO, RF, GB, and VQC.
-           GB leads \koc{} prediction on the fair 16-feature set;
-           all models perform poorly on \degtl{} with high fold-level
-           variance.}
+  \caption{Model comparison (leave-one-out CV \rtwo{}): (a)~\degtl{}
+           prediction using all 21 features and (b)~\koc{} prediction
+           using the fair 20-feature set (excluding bioaccessibility~$B$).
+           Classical models (Ridge, LASSO, RF, GB, MLP) are evaluated
+           via LOO-CV; VQC uses 5-fold CV due to computational cost.
+           The hybrid model uses nested LOO-CV for leakage-free
+           $\alpha$ optimization. RF achieves the best standalone
+           performance for both properties.}
   \label{fig:comparison}
 \end{figure}
 
@@ -591,7 +593,7 @@ $\alpha$. This prevents the stacking weight from ``seeing'' the
 held-out target.
 
 The nested procedure yields $\alpha_\text{deg} = 0.20 \pm 0.02$ (101/110
-folds select $\alpha = 0.20$, 7 select 0.15, 1 selects 0.10, 1 selects
+folds select $\alpha = 0.20$; 7 select 0.15; 1 selects 0.10; 1 selects
 0.25), confirming that the optimal weight is stable and not an artifact
 of overfitting. For \koc{}, $\alpha = 0.00$ in 109/110 folds, confirming
 that the VQC contributes nothing beyond RF for \koc{}.
@@ -689,7 +691,7 @@ factors contribute:
   \item \textbf{The DegT50 problem is inherently hard:} Even with perfect
         structural descriptors, soil half-life depends on microbial
         community composition, temperature, moisture, organic matter
-        content, and pH—none of which are encoded in molecular structure.
+        content, and pH---none of which are encoded in molecular structure.
         An \rtwo{} ceiling near 0.2--0.3 may be fundamental for
         structure-only models.
 

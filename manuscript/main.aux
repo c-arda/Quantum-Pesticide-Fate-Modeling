@@ -77,8 +77,8 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Variational Quantum Circuit Performance}{11}{subsection.3.2}\protected@file@percent }
 \newlabel{sec:results_qml}{{3.2}{11}{Variational Quantum Circuit Performance}{subsection.3.2}{}}
 \newlabel{sec:results_qml@cref}{{[subsection][2][3]3.2}{[1][11][]11}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Model comparison (5-fold CV, per-fold mean R\textsuperscript  {2}{} $\pm $ fold standard deviation): (a)~DegT50{} and (b)~K\textsubscript  {oc}{} prediction across Ridge, LASSO, RF, GB, and VQC. GB leads K\textsubscript  {oc}{} prediction on the fair 16-feature set; all models perform poorly on DegT50{} with high fold-level variance.}}{12}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:comparison}{{5}{12}{Model comparison (5-fold CV, per-fold mean \rtwo {} $\pm $ fold standard deviation): (a)~\degtl {} and (b)~\koc {} prediction across Ridge, LASSO, RF, GB, and VQC. GB leads \koc {} prediction on the fair 16-feature set; all models perform poorly on \degtl {} with high fold-level variance}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Model comparison (leave-one-out CV R\textsuperscript  {2}{}): (a)~DegT50{} prediction using all 21 features and (b)~K\textsubscript  {oc}{} prediction using the fair 20-feature set (excluding bioaccessibility~$B$). Classical models (Ridge, LASSO, RF, GB, MLP) are evaluated via LOO-CV; VQC uses 5-fold CV due to computational cost. The hybrid model uses nested LOO-CV for leakage-free $\alpha $ optimization. RF achieves the best standalone performance for both properties.}}{12}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:comparison}{{5}{12}{Model comparison (leave-one-out CV \rtwo {}): (a)~\degtl {} prediction using all 21 features and (b)~\koc {} prediction using the fair 20-feature set (excluding bioaccessibility~$B$). Classical models (Ridge, LASSO, RF, GB, MLP) are evaluated via LOO-CV; VQC uses 5-fold CV due to computational cost. The hybrid model uses nested LOO-CV for leakage-free $\alpha $ optimization. RF achieves the best standalone performance for both properties}{figure.caption.7}{}}
 \newlabel{fig:comparison@cref}{{[figure][5][]5}{[1][11][]12}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Hybrid Stacking Results}{12}{subsection.3.3}\protected@file@percent }
 \newlabel{sec:results_hybrid}{{3.3}{12}{Hybrid Stacking Results}{subsection.3.3}{}}
@@ -95,17 +95,17 @@
 \citation{mcclean2018}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces AOP-Wiki-derived mechanism-of-action pathway coverage across the 110{} pesticide dataset. 67 substances (60.9\%) map to at least one of 6 pathway categories.}}{14}{figure.caption.10}\protected@file@percent }
 \newlabel{fig:aop}{{7}{14}{AOP-Wiki-derived mechanism-of-action pathway coverage across the \nsub {} pesticide dataset. 67 substances (60.9\%) map to at least one of 6 pathway categories}{figure.caption.10}{}}
-\newlabel{fig:aop@cref}{{[figure][7][]7}{[1][13][]14}{}{}{}}
+\newlabel{fig:aop@cref}{{[figure][7][]7}{[1][14][]14}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Discussion}{14}{section.4}\protected@file@percent }
 \newlabel{sec:discussion}{{4}{14}{Discussion}{section.4}{}}
-\newlabel{sec:discussion@cref}{{[section][4][]4}{[1][13][]14}{}{}{}}
+\newlabel{sec:discussion@cref}{{[section][4][]4}{[1][14][]14}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Why Does QML Fail on DegT50?}{14}{subsection.4.1}\protected@file@percent }
 \citation{havlicek2019}
-\citation{arda2026nd}
 \@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Architecture experiment: DegT50 prediction (5-fold CV) across four circuit variants. These experiments used the initial single 12-qubit circuit (R\textsuperscript  {2}{}~$= -0.141$); the per-target 8-qubit circuit (R\textsuperscript  {2}{}~$= -0.028$) was developed subsequently based on these findings.}}{15}{table.caption.11}\protected@file@percent }
 \newlabel{tab:arch}{{3}{15}{Architecture experiment: DegT50 prediction (5-fold CV) across four circuit variants. These experiments used the initial single 12-qubit circuit (\rtwo {}~$= -0.141$); the per-target 8-qubit circuit (\rtwo {}~$= -0.028$) was developed subsequently based on these findings}{table.caption.11}{}}
 \newlabel{tab:arch@cref}{{[table][3][]3}{[1][15][]15}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}When Might QML Add Value?}{15}{subsection.4.2}\protected@file@percent }
+\citation{arda2026nd}
 \citation{cerezo2021}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}The Value of Negative Results}{16}{subsection.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {5}Conclusions}{16}{section.5}\protected@file@percent }
