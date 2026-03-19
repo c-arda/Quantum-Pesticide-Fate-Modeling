@@ -441,40 +441,40 @@ classical baselines.
       \textbf{\rtwo{}} & \textbf{RMSE} \\
     \midrule
     \multirow{4}{*}{Ridge}
-      & \degtl{}         & LOO    & 0.124   & --- \\
-      & \degtl{}         & 5-fold & 0.183   & --- \\
-      & \koc{} (21f)     & LOO    & 0.825$^\dagger$ & --- \\
-      & \koc{} (20f)     & LOO    & 0.532   & --- \\
+      & \degtl{}         & LOO    & 0.124   \\
+      & \degtl{}         & 5-fold & 0.183   \\
+      & \koc{} (21f)     & LOO    & 0.825$^\dagger$ \\
+      & \koc{} (20f)     & LOO    & 0.532   \\
     \midrule
     \multirow{4}{*}{LASSO}
-      & \degtl{}         & LOO    & 0.090   & --- \\
-      & \degtl{}         & 5-fold & 0.029   & --- \\
-      & \koc{} (21f)     & LOO    & 0.746$^\dagger$ & --- \\
-      & \koc{} (20f)     & LOO    & 0.512   & --- \\
+      & \degtl{}         & LOO    & 0.090   \\
+      & \degtl{}         & 5-fold & 0.029   \\
+      & \koc{} (21f)     & LOO    & 0.746$^\dagger$ \\
+      & \koc{} (20f)     & LOO    & 0.512   \\
     \midrule
     \multirow{4}{*}{Random Forest}
-      & \degtl{}         & LOO    & \textbf{0.287}   & --- \\
-      & \degtl{}         & 5-fold & 0.275   & --- \\
-      & \koc{} (21f)     & LOO    & \textbf{0.759}   & --- \\
-      & \koc{} (20f)     & LOO    & 0.712   & --- \\
+      & \degtl{}         & LOO    & \textbf{0.287}   \\
+      & \degtl{}         & 5-fold & 0.275   \\
+      & \koc{} (21f)     & LOO    & \textbf{0.759}   \\
+      & \koc{} (20f)     & LOO    & 0.712   \\
     \midrule
     \multirow{4}{*}{Gradient Boosting}
-      & \degtl{}         & LOO    & 0.283   & --- \\
-      & \degtl{}         & 5-fold & 0.290   & --- \\
-      & \koc{} (21f)     & LOO    & 0.752   & --- \\
-      & \koc{} (20f)     & LOO    & 0.750   & --- \\
+      & \degtl{}         & LOO    & 0.283   \\
+      & \degtl{}         & 5-fold & 0.290   \\
+      & \koc{} (21f)     & LOO    & 0.752   \\
+      & \koc{} (20f)     & LOO    & 0.750   \\
     \midrule
     \multirow{2}{*}{MLP}
-      & \degtl{}         & LOO    & 0.075   & --- \\
-      & \koc{} (21f)     & LOO    & 0.497   & --- \\
+      & \degtl{}         & LOO    & 0.075   \\
+      & \koc{} (21f)     & LOO    & 0.497   \\
     \midrule
     \multirow{2}{*}{VQC (per-target)}
-      & \degtl{} (8q)    & 5-fold & $-$0.028 & --- \\
-      & \koc{} (12q)     & 5-fold & 0.269   & --- \\
+      & \degtl{} (8q)    & 5-fold & $-$0.028 \\
+      & \koc{} (12q)     & 5-fold & 0.269   \\
     \midrule
     \multirow{2}{*}{Hybrid (nested CV)}
-      & \degtl{}         & nested LOO & 0.288   & --- \\
-      & \koc{}           & nested LOO & 0.750   & --- \\
+      & \degtl{}         & nested LOO & 0.288   \\
+      & \koc{}           & nested LOO & 0.750   \\
     \bottomrule
   \end{tabular}
 
@@ -735,7 +735,7 @@ a reduced learning rate (0.03) and extended training (120~epochs).
     D & Baseline+, lr$=$0.03                 & 12 & 8  & 120 & 0.009 & $-$0.205 & 4.1\,h \\
     \midrule
     \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.04)}} & 12 & 8 & 60
-      & --- & $-$0.141 & --- \\
+      & --- & $-$0.141 \\
     \bottomrule
   \end{tabular}
 \end{table}
