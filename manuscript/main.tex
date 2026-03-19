@@ -533,14 +533,15 @@ models.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig5_model_comparison.pdf}
-  \caption{Model comparison (leave-one-out CV \rtwo{}): (a)~\degtl{}
-           prediction using all 21 features and (b)~\koc{} prediction
-           using the fair 20-feature set (excluding bioaccessibility~$B$).
+  \caption{Model comparison (leave-one-out CV \rtwo{}) using all 21
+           features for both targets: (a)~\degtl{} and (b)~\koc{}.
            Classical models (Ridge, LASSO, RF, GB, MLP) are evaluated
            via LOO-CV; VQC uses 5-fold CV due to computational cost.
            The hybrid model uses nested LOO-CV for leakage-free
-           $\alpha$ optimization. RF achieves the best standalone
-           performance for both properties.}
+           $\alpha$ optimization.
+           $^\dagger$\koc{} scores include the circular bioaccessibility
+           feature~$B$; see \cref{tab:baselines} for the fair
+           20-feature comparison.}
   \label{fig:comparison}
 \end{figure}
 
