@@ -78,18 +78,20 @@ re-uploading. Leave-one-out cross-validation benchmarks reveal that
 Random Forest (RF) achieves \rtwo{}~=~0.287 for \degtl{} and 0.759 for
 \koc{}, while Gradient Boosting (GB) reaches 0.283 and 0.752,
 respectively. An MLP neural network achieves only 0.075 and 0.497.
-The VQC alone underperforms (\rtwo{}~$= -0.028$ for \degtl{}, 5-fold CV),
-but a hybrid stacking framework blending QML and RF predictions yields
-$\alpha = 0.30$, achieving \rtwo{}~$= 0.231$ for \degtl{}
-(+19\% over standalone RF). This demonstrates that VQCs capture
-complementary molecular patterns not accessible to tree-based models.
-These results provide a rigorous benchmark for near-term quantum machine
-learning applied to regulatory chemistry and highlight the critical role
-of per-target circuit design and hybrid stacking in small-dataset QML.
+The VQC alone underperforms all classical baselines
+(\rtwo{}~$= -0.028$ for \degtl{}, 5-fold CV). A hybrid stacking
+framework with nested LOO-CV for leakage-free $\alpha$ optimization
+yields $\alpha = 0.20 \pm 0.02$, but the resulting hybrid \rtwo{}
+(0.288 for \degtl{}) improves over standalone RF by only +0.001---a
+negligible and statistically insignificant margin. These results
+demonstrate that near-term VQCs on small regulatory datasets
+($N \approx 110$) cannot outperform properly feature-engineered classical
+models, and caution against premature claims of quantum advantage in
+chemistry applications with limited training data.
 
 \vspace{6pt}
 \noindent\textbf{Keywords:} quantum machine learning, variational quantum
-circuits, pesticide fate, DegT50, Koc, QSAR, hybrid stacking, regulatory
+circuits, pesticide fate, DegT50, Koc, QSAR, negative result, regulatory
 chemistry, EU SPIN
 \end{abstract}
 
@@ -563,30 +565,37 @@ confirming that the circuit learns noise rather than signal.
 \subsection{Hybrid Stacking Results}
 \label{sec:results_hybrid}
 
-The hybrid stacker optimizes $\alpha$ via grid search (step 0.05) over
-the QML 5-fold CV and RF \loocv{} predictions. All 110 substances are
-used for blending. The optimized weight is $\alpha = 0.30$ for \degtl{}
-and $\alpha = 0.00$ for \koc{} (i.e., RF-only for \koc{}),
-yielding hybrid \rtwo{} of 0.231 for \degtl{} and 0.765 for \koc{}.
+To avoid data leakage in $\alpha$ optimization, we employ nested
+leave-one-out cross-validation: for each held-out substance~$i$,
+$\alpha$ is optimized on the remaining $N-1$ substances by grid search
+(step 0.05), and substance~$i$ is predicted with that fold-specific
+$\alpha$. This prevents the stacking weight from ``seeing'' the
+held-out target.
 
-The \degtl{} result is notable: the hybrid model (\rtwo{}~$= 0.231$)
-outperforms standalone RF (\rtwo{}~$= 0.287$ with 21 features on \loocv{},
-but the hybrid uses 5-fold QML predictions blended with LOO RF, yielding
-+19\% improvement over RF alone on the same substance set).
-This indicates that the VQC, despite its poor standalone \rtwo{}
-($= -0.028$), captures complementary molecular patterns that the RF
-misses---likely non-linear feature interactions in the quantum Hilbert
-space that do not correspond to any decision tree splitting surface.
+The nested procedure yields $\alpha_\text{deg} = 0.20 \pm 0.02$ (101/110
+folds select $\alpha = 0.20$, 7 select 0.15, 1 selects 0.10, 1 selects
+0.25), confirming that the optimal weight is stable and not an artifact
+of overfitting. For \koc{}, $\alpha = 0.00$ in 109/110 folds, confirming
+that the VQC contributes nothing beyond RF for \koc{}.
+
+The honest hybrid \rtwo{} for \degtl{} is 0.288---an improvement of
+just +0.001 over standalone RF (0.287). This margin is negligible and
+not statistically significant. For \koc{}, the hybrid (0.750) slightly
+\emph{degrades} RF performance (0.759), as the single fold with
+$\alpha > 0$ introduces noise.
+
+\textbf{Comparison with na\"ive $\alpha$ optimization:} Without nested
+CV (i.e., optimizing $\alpha$ on the same predictions used for
+evaluation), the hybrid achieves \rtwo{}~$= 0.305$ for \degtl{}---a
+spuriously inflated result due to data leakage in the stacking weight.
+This demonstrates the importance of nested CV for honest hybrid
+evaluation.
 
 \textbf{Circularity caveat:} Because the VQC was trained on all
-\nfeat{} features (including bioaccessibility~$B$), the hybrid \koc{}
-result of 0.783 inherits the circular contribution of~$B$. The fair
-16-feature RF baseline (excluding~$B$) achieves \rtwo{}~$= 0.726$
-(\cref{tab:baselines}); a strictly circularity-free hybrid comparison
-would require retraining the VQC without~$B$, which was not performed.
-The QML component thus contributes a marginal complementary signal;
-however, the improvement is not statistically significant and comes at
-$\sim$100$\times$ the computational cost.
+\nfeat{} features (including bioaccessibility~$B$), the \koc{}
+evaluation inherits the circular contribution of~$B$. A strictly
+circularity-free comparison would require retraining the VQC
+without~$B$, which was not performed.
 
 
 % ── 3.4 AOP Features ────────────────────────────────────────────
@@ -758,45 +767,47 @@ and classical machine learning for predicting pesticide environmental fate
 properties from the EU SPIN database. Key findings:
 
 \begin{enumerate}
-  \item \textbf{Per-target circuit design eliminates overfitting:} Replacing
+  \item \textbf{Per-target circuit design reduces overfitting:} Replacing
         the single 12-qubit circuit ($N_\text{params}/N = 2.74$) with an
         8-qubit \degtl{} circuit ($N_\text{params}/N = 1.39$) improved
-        \degtl{} \rtwo{} from $-0.141$ to $-0.028$ (5-fold CV), confirming
-        that the initial failure was architectural, not fundamental. However,
-        the near-zero \rtwo{} indicates that the remaining bottleneck is the
-        target property and feature set.
+        \degtl{} \rtwo{} from $-0.141$ to $-0.028$ (5-fold CV). However,
+        the \rtwo{} remains below zero, meaning the model still fails to
+        outperform a constant mean prediction.
 
-  \item \textbf{Random Forest leads standalone prediction:} With 21 features
-        (including 4 DegT50-targeted descriptors), RF achieves \rtwo{}~$= 0.287$
-        for \degtl{} and $0.759$ for \koc{} (\loocv{}). The MLP neural network
-        (0.075, 0.497) performs substantially worse, confirming that
-        high-capacity models struggle with small datasets.
+  \item \textbf{Classical models dominate:} Random Forest with 21 features
+        achieves \rtwo{}~$= 0.287$ for \degtl{} and $0.759$ for \koc{}
+        (\loocv{}). Gradient Boosting performs comparably (0.283, 0.752),
+        while the MLP neural network (0.075, 0.497) underperforms,
+        confirming that high-capacity models struggle with small datasets.
 
-  \item \textbf{Hybrid stacking captures complementary signal:} A 30\% QML
-        + 70\% RF blend ($\alpha = 0.30$) achieves \degtl{} \rtwo{}~$= 0.231$,
-        demonstrating that VQCs capture molecular patterns inaccessible to
-        tree-based models. This is the central positive finding: even with
-        near-zero standalone \rtwo{}, the quantum component adds value in an
-        ensemble context, likely by encoding non-linear feature interactions
-        in the quantum Hilbert space.
+  \item \textbf{Hybrid stacking provides no significant improvement:}
+        Nested LOO-CV for leakage-free $\alpha$ optimization yields
+        $\alpha = 0.20 \pm 0.02$, producing a hybrid \degtl{}
+        \rtwo{}~$= 0.288$---an improvement of just +0.001 over standalone
+        RF. This margin is negligible. The VQC does not capture
+        complementary patterns beyond what the 21-feature RF already
+        encodes.
 
-  \item \textbf{\degtl{} remains structurally bounded:} All models achieve
+  \item \textbf{\degtl{} is structurally bounded:} All models achieve
         \rtwo{}~$\leq 0.29$ (\loocv{}), supporting the hypothesis that
         soil degradation depends on environmental factors (microbial
-        community, temperature, moisture) not captured by molecular structure.
-        An \rtwo{} ceiling near 0.3 may be fundamental for structure-only
-        models.
+        community, temperature, moisture) not captured by molecular
+        structure. An \rtwo{} ceiling near 0.3 may be fundamental for
+        structure-only models.
 
-  \item \textbf{AOP-derived features provide no improvement,} indicating
-        that mechanism-of-action labels do not encode additional variance
-        beyond structural descriptors.
+  \item \textbf{Minimum dataset recommendation:} Based on the observed
+        failure at $N = \nsub{}$ and the parameter-to-data ratio analysis,
+        we estimate that VQC generalization for circuits of this size
+        requires $N \gtrsim 1000$ samples---an order of magnitude beyond
+        current regulatory databases.
 \end{enumerate}
 
-These results demonstrate that near-term QML, when implemented with
-per-target circuit design and hybrid stacking, can contribute meaningful
-complementary signal even on small regulatory datasets. The hybrid approach
-offers a practical pathway for integrating quantum and classical models
-while quantum hardware matures.
+These results caution against premature claims of quantum advantage on
+small regulatory datasets. Even with per-target circuit design, early
+stopping, and hybrid stacking with proper nested cross-validation, the
+VQC does not outperform a well-engineered Random Forest. Negative results
+such as this are essential for grounding the rapidly growing QML field
+in empirical reality.
 
 
 % ══════════════════════════════════════════════════════════════════
