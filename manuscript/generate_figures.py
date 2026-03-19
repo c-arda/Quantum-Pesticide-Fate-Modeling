@@ -272,7 +272,7 @@ def fig5_model_comparison():
     colors_deg = ["#94a3b8", "#94a3b8", "#2563eb", "#7c3aed", "#f59e0b", "#dc2626", "#059669"]
     bars = axes[0].bar(x, deg_r2, width, color=colors_deg, alpha=0.85, edgecolor="white")
     axes[0].set_ylabel("R² (LOO CV)")
-    axes[0].set_title("(a) DegT50 prediction (20 features, excl. B)", fontsize=9)
+    axes[0].set_title("(a) DegT50 prediction (21 features)", fontsize=9)
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(labels, fontsize=6.5)
     axes[0].axhline(0, color="black", lw=0.5)
