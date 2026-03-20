@@ -9,20 +9,20 @@
 [![HTML5](https://img.shields.io/badge/HTML5-CSS3-E34F26.svg?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![EC 1107/2009](https://img.shields.io/badge/EU-EC%201107%2F2009-003399.svg?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex%3A32009R1107)
 [![ChemRxiv](https://img.shields.io/badge/ChemRxiv-10.26434/chemrxiv.15000799-B31B1B.svg)](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000799/v1)
+[![JCIM](https://img.shields.io/badge/JCIM-Submitted-0072B2.svg?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHRleHQgeD0iMiIgeT0iMTIiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiPkE8L3RleHQ+PC9zdmc+)](https://pubs.acs.org/journal/jcisd8)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — a 6-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances with 21 molecular descriptors from the EU SPIN database, benchmarked against Random Forest and Gradient Boosting, integrated with FOCUS regulatory fate models.
+**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — an 8-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances with 21 molecular descriptors from the EU SPIN database, benchmarked against Random Forest, Gradient Boosting, and MLP. **Honest negative result:** near-term VQCs cannot outperform classical models on small regulatory datasets.
 
 ## Highlights
 
-- **Per-target VQCs** — 6-qubit/5-layer for DegT50 (97 params) + 12-qubit/8-layer for Koc (301 params)
-- **Early stopping** with patience=10 epochs to prevent overtraining
-- **17 curated molecular descriptors** including microbial degradation proxies and photolability features
+- **Per-target VQCs** — 8-qubit/6-layer for DegT50 (153 params) + 12-qubit/8-layer for Koc (301 params)
+- **21 curated molecular descriptors** including DegT50-targeted degradation proxies
 - **110 pesticide substances** from the EU SPIN database (SQLite-backed, validated SMILES)
-- **Classical baselines** (Random Forest + Gradient Boosting) for systematic comparison
-- **Hybrid QML+RF stacking** — learned blending weight α per property, optimized via LOO-CV
+- **Classical baselines** (Ridge, LASSO, Random Forest, Gradient Boosting, MLP) via LOO-CV
+- **Nested LOO-CV** for leakage-free hybrid stacking (α optimization)
+- **Honest negative result** — VQC R²=−0.028, hybrid improves RF by only +0.001
 - **FOCUS regulatory pipeline** — feeds predictions into PEARL/GEM groundwater models → PEC (µg/L)
-- **Field validation** against published groundwater monitoring data (8 substances)
 - **Web dashboard** with 7 interactive panels
 
 ## Architecture
