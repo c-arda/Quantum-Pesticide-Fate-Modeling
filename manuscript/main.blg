@@ -1,48 +1,46 @@
 This is BibTeX, Version 0.99d (TeX Live 2026/dev/Arch Linux)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
-The style file: achemso.bst
-Reallocated singl_function (elt_size=8) to 100 items from 50.
+The style file: unsrtnat.bst
 Database file #1: references.bib
-achemso 2025-09-22 v3.14
 You've used 22 entries,
-            2538 wiz_defined-function locations,
-            888 strings with 11030 characters,
-and the built_in function-call counts, 7327 in all, are:
-= -- 563
-> -- 475
+            2481 wiz_defined-function locations,
+            697 strings with 9089 characters,
+and the built_in function-call counts, 8591 in all, are:
+= -- 694
+> -- 542
 < -- 10
-+ -- 188
++ -- 210
 - -- 166
-* -- 777
-:= -- 1008
-add.period$ -- 41
+* -- 705
+:= -- 1466
+add.period$ -- 83
 call.type$ -- 22
-change.case$ -- 0
-chr.to.int$ -- 0
+change.case$ -- 47
+chr.to.int$ -- 22
 cite$ -- 24
-duplicate$ -- 421
-empty$ -- 462
+duplicate$ -- 390
+empty$ -- 718
 format.name$ -- 190
-if$ -- 1399
-int.to.chr$ -- 0
-int.to.str$ -- 1
-missing$ -- 0
-newline$ -- 160
+if$ -- 1759
+int.to.chr$ -- 1
+int.to.str$ -- 23
+missing$ -- 17
+newline$ -- 135
 num.names$ -- 60
-pop$ -- 47
+pop$ -- 148
 preamble$ -- 1
-purify$ -- 0
+purify$ -- 22
 quote$ -- 0
-skip$ -- 20
+skip$ -- 228
 stack$ -- 0
-substring$ -- 272
-swap$ -- 458
-text.length$ -- 44
+substring$ -- 325
+swap$ -- 41
+text.length$ -- 0
 text.prefix$ -- 0
-top$ -- 1
+top$ -- 0
 type$ -- 154
 warning$ -- 0
 while$ -- 63
 width$ -- 0
-write$ -- 300
+write$ -- 325

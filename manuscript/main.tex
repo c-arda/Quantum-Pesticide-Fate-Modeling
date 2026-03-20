@@ -19,7 +19,7 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{cleveref}
-\usepackage{natbib}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage{setspace}
 \usepackage{float}
 \usepackage{caption}
@@ -105,26 +105,26 @@ chemistry, EU SPIN
 % ══════════════════════════════════════════════════════════════════
 
 Pesticide environmental fate assessment is a cornerstone of EU regulatory
-approval under Regulation (EC)~No~1107/2009~\citep{ec1107_2009}. Two
+approval under Regulation (EC)~No~1107/2009~\cite{ec1107_2009}. Two
 properties dominate the risk evaluation: the soil degradation half-life
 (\degtl{}), governing persistence, and the organic carbon sorption
 coefficient (\koc{}), governing mobility and leaching potential. Together,
-these parameters feed into the FOCUS groundwater models~\citep{focus2006}
+these parameters feed into the FOCUS groundwater models~\cite{focus2006}
 that determine whether a substance can be approved for agricultural use.
 
 Experimental determination of \degtl{} follows OECD Guideline
-307~\citep{oecd307}, requiring months-long incubation studies under
+307~\cite{oecd307}, requiring months-long incubation studies under
 controlled temperature and moisture. \koc{} is measured via batch
-equilibrium adsorption (OECD 106)~\citep{oecd106}. Both are expensive,
+equilibrium adsorption (OECD 106)~\cite{oecd106}. Both are expensive,
 time-consuming, and subject to substantial inter-laboratory variability.
 In silico prediction of these properties from molecular structure alone
 would accelerate the regulatory pipeline and reduce animal testing
 requirements.
 
 Classical machine learning approaches, including Random Forests
-(RF)~\citep{breiman2001} and Gradient Boosting (GB)~\citep{friedman2001},
+(RF)~\cite{breiman2001} and Gradient Boosting (GB)~\cite{friedman2001},
 have been applied to QSAR prediction of physicochemical and environmental
-fate properties~\citep{mansouri2018}. While \koc{} prediction from
+fate properties~\cite{mansouri2018}. While \koc{} prediction from
 structural descriptors achieves reasonable accuracy (\rtwo{}~$> 0.7$),
 \degtl{} remains notoriously difficult to predict because soil degradation
 depends on microbial community composition, soil organic matter, and
@@ -132,15 +132,15 @@ environmental conditions that are not captured by molecular structure alone.
 
 Quantum machine learning (QML) offers a fundamentally different
 computational paradigm. Variational quantum circuits
-(VQCs)~\citep{cerezo2021} encode classical data into quantum states via
+(VQCs)~\cite{cerezo2021} encode classical data into quantum states via
 parameterized gates and can represent functions in exponentially large
-Hilbert spaces~\citep{havlicek2019}. The IQP (Instantaneous Quantum
-Polynomial) encoding scheme~\citep{schuld2019iqp} and data
-re-uploading~\citep{perezslava2020} have been shown to increase the
-expressive power of shallow quantum circuits~\citep{schuld2020}.
+Hilbert spaces~\cite{havlicek2019}. The IQP (Instantaneous Quantum
+Polynomial) encoding scheme~\cite{schuld2019iqp} and data
+re-uploading~\cite{perezslava2020} have been shown to increase the
+expressive power of shallow quantum circuits~\cite{schuld2020}.
 
 This work investigates whether VQCs, implemented via PennyLane on a
-statevector simulator~\citep{pennylane2022}, can extract predictive signal
+statevector simulator~\cite{pennylane2022}, can extract predictive signal
 for pesticide fate properties that classical models miss. Rather than
 claiming quantum advantage, we present a systematic comparative benchmark
 that highlights both the potential and the fundamental limitations of
@@ -158,7 +158,7 @@ near-term QML on small regulatory datasets.
 
 The dataset comprises \nsub{} pesticide active substances registered in
 the EU Substances, Preparations and Indicators Navigator (EU
-SPIN)~\citep{euspin2024}. These span 50 chemical classes including
+SPIN)~\cite{euspin2024}. These span 50 chemical classes including
 organophosphates (7), triazoles (9), neonicotinoids (7), pyrethroids (6),
 strobilurins (6), and sulfonylureas (6), among others. Target properties
 include:
@@ -282,7 +282,7 @@ Both circuits share the same architecture (\cref{fig:circuit}):
         are encoded via $R_Y$ rotations on qubit $j \bmod N_\text{qubits}$.
   \item \textbf{Data re-uploading:} A second angle encoding layer with
         $R_Y(\phi_i)$ rotations, following the universal approximation
-        strategy of P{\'e}rez-Salinas \emph{et al.}~\citep{perezslava2020}.
+        strategy of P{\'e}rez-Salinas \emph{et al.}~\cite{perezslava2020}.
   \item \textbf{Variational layers:} $L$ layers of single-qubit
         $\text{Rot}(\theta, \phi, \omega)$ rotations and alternating
         nearest-neighbor CNOT entangling patterns.
@@ -315,7 +315,7 @@ The per-target design balances expressivity against overfitting risk:
 Separate circuits are trained for \degtl{} and \koc{} prediction.
 Variational parameters are initialized uniformly in $[-0.5, 0.5]$ with
 a fixed random seed (42) for reproducibility. Optimization uses the Adam
-optimizer~\citep{kingma2015} with learning rate 0.04 and 80 training
+optimizer~\cite{kingma2015} with learning rate 0.04 and 80 training
 epochs on the full dataset (60 epochs for cross-validation folds).
 Early stopping with patience~10 is applied: training halts if the
 MSE does not improve for 10 consecutive epochs, mitigating overfitting
@@ -343,13 +343,13 @@ shallow quantum circuits.
 \label{sec:baselines}
 
 Four classical regressors are trained on the identical feature sets
-using scikit-learn~\citep{sklearn2011}:
+using scikit-learn~\cite{sklearn2011}:
 
 \begin{itemize}[nosep]
   \item \textbf{Ridge Regression:} $L_2$-penalized linear model
-        ($\alpha = 1.0$)~\citep{hoerl1970}.
+        ($\alpha = 1.0$)~\cite{hoerl1970}.
   \item \textbf{LASSO:} $L_1$-penalized linear model
-        ($\alpha = 0.1$)~\citep{tibshirani1996}.
+        ($\alpha = 0.1$)~\cite{tibshirani1996}.
   \item \textbf{Random Forest (RF):} 200 trees, max depth 10.
   \item \textbf{Gradient Boosting (GB):} 200 estimators, max depth 4,
         learning rate 0.1.
@@ -405,7 +405,7 @@ information.
 
 To test whether mechanism-of-action (MoA) information improves \degtl{}
 prediction, we derive 6 binary features from AOP-Wiki
-data~\citep{aopwiki2024, villeneuve2014} by mapping each substance's
+data~\cite{aopwiki2024, villeneuve2014} by mapping each substance's
 chemical class to its primary toxicological pathway:
 
 \begin{enumerate}[nosep]
@@ -693,7 +693,7 @@ factors contribute:
 
   \item \textbf{Barren plateaus:} With 8--12 qubits and 6--8
         layers, the VQC may suffer from vanishing gradients in portions of
-        the parameter landscape~\citep{mcclean2018}, making optimization
+        the parameter landscape~\cite{mcclean2018}, making optimization
         unreliable with limited training data for validation.
 
   \item \textbf{The DegT50 problem is inherently hard:} Even with perfect
@@ -772,11 +772,11 @@ related problems with:
   \item Larger datasets ($N > 1000$) where the parameter-to-data ratio
         is favorable
   \item Higher-dimensional feature spaces where quantum feature maps
-        may provide kernel advantages~\citep{havlicek2019}
+        may provide kernel advantages~\cite{havlicek2019}
   \item Quantum chemical descriptors (orbital energies, electron
         correlations) that naturally map to qubit representations.
         For example, the $N_D$ electron correlation descriptor derived
-        from coupled-cluster natural orbital occupations~\citep{arda2026nd}
+        from coupled-cluster natural orbital occupations~\cite{arda2026nd}
         quantifies multireference character across molecular systems and
         could serve as a qubit-native feature encoding, replacing or
         augmenting classical RDKit descriptors with information rooted
@@ -789,7 +789,7 @@ This study contributes to the growing body of critical QML benchmarks that
 distinguish genuine quantum advantage from overstatement. Reporting negative results
 is essential for the field's credibility and helps practitioners avoid
 deploying quantum solutions where classical methods
-suffice~\citep{cerezo2021}.
+suffice~\cite{cerezo2021}.
 
 
 % ══════════════════════════════════════════════════════════════════
@@ -856,7 +856,7 @@ scikit-learn developer communities for their open-source contributions.
 
 
 % ══════════════════════════════════════════════════════════════════
-\section*{Data Availability}
+\section*{Data and Software Availability}
 % ══════════════════════════════════════════════════════════════════
 
 The substance database, quantum circuit implementation, classical baselines,
@@ -874,7 +874,7 @@ The author declares no competing interests.
 % ══════════════════════════════════════════════════════════════════
 % Bibliography
 % ══════════════════════════════════════════════════════════════════
-\bibliographystyle{achemso}
+\bibliographystyle{unsrtnat}
 \bibliography{references}
 
 \end{document}
