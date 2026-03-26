@@ -1,0 +1,958 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% QP-FATE: RSC Digital Discovery Format
+%% Converted from JCIM format
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[twoside,twocolumn,9pt]{article}
+\usepackage{extsizes}
+\usepackage[super,sort&compress,comma]{natbib}
+\usepackage[version=4]{mhchem}
+\usepackage[left=1.5cm, right=1.5cm, top=1.785cm, bottom=2.0cm]{geometry}
+\usepackage{balance}
+\usepackage{mathptmx}
+\usepackage{sectsty}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{lastpage}
+\usepackage[format=plain,justification=justified,singlelinecheck=false,font={stretch=1.125,small,sf},labelfont=bf,labelsep=space]{caption}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{fnpos}
+\usepackage[english]{babel}
+\addto{\captionsenglish}{%
+  \renewcommand{\refname}{Notes and references}
+}
+\usepackage{array}
+\usepackage{droidsans}
+\usepackage{charter}
+\usepackage[T1]{fontenc}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{setspace}
+\usepackage[compact]{titlesec}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{subcaption}
+
+%%% Custom commands from original manuscript
+\newcommand{\degtl}{DegT50}
+\newcommand{\koc}{K\textsubscript{oc}}
+\newcommand{\rtwo}{R\textsuperscript{2}}
+\newcommand{\loocv}{LOO-CV}
+\newcommand{\nqubits}{8/12}  % per-target
+\newcommand{\nlayers}{6/8}    % per-target
+\newcommand{\nparams}{153/301}% per-target
+\newcommand{\nsub}{110}
+\newcommand{\nfeat}{21}
+\newcommand{\pending}[1]{\textcolor{red!70!black}{\textbf{[PENDING: #1]}}}
+
+\definecolor{cream}{RGB}{222,217,201}
+
+\begin{document}
+
+\pagestyle{fancy}
+\thispagestyle{plain}
+\fancypagestyle{plain}{
+%%%HEADER%%%
+\renewcommand{\headrulewidth}{0pt}
+}
+%%%END OF HEADER%%%
+
+%%%PAGE SETUP%%%
+\makeFNbottom
+\makeatletter
+\renewcommand\LARGE{\@setfontsize\LARGE{15pt}{17}}
+\renewcommand\Large{\@setfontsize\Large{12pt}{14}}
+\renewcommand\large{\@setfontsize\large{10pt}{12}}
+\renewcommand\footnotesize{\@setfontsize\footnotesize{7pt}{10}}
+\makeatother
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand\footnoterule{\vspace*{1pt}%
+\color{cream}\hrule width 3.5in height 0.4pt \color{black}\vspace*{5pt}}
+\setcounter{secnumdepth}{5}
+
+\makeatletter
+\renewcommand\@biblabel[1]{#1}
+\renewcommand\@makefntext[1]%
+{\noindent\makebox[0pt][r]{\@thefnmark\,}#1}
+\makeatother
+\renewcommand{\figurename}{\small{Fig.}~}
+\sectionfont{\sffamily\Large}
+\subsectionfont{\normalsize}
+\subsubsectionfont{\bf}
+\setstretch{1.125}
+\setlength{\skip\footins}{0.8cm}
+\setlength{\footnotesep}{0.25cm}
+\setlength{\jot}{10pt}
+\titlespacing*{\section}{0pt}{4pt}{4pt}
+\titlespacing*{\subsection}{0pt}{15pt}{1pt}
+%%%END OF PAGE SETUP%%%
+
+%%%FOOTER%%%
+\fancyfoot{}
+\fancyfoot[LO,RE]{\vspace{-7.1pt}\includegraphics[height=9pt]{head_foot/LF}}
+\fancyfoot[CO]{\vspace{-7.1pt}\hspace{13.2cm}\includegraphics{head_foot/RF}}
+\fancyfoot[CE]{\vspace{-7.2pt}\hspace{-14.2cm}\includegraphics{head_foot/RF}}
+\fancyfoot[RO]{\footnotesize{\sffamily{1--\pageref{LastPage} ~\textbar  \hspace{2pt}\thepage}}}
+\fancyfoot[LE]{\footnotesize{\sffamily{\thepage~\textbar\hspace{3.45cm} 1--\pageref{LastPage}}}}
+\fancyhead{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\arrayrulewidth}{1pt}
+\setlength{\columnsep}{6.5mm}
+\setlength\bibsep{1pt}
+%%%END OF FOOTER%%%
+
+%%%FIGURE SETUP%%%
+\makeatletter
+\newlength{\figrulesep}
+\setlength{\figrulesep}{0.5\textfloatsep}
+
+\newcommand{\topfigrule}{\vspace*{-1pt}%
+\noindent{\color{cream}\rule[-\figrulesep]{\columnwidth}{1.5pt}} }
+
+\newcommand{\botfigrule}{\vspace*{-2pt}%
+\noindent{\color{cream}\rule[\figrulesep]{\columnwidth}{1.5pt}} }
+
+\newcommand{\dblfigrule}{\vspace*{-1pt}%
+\noindent{\color{cream}\rule[-\figrulesep]{\textwidth}{1.5pt}} }
+
+\makeatother
+%%%END OF FIGURE SETUP%%%
+
+%%%TITLE, AUTHORS AND ABSTRACT%%%
+\twocolumn[
+  \begin{@twocolumnfalse}
+{\includegraphics[height=30pt]{head_foot/journal_name}\hfill\raisebox{0pt}[0pt][0pt]{\includegraphics[height=55pt]{head_foot/RSC_LOGO_CMYK}}\\[1ex]
+\includegraphics[width=18.5cm]{head_foot/header_bar}}\par
+\vspace{1em}
+\sffamily
+\begin{tabular}{m{4.5cm} p{13.5cm} }
+
+\includegraphics{head_foot/DOI} & \noindent\LARGE{\textbf{Variational Quantum Circuits for Pesticide Environmental Fate Prediction: A Comparative Study with Classical Machine Learning on the EU SPIN Database}} \\%
+\vspace{0.3cm} & \vspace{0.3cm} \\
+
+ & \noindent\large{Celal Arda\textit{$^{a}$}} \\
+
+\includegraphics{head_foot/dates} & \noindent\normalsize{Predicting pesticide environmental fate properties---specifically soil degradation half-life (\degtl{}) and organic carbon sorption coefficient (\koc{})---is essential for regulatory risk assessment under EC~1107/2009. Classical QSAR models achieve moderate predictive power for \koc{} but struggle with \degtl{} due to its dependence on complex soil microbial processes. This work investigates whether variational quantum circuits (VQCs) can capture non-linear molecular descriptor relationships that elude classical regressors. We encode 21 physicochemical descriptors for 110 EU-registered pesticides into per-target quantum circuits: an 8-qubit circuit for \degtl{} (17 core features) and a 12-qubit circuit for \koc{} (all 21 features), each with IQP-style encoding and data re-uploading. Leave-one-out cross-validation benchmarks reveal that Random Forest (RF) achieves \rtwo{}~=~0.287 for \degtl{} and 0.759 for \koc{}, while Gradient Boosting (GB) reaches 0.283 and 0.752, respectively. An MLP neural network achieves only 0.075 and 0.497. The VQC alone underperforms all classical baselines (\rtwo{}~$= -0.028$ for \degtl{}, 5-fold CV). A hybrid stacking framework with nested LOO-CV for leakage-free $\alpha$ optimization yields $\alpha = 0.20 \pm 0.02$, but the resulting hybrid \rtwo{} (0.288 for \degtl{}) improves over standalone RF by only +0.001---a negligible and statistically insignificant margin. These results demonstrate that near-term VQCs on small regulatory datasets ($N \approx 110$) cannot outperform properly feature-engineered classical models, and caution against premature claims of quantum advantage in chemistry applications with limited training data.  \vspace{6pt} \noindent\textbf{Keywords:} quantum machine learning, variational quantum circuits, pesticide fate, DegT50, Koc, QSAR, negative result, regulatory chemistry, EU SPIN} \\
+
+\end{tabular}
+
+ \end{@twocolumnfalse} \vspace{0.6cm}
+
+  ]
+%%%END OF TITLE, AUTHORS AND ABSTRACT%%%
+
+%%%FONT SETUP%%%
+\renewcommand*\rmdefault{bch}\normalfont\upshape
+\rmfamily
+\section*{}
+\vspace{-1cm}
+
+%%%FOOTNOTES%%%
+\footnotetext{\textit{$^{a}$~Independent Researcher, Weinheim, Germany. E-mail: celal.arda@outlook.de}}
+%%%END OF FOOTNOTES%%%
+
+%%%MAIN TEXT%%%
+
+
+
+
+
+
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:intro}
+% ══════════════════════════════════════════════════════════════════
+
+Pesticide environmental fate assessment is a cornerstone of EU regulatory
+approval under Regulation (EC)~No~1107/2009~\cite{ec1107_2009}. Two
+properties dominate the risk evaluation: the soil degradation half-life
+(\degtl{}), governing persistence, and the organic carbon sorption
+coefficient (\koc{}), governing mobility and leaching potential. Together,
+these parameters feed into the FOCUS groundwater models~\cite{focus2006}
+that determine whether a substance can be approved for agricultural use.
+
+Experimental determination of \degtl{} follows OECD Guideline
+307~\cite{oecd307}, requiring months-long incubation studies under
+controlled temperature and moisture. \koc{} is measured via batch
+equilibrium adsorption (OECD 106)~\cite{oecd106}. Both are expensive,
+time-consuming, and subject to substantial inter-laboratory variability.
+In silico prediction of these properties from molecular structure alone
+would accelerate the regulatory pipeline and reduce animal testing
+requirements.
+
+Classical machine learning approaches, including Random Forests
+(RF)~\cite{breiman2001} and Gradient Boosting (GB)~\cite{friedman2001},
+have been applied to QSAR prediction of physicochemical and environmental
+fate properties~\cite{mansouri2018}. While \koc{} prediction from
+structural descriptors achieves reasonable accuracy (\rtwo{}~$> 0.7$),
+\degtl{} remains notoriously difficult to predict because soil degradation
+depends on microbial community composition, soil organic matter, and
+environmental conditions that are not captured by molecular structure alone.
+
+Quantum machine learning (QML) offers a fundamentally different
+computational paradigm. Variational quantum circuits
+(VQCs)~\cite{cerezo2021} encode classical data into quantum states via
+parameterized gates and can represent functions in exponentially large
+Hilbert spaces~\cite{havlicek2019}. The IQP (Instantaneous Quantum
+Polynomial) encoding scheme~\cite{schuld2019iqp} and data
+re-uploading~\cite{perezslava2020} have been shown to increase the
+expressive power of shallow quantum circuits~\cite{schuld2020}.
+
+This work investigates whether VQCs, implemented via PennyLane on a
+statevector simulator~\cite{pennylane2022}, can extract predictive signal
+for pesticide fate properties that classical models miss. Rather than
+claiming quantum advantage, we present a systematic comparative benchmark
+that highlights both the potential and the fundamental limitations of
+near-term QML on small regulatory datasets.
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Materials and Methods}
+\label{sec:methods}
+% ══════════════════════════════════════════════════════════════════
+
+% ── 2.1 Dataset ───────────────────────────────────────────────────
+\subsection{Dataset}
+\label{sec:dataset}
+
+The dataset comprises \nsub{} pesticide active substances registered in
+the EU Substances, Preparations and Indicators Navigator (EU
+SPIN)~\cite{euspin2024}. These span 50 chemical classes including
+organophosphates (7), triazoles (9), neonicotinoids (7), pyrethroids (6),
+strobilurins (6), and sulfonylureas (6), among others. Target properties
+include:
+
+\begin{itemize}[nosep]
+  \item \degtl{} (soil): laboratory degradation half-life in days,
+        range \SIrange{0.5}{1389}{\day} (median \SI{24}{\day},
+        mean \SI{75.7}{\day})
+  \item \koc{}: organic carbon sorption coefficient,
+        range \SIrange{25}{1000000}{\milli\litre\per\gram}
+        (median \SI{508}{\milli\litre\per\gram})
+\end{itemize}
+
+Both targets are log\textsubscript{10}-transformed prior to modeling to
+reduce skewness and align with chemical convention. The target distributions
+are shown in \ref{fig:dataset}.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig1_dataset_overview.pdf}
+  \caption{Distribution of (a)~soil degradation half-life (\degtl{}) and
+           (b)~organic carbon sorption coefficient (\koc{}) for the
+           \nsub{} EU SPIN pesticides, shown on log\textsubscript{10}
+           scale. Red dashed lines indicate medians.}
+  \label{fig:dataset}
+\end{figure*}
+
+
+% ── 2.2 Feature Engineering ──────────────────────────────────────
+\subsection{Molecular Descriptor Features}
+\label{sec:features}
+
+We compute \nfeat{} molecular descriptor features for each substance,
+organized in four phases of development:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Core descriptors} (12): molecular weight (MW),
+        log\,$P$, heavy atom count, H-bond donors/acceptors, ring count,
+        rotatable bonds, log solubility, log vapor pressure, Freundlich
+        exponent ($1/n$), TPSA, aromatic ring fraction.
+
+        \textbf{Note:} The Freundlich exponent ($1/n$) is an empirical
+        parameter from soil batch equilibrium studies, not a purely
+        in-silico molecular descriptor. It is included as a known input
+        from regulatory dossiers; predictions for novel substances would
+        require it to be available or excluded.
+  \item \textbf{Microbial degradation proxies} (3): count of hydrolyzable
+        bonds, halogen count, bioaccessibility score. The bioaccessibility
+        score is defined as
+        $B = \log_{10}(S_\text{water} / K_\text{oc})$,
+        where $S_\text{water}$ is the aqueous solubility (mg\,L$^{-1}$) and
+        $K_\text{oc}$ the measured sorption coefficient.
+
+        \textbf{Circularity note:} Because $B$ includes the measured
+        $K_\text{oc}$, using it as a feature when \emph{predicting}
+        $K_\text{oc}$ introduces partial data leakage. For \degtl{}
+        prediction this is unproblematic (the target is unrelated to
+        $K_\text{oc}$), but for \koc{} prediction we report all results
+        both with the full feature set and with reduced sets that
+        exclude $B$ (\ref{tab:baselines}).
+  \item \textbf{Blind-spot corrections} (2): charge state at soil pH~6.5,
+        conjugated $\pi$-system size.
+  \item \textbf{DegT50-targeted descriptors} (4): heteroatom ratio
+        (N/O/S/P density as a proxy for microbial attackability),
+        sp\textsuperscript{3} fraction (molecular shape and flexibility),
+        Henry-to-solubility ratio (volatilization pathway proxy), and
+        oxidation susceptibility (count of cytochrome P450 metabolic
+        lability sites: tertiary C--H, benzylic, allylic, thioether, and
+        secondary amine substructures). These four features were added
+        based on residual error analysis of the worst-predicted
+        substances.
+
+        \textbf{Feature selection caveat:} Because these descriptors
+        were selected after inspecting model errors on the full dataset,
+        there is a risk of positive bias in cross-validation scores for
+        models using all~21 features. The classical baselines reported
+        in \ref{tab:baselines} should therefore be interpreted as
+        optimistic upper bounds. This does not affect the QML comparison,
+        as the VQC \degtl{} circuit uses only 17 features
+        (excluding these four descriptors).
+\end{enumerate}
+
+All features are min--max scaled to $[0, \pi]$ based on dataset statistics,
+as required for angle encoding in the quantum circuit. Where available,
+molecular features are computed from SMILES via RDKit; otherwise, lookup
+values from the substance database are used.
+
+The Random Forest feature importances (\ref{fig:importance}) reveal that
+\degtl{} prediction relies on a distributed set of features, led by
+heteroatom ratio (14.1\%), Freundlich $1/n$ (11.7\%), and aromatic ring
+fraction (11.4\%), with three of the four DegT50-targeted descriptors
+ranking in the top five. \koc{} is
+dominated by bioaccessibility (52.3\%) and log\,$P$ (19.7\%).
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig2_feature_importance.pdf}
+  \caption{Random Forest feature importances for (a)~\degtl{} and (b)~\koc{}
+           prediction, trained on the full \nsub{}-substance dataset.
+           \degtl{} shows distributed importance across many features,
+           while \koc{} is dominated by bioaccessibility and log\,$P$.}
+  \label{fig:importance}
+\end{figure*}
+
+
+% ── 2.3 Quantum Circuit ─────────────────────────────────────────
+\subsection{Variational Quantum Circuit Architecture}
+\label{sec:circuit}
+
+We employ per-target circuits optimized for each prediction task:
+an 8-qubit, 6-layer circuit for \degtl{} (using the 17-feature core set)
+and a 12-qubit, 8-layer circuit for \koc{} (using all 21 features).
+Both circuits share the same architecture (\ref{fig:circuit}):
+
+\begin{enumerate}[nosep]
+  \item \textbf{IQP-style feature encoding:} Hadamard gates followed by
+        $R_Z(\phi_i)$ rotations on each qubit, then CNOT-$R_Z$-CNOT
+        entangling gates encoding pairwise feature products
+        $\phi_i \cdot \phi_j$.
+  \item \textbf{Feature overflow encoding:} Features $j > N_\text{qubits}$
+        are encoded via $R_Y$ rotations on qubit $j \bmod N_\text{qubits}$.
+  \item \textbf{Data re-uploading:} A second angle encoding layer with
+        $R_Y(\phi_i)$ rotations, following the universal approximation
+        strategy of P{\'e}rez-Salinas \emph{et al.}~\cite{perezslava2020}.
+  \item \textbf{Variational layers:} $L$ layers of single-qubit
+        $\text{Rot}(\theta, \phi, \omega)$ rotations and alternating
+        nearest-neighbor CNOT entangling patterns.
+  \item \textbf{Readout:} Expectation values $\langle Z_i \rangle$ on all
+        qubits, followed by a linear regression layer with bias
+        ($N_\text{qubits} + 1$ parameters).
+\end{enumerate}
+
+For the \degtl{} circuit (8q/6L): $6 \times 8 \times 3 = 144$ variational
+plus 9 readout = 153 parameters ($N_\text{params}/N_\text{data} = 1.39$).
+For the \koc{} circuit (12q/8L): $8 \times 12 \times 3 = 288$ variational
+plus 13 readout = 301 parameters ($N_\text{params}/N_\text{data} = 2.74$).
+The per-target design balances expressivity against overfitting risk:
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig4_circuit_schematic.pdf}
+  \caption{Schematic of the variational quantum circuit architecture.
+           Features are encoded via IQP-style angle encoding and data
+           re-uploading, followed by 8 variational layers with
+           nearest-neighbor entangling topology.}
+  \label{fig:circuit}
+\end{figure*}
+
+
+% ── 2.4 Training ────────────────────────────────────────────────
+\subsection{Training Procedure}
+\label{sec:training}
+
+Separate circuits are trained for \degtl{} and \koc{} prediction.
+Variational parameters are initialized uniformly in $[-0.5, 0.5]$ with
+a fixed random seed (42) for reproducibility. Optimization uses the Adam
+optimizer~\cite{kingma2015} with learning rate 0.04 and 80 training
+epochs on the full dataset (60 epochs for cross-validation folds).
+Early stopping with patience~10 is applied: training halts if the
+MSE does not improve for 10 consecutive epochs, mitigating overfitting
+on the smaller \degtl{} circuit.
+Gradients are computed via the parameter-shift rule on the PennyLane
+\texttt{default.qubit} statevector simulator.
+
+Critically, the \degtl{} QML circuit receives only the 17 core features
+(indices 0--16), while the \koc{} circuit receives all 21 features.
+This per-model feature selection was motivated by empirical observation
+that the four additional descriptors degrade QML performance
+when compressed into limited qubit capacity (8 qubits). Although
+these features were designed to target DegT50 prediction, including them
+forces 21 features into 8 qubits, increasing the information compression
+ratio and worsening overfitting. The classical RF, with its implicit
+regularization via bagging and feature subsampling, handles the additional
+features without penalty. This asymmetry is a limitation: the VQC's
+inability to exploit DegT50-targeted features highlights the fundamental
+scaling challenge of encoding high-dimensional classical data into
+shallow quantum circuits.
+
+
+% ── 2.5 Classical Baselines ──────────────────────────────────────
+\subsection{Classical Baselines}
+\label{sec:baselines}
+
+Four classical regressors are trained on the identical feature sets
+using scikit-learn~\cite{sklearn2011}:
+
+\begin{itemize}[nosep]
+  \item \textbf{Ridge Regression:} $L_2$-penalized linear model
+        ($\alpha = 1.0$)~\cite{hoerl1970}.
+  \item \textbf{LASSO:} $L_1$-penalized linear model
+        ($\alpha = 0.1$)~\cite{tibshirani1996}.
+  \item \textbf{Random Forest (RF):} 200 trees, max depth 10.
+  \item \textbf{Gradient Boosting (GB):} 200 estimators, max depth 4,
+        learning rate 0.1.
+  \item \textbf{MLP Neural Network:} Two hidden layers (64, 32 neurons),
+        ReLU activation, Adam optimizer, early stopping with 15\%
+        validation split, $L_2$ regularization ($\alpha = 0.01$).
+        Features are standardized per fold.
+\end{itemize}
+
+All models use the same random seed (42) for reproducibility.
+
+
+% ── 2.6 Cross-Validation ────────────────────────────────────────
+\subsection{Cross-Validation Strategy}
+\label{sec:cv}
+
+Leave-one-out cross-validation (\loocv{}) is the primary evaluation metric,
+as it maximizes training data usage for the small \nsub{}-substance dataset.
+Each fold trains the model on $N-1$ substances and predicts the held-out
+substance. 5-fold CV with stratified random splits is used as a faster
+supplementary benchmark.
+
+For the VQC, \loocv{} would require \nsub{} $\times$ 2 (two properties)
+full training runs, each with 60 epochs of gradient optimization over
+153--301 parameters---prohibitively expensive for a statevector simulator.
+Therefore, 5-fold~CV is used for VQC evaluation. Fold-level checkpointing
+saves results after each fold to a JSON file, enabling crash-resilient
+resumption.
+
+
+% ── 2.7 Hybrid Stacking ─────────────────────────────────────────
+\subsection{Hybrid QML+RF Stacking}
+\label{sec:hybrid}
+
+To explore whether QML and RF capture complementary signal, we implement
+a learned stacking predictor:
+\begin{equation}
+  \hat{y}_\text{hybrid} = \alpha \cdot \hat{y}_\text{QML} +
+                           (1 - \alpha) \cdot \hat{y}_\text{RF}
+\end{equation}
+where $\alpha \in [0, 1]$ is optimized via nested cross-validation:
+for each held-out substance, $\alpha$ is selected by grid search
+(step 0.05) on the remaining $N-1$ samples to minimize the inner
+\loocv{} mean squared error. This prevents leakage of test information
+into the stacking weight. If $\alpha = 0$, the QML
+component adds no value; if $\alpha > 0$, the VQC captures complementary
+information.
+
+
+% ── 2.8 AOP-Informed Features ───────────────────────────────────
+\subsection{Adverse Outcome Pathway Features}
+\label{sec:aop}
+
+To test whether mechanism-of-action (MoA) information improves \degtl{}
+prediction, we derive 6 binary features from AOP-Wiki
+data~\cite{aopwiki2024, villeneuve2014} by mapping each substance's
+chemical class to its primary toxicological pathway:
+
+\begin{enumerate}[nosep]
+  \item AChE inhibition (organophosphates, carbamates; 15 substances)
+  \item GABA/ion channel disruption (pyrethroids; 11 substances)
+  \item Mitochondrial respiration (SDHI, strobilurins; 12 substances)
+  \item Nicotinic AChR agonism (neonicotinoids; 10 substances)
+  \item Endocrine disruption (triazines; 13 substances)
+  \item Cell division inhibition (benzimidazoles; 6 substances)
+\end{enumerate}
+
+Coverage: 67/\nsub{} substances (60.9\%) are assigned to at least one
+pathway category (\ref{fig:aop}).
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Results}
+\label{sec:results}
+% ══════════════════════════════════════════════════════════════════
+
+% ── 3.1 Classical Baselines ──────────────────────────────────────
+\subsection{Classical Baseline Performance}
+\label{sec:results_classical}
+
+\ref{tab:baselines} summarizes the cross-validation performance of the
+classical baselines.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Baseline performance (leave-one-out and 5-fold CV).
+           All metrics computed on log\textsubscript{10}-scaled targets.
+           \koc{} results are shown both with the full 21-feature set
+           (including bioaccessibility $B$) and the fair 20-feature set
+           (excluding $B$; see circularity note in \ref{sec:features}).}
+  \label{tab:baselines}
+  \small
+  \begin{tabular}{lllc}
+    \toprule
+    \textbf{Model} & \textbf{Property} & \textbf{CV} &
+      \textbf{\rtwo{}} \\
+    \midrule
+    \multirow{4}{*}{Ridge}
+      & \degtl{}         & LOO    & 0.124   \\
+      & \degtl{}         & 5-fold & 0.183   \\
+      & \koc{} (21f)     & LOO    & 0.825$^\dagger$ \\
+      & \koc{} (20f)     & LOO    & 0.532   \\
+    \midrule
+    \multirow{4}{*}{LASSO}
+      & \degtl{}         & LOO    & 0.090   \\
+      & \degtl{}         & 5-fold & 0.029   \\
+      & \koc{} (21f)     & LOO    & 0.746$^\dagger$ \\
+      & \koc{} (20f)     & LOO    & 0.512   \\
+    \midrule
+    \multirow{4}{*}{Random Forest}
+      & \degtl{}         & LOO    & \textbf{0.287}   \\
+      & \degtl{}         & 5-fold & 0.275   \\
+      & \koc{} (21f)     & LOO    & \textbf{0.759}   \\
+      & \koc{} (20f)     & LOO    & 0.712   \\
+    \midrule
+    \multirow{4}{*}{Gradient Boosting}
+      & \degtl{}         & LOO    & 0.283   \\
+      & \degtl{}         & 5-fold & 0.290   \\
+      & \koc{} (21f)     & LOO    & 0.752   \\
+      & \koc{} (20f)     & LOO    & 0.750   \\
+    \midrule
+    \multirow{2}{*}{MLP}
+      & \degtl{}         & LOO    & 0.075   \\
+      & \koc{} (21f)     & LOO    & 0.497   \\
+    \midrule
+    \multirow{2}{*}{VQC (per-target)}
+      & \degtl{} (8q)    & 5-fold & $-$0.028 \\
+      & \koc{} (12q)     & 5-fold & 0.269   \\
+    \midrule
+    \multirow{2}{*}{Hybrid (nested CV)}
+      & \degtl{}         & nested LOO & 0.288   \\
+      & \koc{}           & nested LOO & 0.750   \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{4pt}
+  {\footnotesize $^\dagger$Inflated by bioaccessibility circularity:
+  $B = \log_{10}(S/K_\text{oc})$ uses measured \koc{} as input.
+  The 20-feature (20f) rows exclude $B$ and represent the fair comparison.
+  21f = all 21 features including $B$.}
+\end{table}
+
+Key observations:
+\begin{itemize}[nosep]
+  \item \textbf{Bioaccessibility inflates linear \koc{} models:} Ridge
+        \rtwo{} drops from 0.825 to 0.532 ($\Delta = -0.29$) when the
+        circular bioaccessibility feature is removed, because $B$ is
+        a near-linear transform of the target. Ensemble models are far
+        more robust: GB loses only 0.002 in \loocv{} \rtwo{} (0.752
+        $\rightarrow$ 0.750), because tree-based methods can derive the
+        same information from log\,$P$ and solubility independently.
+  \item \textbf{RF leads DegT50, GB competitive:} RF achieves the highest
+        \loocv{} \rtwo{} for \degtl{} (0.287), with GB close behind
+        (0.283). For \koc{} (21 features), RF leads (0.759) followed
+        by GB (0.752). Linear models substantially trail.
+  \item \textbf{MLP underperforms:} The neural network (0.075 DegT50,
+        0.497 Koc) performs worst among all models except VQC, confirming
+        that high-capacity models struggle with $N = 110$ samples.
+  \item \degtl{} prediction is poor across all models (\rtwo{}~$< 0.30$),
+        suggesting a fundamental ceiling for structure-only prediction.
+\end{itemize}
+
+Wilcoxon signed-rank tests on per-substance LOO squared residuals
+confirm that none of the pairwise model differences are
+statistically significant at $\alpha = 0.05$.
+
+The predicted-vs-experimental plots for RF \loocv{} (\ref{fig:predexp})
+visually confirm the high scatter for \degtl{} and the tight correlation
+for \koc{}.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig3_pred_vs_exp.pdf}
+  \caption{Predicted vs.\ experimental values for RF leave-one-out
+           cross-validation: (a)~\degtl{} and (b)~\koc{} on
+           log\textsubscript{10} scale. Dashed line = perfect prediction.}
+  \label{fig:predexp}
+\end{figure*}
+
+
+% ── 3.2 QML Performance ─────────────────────────────────────────
+\subsection{Variational Quantum Circuit Performance}
+\label{sec:results_qml}
+
+\ref{fig:comparison} compares cross-validation performance across all
+evaluated models.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig5_model_comparison.pdf}
+  \caption{Model comparison (leave-one-out CV \rtwo{}) using all 21
+           features for both targets: (a)~\degtl{} and (b)~\koc{}.
+           Classical models (Ridge, LASSO, RF, GB, MLP) are evaluated
+           via LOO-CV; VQC uses 5-fold CV due to computational cost.
+           The hybrid model uses nested LOO-CV for leakage-free
+           $\alpha$ optimization.
+           $^\dagger$\koc{} scores include the circular bioaccessibility
+           feature~$B$; see \ref{tab:baselines} for the fair
+           20-feature comparison.}
+  \label{fig:comparison}
+\end{figure*}
+
+The per-target VQC achieves \rtwo{}~$= -0.028$ for \degtl{} (5-fold CV,
+8-qubit circuit with 17 features), a substantial improvement over the
+initial 12-qubit single-circuit baseline (\rtwo{}~$= -0.141$). The
+near-zero \rtwo{} indicates that circuit rightsizing reduced the parameter
+count but failed to eliminate overfitting---the remaining bottleneck is the
+target property itself, not the circuit architecture.
+For \koc{}, the 12-qubit VQC achieves \rtwo{}~$= 0.269$ (5-fold CV, 21
+features), below the GB baseline of 0.752.
+
+The \degtl{} per-target circuit has a substantially improved
+parameter-to-data ratio:
+\begin{equation}
+  \frac{N_\text{params}}{N_\text{data}} = \frac{153}{110} = 1.39
+  \quad\text{(vs.\ 2.74 for the original 12-qubit circuit)}
+\end{equation}
+
+The MLP neural network (64-32 hidden layers, standardized features)
+achieves \rtwo{}~$= 0.075$ for \degtl{} and $0.497$ for \koc{}
+(\loocv{}), performing worse than both tree-based models, confirming
+that the small dataset size limits all high-capacity models.
+
+\ref{fig:training_curves} provides direct empirical evidence: training
+loss decreases steadily while validation loss plateaus or increases,
+confirming that the circuit learns noise rather than signal.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig7_training_curves.pdf}
+  \caption{VQC training curves (80/20 train-validation split, 80~epochs):
+           (a)~\degtl{} and (b)~\koc{}. Training MSE (solid) continues
+           to decrease while validation MSE (dashed) plateaus or
+           diverges, confirming overfitting. The vertical dotted line
+           marks the epoch of minimum validation loss.}
+  \label{fig:training_curves}
+\end{figure*}
+
+
+% ── 3.3 Hybrid Stacking ─────────────────────────────────────────
+\subsection{Hybrid Stacking Results}
+\label{sec:results_hybrid}
+
+To avoid data leakage in $\alpha$ optimization, we employ nested
+leave-one-out cross-validation: for each held-out substance~$i$,
+$\alpha$ is optimized on the remaining $N-1$ substances by grid search
+(step 0.05), and substance~$i$ is predicted with that fold-specific
+$\alpha$. This prevents the stacking weight from ``seeing'' the
+held-out target.
+
+The nested procedure yields $\alpha_\text{deg} = 0.20 \pm 0.02$ (101/110
+folds select $\alpha = 0.20$; 7 select 0.15; 1 selects 0.10; 1 selects
+0.25), confirming that the optimal weight is stable and not an artifact
+of overfitting. For \koc{}, $\alpha = 0.00$ in 109/110 folds, confirming
+that the VQC contributes nothing beyond RF for \koc{}.
+
+The honest hybrid \rtwo{} for \degtl{} is 0.288---an improvement of
+just +0.001 over standalone RF (0.287). This margin is negligible and
+not statistically significant. For \koc{}, the hybrid (0.750) slightly
+\emph{degrades} RF performance (0.759), as the single fold with
+$\alpha > 0$ introduces noise.
+
+\textbf{Comparison with na\"ive $\alpha$ optimization:} Without nested
+CV (i.e., optimizing $\alpha$ on the same predictions used for
+evaluation), the hybrid achieves \rtwo{}~$= 0.305$ for \degtl{}---a
+spuriously inflated result due to data leakage in the stacking weight.
+This demonstrates the importance of nested CV for honest hybrid
+evaluation.
+
+\textbf{Circularity caveat:} Because the VQC was trained on all
+\nfeat{} features (including bioaccessibility~$B$), the \koc{}
+evaluation inherits the circular contribution of~$B$. A strictly
+circularity-free comparison would require retraining the VQC
+without~$B$, which was not performed.
+
+
+% ── 3.4 AOP Features ────────────────────────────────────────────
+\subsection{AOP-Informed Features}
+\label{sec:results_aop}
+
+Adding 6 binary MoA pathway features to the \nfeat{} molecular descriptors
+yields no improvement in RF \loocv{} performance (\ref{tab:aop}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Effect of AOP-derived MoA features on RF \loocv{} performance.}
+  \label{tab:aop}
+  \small
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Feature Set} & \textbf{$N_\text{features}$} &
+      \textbf{\degtl{} \rtwo{}} & \textbf{\koc{} \rtwo{}} \\
+    \midrule
+    Molecular descriptors only     & 21 & 0.287 & 0.759 \\
+    + AOP MoA pathways             & 27 & 0.283 & 0.758 \\
+    \midrule
+    $\Delta$\rtwo{}                & +6 & $-0.004$ & $-0.001$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+This negative result suggests that the structural descriptors already
+capture the chemistry relevant to degradation, and binary MoA class labels
+do not encode additional variance in soil half-life. We note that the
+remaining 40\% of substances receive all-zero AOP vectors, adding noise
+without signal; however, restricting the analysis to the 67 covered
+substances yields comparable \rtwo{} values, confirming that the null
+result is not a statistical artifact of sparse coverage.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{fig6_aop_coverage.pdf}
+  \caption{AOP-Wiki-derived mechanism-of-action pathway coverage across
+           the \nsub{} pesticide dataset. 67 substances (60.9\%) map to
+           at least one of 6 pathway categories.}
+  \label{fig:aop}
+\end{figure*}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Discussion}
+\label{sec:discussion}
+% ══════════════════════════════════════════════════════════════════
+
+\subsection{Why Does QML Fail on DegT50?}
+
+The negative \rtwo{} of the VQC for \degtl{} prediction is not a failure
+of quantum computing per se, but rather a predictable consequence of
+applying a 153--301-parameter model to \nsub{} data points. Several
+factors contribute:
+
+\begin{enumerate}
+  \item \textbf{Overfitting:} Despite the improved
+        $N_\text{params}/N_\text{data}$ ratio of 1.39 for the 8-qubit
+        \degtl{} circuit (vs.\ 2.74 for the original 12-qubit circuit),
+        the VQC still produces negative \rtwo{}. Even near-unity ratios
+        appear insufficient for generalization with $N = 110$ samples.
+        Classical models with far fewer effective parameters (RF uses
+        bagging and feature subsampling as implicit regularization) are
+        more robust.
+
+  \item \textbf{Barren plateaus:} With 8--12 qubits and 6--8
+        layers, the VQC may suffer from vanishing gradients in portions of
+        the parameter landscape~\cite{mcclean2018}, making optimization
+        unreliable with limited training data for validation.
+
+  \item \textbf{The DegT50 problem is inherently hard:} Even with perfect
+        structural descriptors, soil half-life depends on microbial
+        community composition, temperature, moisture, organic matter
+        content, and pH---none of which are encoded in molecular structure.
+        An \rtwo{} ceiling near 0.2--0.3 may be fundamental for
+        structure-only models.
+
+  \item \textbf{Linear readout bottleneck:} The VQC readout layer is a
+        linear combination of $\langle Z_i \rangle$ expectation values.
+        Any function the circuit can express must therefore lie in the
+        span of these $N_\text{qubits}$ observables. Given that Ridge
+        regression---itself a linear model---already achieves \rtwo{}~=~0.825
+        for \koc{} with the 21-feature set (inflated by bioaccessibility
+        circularity; the fair 20-feature \rtwo{} is 0.532),
+        it is unclear whether the quantum feature map provides
+        additional expressive power beyond what a linear model over the
+        raw descriptors captures.
+\end{enumerate}
+
+To disentangle these hypotheses, we conducted a systematic architecture
+search testing four circuit variants via 5-fold CV on \degtl{} only
+(\ref{tab:arch}): (A)~a shallow-wide circuit (12~qubits, 3~layers,
+all-to-all CZ entanglement, double data re-uploading); (B)~a deep-narrow
+circuit (8~qubits, 12~layers, ring CNOT, triple re-uploading);
+(C)~a hardware-efficient template using PennyLane's
+\texttt{StronglyEntanglingLayers}; and (D)~the baseline architecture with
+a reduced learning rate (0.03) and extended training (120~epochs).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Architecture experiment: DegT50 prediction (5-fold CV) across
+           four circuit variants. These experiments used the initial single
+           12-qubit circuit (\rtwo{}~$= -0.141$); the per-target 8-qubit
+           circuit (\rtwo{}~$= -0.028$) was developed subsequently based on
+           these findings.}
+  \label{tab:arch}
+  \small
+  \begin{tabular}{llcccccc}
+    \toprule
+    \textbf{Variant} & \textbf{Architecture} & \textbf{$N_q$} &
+      \textbf{$L$} & \textbf{Epochs} &
+      \textbf{Train MSE} & \textbf{\rtwo{}} & \textbf{Time} \\
+    \midrule
+    A & All-to-all CZ, 2$\times$ re-upload  & 12 & 3  & 80  & 0.183 & $-$0.157 & 2.1\,h \\
+    B & Ring CNOT, 3$\times$ re-upload       &  8 & 12 & 100 & 0.003 & $-$0.190 & 3.3\,h \\
+    C & \texttt{StronglyEntanglingLayers}    & 12 & 5  & 60  & 0.165 & $-$0.146 & 1.3\,h \\
+    D & Baseline+, lr$=$0.03                 & 12 & 8  & 120 & 0.009 & $-$0.205 & 4.1\,h \\
+    \midrule
+    \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.04)}} & 12 & 8 & 60
+      & --- & $-$0.141 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+No variant improves upon the baseline. Remarkably, the two variants that
+achieve near-zero training MSE---variant~B (0.003) and variant~D
+(0.009)---produce the \emph{worst} test \rtwo{} ($-0.190$ and $-0.205$,
+respectively), while the underfit variants~A and~C (training MSE $\sim$0.17)
+perform marginally better. This anti-correlation between training fitness
+and generalization is a textbook signature of severe overfitting and
+demonstrates that the VQC has \emph{sufficient} expressivity to memorize
+\degtl{} training data but cannot extract a generalizable
+structure--activity relationship. The failure is therefore intrinsic to the
+target property and feature set, not to circuit architecture. Notably,
+variant~A uses only 3 layers ($N_\text{params}/N_\text{data} \approx 1.0$),
+yet still produces negative \rtwo{}, demonstrating that reducing the
+parameter count alone does not rescue \degtl{} prediction.
+
+\subsection{When Might QML Add Value?}
+
+Despite the negative results on this dataset, QML may offer advantages in
+related problems with:
+\begin{itemize}[nosep]
+  \item Larger datasets ($N > 1000$) where the parameter-to-data ratio
+        is favorable
+  \item Higher-dimensional feature spaces where quantum feature maps
+        may provide kernel advantages~\cite{havlicek2019}
+  \item Quantum chemical descriptors (orbital energies, electron
+        correlations) that naturally map to qubit representations.
+        For example, the $N_D$ electron correlation descriptor derived
+        from coupled-cluster natural orbital occupations~\cite{arda2026nd}
+        quantifies multireference character across molecular systems and
+        could serve as a qubit-native feature encoding, replacing or
+        augmenting classical RDKit descriptors with information rooted
+        in the electronic wavefunction.
+\end{itemize}
+
+\subsection{The Value of Negative Results}
+
+This study contributes to the growing body of critical QML benchmarks that
+distinguish genuine quantum advantage from overstatement. Reporting negative results
+is essential for the field's credibility and helps practitioners avoid
+deploying quantum solutions where classical methods
+suffice~\cite{cerezo2021}.
+
+
+% ══════════════════════════════════════════════════════════════════
+\section{Conclusions}
+\label{sec:conclusions}
+% ══════════════════════════════════════════════════════════════════
+
+We presented a comparative study of variational quantum circuits
+and classical machine learning for predicting pesticide environmental fate
+properties from the EU SPIN database. Key findings:
+
+\begin{enumerate}
+  \item \textbf{Per-target circuit design reduces overfitting:} Replacing
+        the single 12-qubit circuit ($N_\text{params}/N = 2.74$) with an
+        8-qubit \degtl{} circuit ($N_\text{params}/N = 1.39$) improved
+        \degtl{} \rtwo{} from $-0.141$ to $-0.028$ (5-fold CV). However,
+        the \rtwo{} remains below zero, meaning the model still fails to
+        outperform a constant mean prediction.
+
+  \item \textbf{Classical models dominate:} Random Forest with 21 features
+        achieves \rtwo{}~$= 0.287$ for \degtl{} and $0.759$ for \koc{}
+        (\loocv{}). Gradient Boosting performs comparably (0.283, 0.752),
+        while the MLP neural network (0.075, 0.497) underperforms,
+        confirming that high-capacity models struggle with small datasets.
+
+  \item \textbf{Hybrid stacking provides no significant improvement:}
+        Nested LOO-CV for leakage-free $\alpha$ optimization yields
+        $\alpha = 0.20 \pm 0.02$, producing a hybrid \degtl{}
+        \rtwo{}~$= 0.288$---an improvement of just +0.001 over standalone
+        RF. This margin is negligible. The VQC does not capture
+        complementary patterns beyond what the 21-feature RF already
+        encodes.
+
+  \item \textbf{\degtl{} is structurally bounded:} All models achieve
+        \rtwo{}~$\leq 0.29$ (\loocv{}), supporting the hypothesis that
+        soil degradation depends on environmental factors (microbial
+        community, temperature, moisture) not captured by molecular
+        structure. An \rtwo{} ceiling near 0.3 may be fundamental for
+        structure-only models.
+
+  \item \textbf{Minimum dataset recommendation:} Based on the observed
+        failure at $N = \nsub{}$ and the parameter-to-data ratio analysis,
+        we estimate that VQC generalization for circuits of this size
+        requires $N \gtrsim 1000$ samples---an order of magnitude beyond
+        current regulatory databases.
+\end{enumerate}
+
+These results caution against premature claims of quantum advantage on
+small regulatory datasets. Even with per-target circuit design, early
+stopping, and hybrid stacking with proper nested cross-validation, the
+VQC does not outperform a well-engineered Random Forest. Negative results
+such as this are essential for grounding the rapidly growing QML field
+in empirical reality.
+
+
+% ══════════════════════════════════════════════════════════════════
+\section*{Acknowledgments}
+% ══════════════════════════════════════════════════════════════════
+
+All quantum circuit simulations were performed using the PennyLane
+statevector simulator on consumer-grade hardware. Classical baseline
+computations used scikit-learn. The author thanks the PennyLane and
+scikit-learn developer communities for their open-source contributions.
+
+
+% ══════════════════════════════════════════════════════════════════
+\section*{Data availability}
+% ══════════════════════════════════════════════════════════════════
+
+The substance database, quantum circuit implementation, classical baselines,
+and all analysis code are available at:\\
+\url{https://github.com/c-arda/Quantum-Pesticide-Fate-Modeling}
+
+
+% ══════════════════════════════════════════════════════════════════
+\section*{Author contributions}
+C.A.: Conceptualization, Methodology, Software, Validation, Formal Analysis, Investigation, Data Curation, Writing -- Original Draft, Writing -- Review \& Editing, Visualization.
+
+\section*{Conflicts of interest}
+There are no conflicts to declare.
+% ══════════════════════════════════════════════════════════════════
+
+The author declares no competing interests.
+
+
+% ══════════════════════════════════════════════════════════════════
+% Bibliography
+% ══════════════════════════════════════════════════════════════════
+
+
+
+
+
+\balance
+
+%%%REFERENCES%%%
+\bibliography{references}
+\bibliographystyle{rsc}
+\end{document}
