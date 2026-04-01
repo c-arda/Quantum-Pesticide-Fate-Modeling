@@ -31,3 +31,16 @@ nohup.out
 config.local.*
 *.key
 *.pem
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# RSC template download (not needed in repo)
+manuscript/rsc_template/
+manuscript/rsc_template.zip
