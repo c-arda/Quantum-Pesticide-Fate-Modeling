@@ -1,0 +1,11 @@
+Data Availability Statement
+==========================
+
+The substance database, quantum circuit implementation, classical baselines,
+and all analysis code are archived at Zenodo:
+
+  DOI: https://doi.org/10.5281/zenodo.19386784
+
+and are also available on GitHub:
+
+  https://github.com/c-arda/Quantum-Pesticide-Fate-Modeling
