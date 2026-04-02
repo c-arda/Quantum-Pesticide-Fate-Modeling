@@ -10,6 +10,7 @@
 [![EC 1107/2009](https://img.shields.io/badge/EU-EC%201107%2F2009-003399.svg?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex%3A32009R1107)
 [![ChemRxiv](https://img.shields.io/badge/ChemRxiv-10.26434/chemrxiv.15000799-B31B1B.svg)](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000799/v1)
 [![Digital Discovery](https://img.shields.io/badge/Digital_Discovery-In_Preparation-0072B2.svg)](https://www.rsc.org/journals-books-databases/about-journals/digital-discovery/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19386784.svg)](https://doi.org/10.5281/zenodo.19386784)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — an 8-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances with 21 molecular descriptors from the EU SPIN database, benchmarked against Random Forest, Gradient Boosting, and MLP. **Honest negative result:** near-term VQCs cannot outperform classical models on small regulatory datasets.
