@@ -51,7 +51,7 @@ def fig1_dataset_overview():
     ax.set_ylabel("Count")
     ax.set_title("(a) Soil half-life distribution", fontsize=9)
     ax.axvline(np.median(log_deg), color="#dc2626", ls="--", lw=1, label=f"Median = {np.median(degT50):.0f} d")
-    ax.legend(frameon=False, loc='upper left')
+    ax.legend(frameon=False)
 
     # Koc histogram (log scale)
     ax = axes[1]
@@ -61,7 +61,7 @@ def fig1_dataset_overview():
     ax.set_ylabel("Count")
     ax.set_title("(b) Sorption coefficient distribution", fontsize=9)
     ax.axvline(np.median(log_koc), color="#dc2626", ls="--", lw=1, label=f"Median = {np.median(koc):.0f} mL/g")
-    ax.legend(frameon=False, loc='upper left')
+    ax.legend(frameon=False, markerfirst=False)
 
     plt.tight_layout()
     plt.savefig(os.path.join(FIGDIR, "fig1_dataset_overview.pdf"))
