@@ -279,20 +279,17 @@ def fig5_model_comparison():
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(labels, fontsize=6.5)
     axes[0].axhline(0, color="black", lw=0.5)
-    # Smart label placement to avoid overlap
-    prev_y = None
+    # Set y-limits with headroom for labels
+    y_max_deg = max(deg_r2) * 1.20
+    axes[0].set_ylim(min(min(deg_r2) * 1.3, -0.05), y_max_deg)
+    # Smart label placement
     for bar, val in zip(bars, deg_r2):
         if val < 0:
-            # Place negative labels above zero line to avoid x-axis collision
             y_pos = 0.015
             va = "bottom"
         else:
-            y_pos = val + 0.015
+            y_pos = val + 0.008
             va = "bottom"
-        # Nudge up if too close to previous label
-        if prev_y is not None and abs(y_pos - prev_y) < 0.025 and val >= 0:
-            y_pos = prev_y + 0.025
-        prev_y = y_pos
         axes[0].text(bar.get_x() + bar.get_width()/2, y_pos, f"{val:.3f}",
                     ha="center", va=va, fontsize=5.5,
                     fontweight="bold" if val < 0 else "normal",
@@ -305,9 +302,23 @@ def fig5_model_comparison():
     axes[1].set_title("(b) K$_{oc}$ prediction (21 features, incl. B$^†$)", fontsize=9)
     axes[1].set_xticks(x)
     axes[1].set_xticklabels(labels, fontsize=6.5)
+    # Set y-limits with headroom for labels
+    y_max_koc = max(koc_r2) * 1.15
+    axes[1].set_ylim(0, y_max_koc)
     for bar, val in zip(bars, koc_r2):
-        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.02, f"{val:.3f}",
-                    ha="center", va="bottom", fontsize=6)
+        # Place label inside bar if near the top, else above
+        if val > y_max_koc * 0.85:
+            y_pos = val - 0.03
+            va = "top"
+            color = "white"
+            fw = "bold"
+        else:
+            y_pos = val + 0.015
+            va = "bottom"
+            color = "black"
+            fw = "normal"
+        axes[1].text(bar.get_x() + bar.get_width()/2, y_pos, f"{val:.3f}",
+                    ha="center", va=va, fontsize=6, color=color, fontweight=fw)
 
     plt.tight_layout()
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.pdf"))

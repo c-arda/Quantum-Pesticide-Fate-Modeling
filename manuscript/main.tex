@@ -52,7 +52,7 @@
 \begin{document}
 
 \title{Variational Quantum Circuits for Pesticide Environmental Fate Prediction:\\
-       A Comparative Study with Classical Machine Learning on the EU Pesticides Database Database}
+       A Comparative Study with Classical Machine Learning on the EU Pesticides Database}
 
 \author{Celal Arda \orcidlink{0009-0006-4563-8325}}
 \affil{Independent Researcher}
@@ -75,9 +75,9 @@ classical regressors. We encode 21 physicochemical descriptors for
 8-qubit circuit for \degtl{} (17 core features) and a 12-qubit circuit
 for \koc{} (all 21 features), each with IQP-style encoding and data
 re-uploading. Leave-one-out cross-validation benchmarks reveal that
-Random Forest (RF) achieves \rtwo{}~=~0.287 for \degtl{} and 0.759 for
-\koc{}, while Gradient Boosting (GB) reaches 0.283 and 0.752,
-respectively. An MLP neural network achieves only 0.075 and 0.497.
+Random Forest (RF) achieves \rtwo{}~=~0.287 for \degtl{} and 0.712 for
+\koc{}, while Gradient Boosting (GB) reaches 0.283 and 0.750,
+respectively (fair 20-feature set, excluding circular bioaccessibility). An MLP neural network achieves only 0.075 and 0.497.
 The VQC alone underperforms all classical baselines
 (\rtwo{}~$= -0.028$ for \degtl{}, 5-fold CV). A hybrid stacking
 framework with nested LOO-CV for leakage-free $\alpha$ optimization
@@ -566,7 +566,7 @@ features), below the GB baseline of 0.752.
 The \degtl{} per-target circuit has a substantially improved
 parameter-to-data ratio:
 \begin{equation}
-  \frac{N_\text{params}}{N_\text{data}} = \frac{153}{110} = 1.74
+  \frac{N_\text{params}}{N_\text{train}} = \frac{153}{88} = 1.74
   \quad\text{(vs.\ 3.42 for the original 12-qubit circuit)}
 \end{equation}
 
@@ -690,7 +690,7 @@ factors contribute:
 
 \begin{enumerate}
   \item \textbf{Overfitting:} Despite the improved
-        $N_\text{params}/N_\text{data}$ ratio of 1.39 for the 8-qubit
+        $N_\text{params}/N_\text{train}$ ratio of 1.74 for the 8-qubit
         \degtl{} circuit (vs.\ 3.42 for the original 12-qubit circuit),
         the VQC still produces negative \rtwo{}. Even near-unity ratios
         appear insufficient for generalization with $N = 110$ samples.
@@ -809,12 +809,12 @@ suffice.\cite{cerezo2021}
 
 We presented a comparative study of variational quantum circuits
 and classical machine learning for predicting pesticide environmental fate
-properties from the EU Pesticides Database database. Key findings:
+properties from the EU Pesticides Database. Key findings:
 
 \begin{enumerate}
   \item \textbf{Per-target circuit design reduces overfitting:} Replacing
         the single 12-qubit circuit ($N_\text{params}/N_\text{train} = 3.42$) with an
-        8-qubit \degtl{} circuit ($N_\text{params}/N = 1.74$) improved
+        8-qubit \degtl{} circuit ($N_\text{params}/N_\text{train} = 1.74$) improved
         \degtl{} \rtwo{} from $-0.141$ to $-0.028$ (5-fold CV). However,
         the \rtwo{} remains below zero, meaning the model still fails to
         outperform a constant mean prediction.
