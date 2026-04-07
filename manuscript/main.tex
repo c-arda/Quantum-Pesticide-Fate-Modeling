@@ -537,7 +537,14 @@ for \koc{}.
 \label{sec:results_qml}
 
 \Cref{fig:comparison} compares cross-validation performance across all
-evaluated models.
+evaluated models. The per-target VQC achieves \rtwo{}~$= -0.028$ for \degtl{} (5-fold CV,
+8-qubit circuit with 17 features), a substantial improvement over the
+initial 12-qubit single-circuit baseline (\rtwo{}~$= -0.141$). The
+near-zero \rtwo{} indicates that circuit rightsizing reduced the parameter
+count but failed to eliminate overfitting---the remaining bottleneck is the
+target property itself, not the circuit architecture.
+For \koc{}, the 12-qubit VQC achieves \rtwo{}~$= 0.269$ (5-fold CV, 21
+features), below the GB baseline of 0.752.
 
 \begin{figure}[htbp]
   \centering
@@ -553,15 +560,6 @@ evaluated models.
            20-feature comparison.}
   \label{fig:comparison}
 \end{figure}
-
-The per-target VQC achieves \rtwo{}~$= -0.028$ for \degtl{} (5-fold CV,
-8-qubit circuit with 17 features), a substantial improvement over the
-initial 12-qubit single-circuit baseline (\rtwo{}~$= -0.141$). The
-near-zero \rtwo{} indicates that circuit rightsizing reduced the parameter
-count but failed to eliminate overfitting---the remaining bottleneck is the
-target property itself, not the circuit architecture.
-For \koc{}, the 12-qubit VQC achieves \rtwo{}~$= 0.269$ (5-fold CV, 21
-features), below the GB baseline of 0.752.
 
 The \degtl{} per-target circuit has a substantially improved
 parameter-to-data ratio:
