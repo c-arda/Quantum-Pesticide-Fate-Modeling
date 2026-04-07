@@ -303,22 +303,11 @@ def fig5_model_comparison():
     axes[1].set_xticks(x)
     axes[1].set_xticklabels(labels, fontsize=6.5)
     # Set y-limits with headroom for labels
-    y_max_koc = max(koc_r2) * 1.15
+    y_max_koc = max(koc_r2) * 1.20
     axes[1].set_ylim(0, y_max_koc)
     for bar, val in zip(bars, koc_r2):
-        # Place label inside bar if near the top, else above
-        if val > y_max_koc * 0.85:
-            y_pos = val - 0.03
-            va = "top"
-            color = "white"
-            fw = "bold"
-        else:
-            y_pos = val + 0.015
-            va = "bottom"
-            color = "black"
-            fw = "normal"
-        axes[1].text(bar.get_x() + bar.get_width()/2, y_pos, f"{val:.3f}",
-                    ha="center", va=va, fontsize=6, color=color, fontweight=fw)
+        axes[1].text(bar.get_x() + bar.get_width()/2, val + 0.015, f"{val:.3f}",
+                    ha="center", va="bottom", fontsize=6)
 
     plt.tight_layout()
     plt.savefig(os.path.join(FIGDIR, "fig5_model_comparison.pdf"))
