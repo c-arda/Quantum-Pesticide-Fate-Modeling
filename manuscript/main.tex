@@ -52,7 +52,7 @@
 \begin{document}
 
 \title{Variational Quantum Circuits for Pesticide Environmental Fate Prediction:\\
-       A Comparative Study with Classical Machine Learning on the EU SPIN Database}
+       A Comparative Study with Classical Machine Learning on the EU Pesticides Database Database}
 
 \author{Celal Arda \orcidlink{0009-0006-4563-8325}}
 \affil{Independent Researcher}
@@ -92,7 +92,7 @@ chemistry applications with limited training data.
 \vspace{6pt}
 \noindent\textbf{Keywords:} quantum machine learning, variational quantum
 circuits, pesticide fate, DegT50, Koc, QSAR, negative result, regulatory
-chemistry, EU SPIN
+chemistry, EU Pesticides Database
 \end{abstract}
 
 \newpage
@@ -105,7 +105,7 @@ chemistry, EU SPIN
 % ══════════════════════════════════════════════════════════════════
 
 Pesticide environmental fate assessment is a cornerstone of EU regulatory
-approval under Regulation (EC)~No~1107/2009~\cite{ec1107_2009}. Two
+approval under Regulation (EC)~No~1107/2009.\cite{ec1107_2009} Two
 properties dominate the risk evaluation: the soil degradation half-life
 (\degtl{}), governing persistence, and the organic carbon sorption
 coefficient (\koc{}), governing mobility and leaching potential. Together,
@@ -113,7 +113,7 @@ these parameters feed into the FOCUS groundwater models~\cite{focus2006}
 that determine whether a substance can be approved for agricultural use.
 
 Experimental determination of \degtl{} follows OECD Guideline
-307~\cite{oecd307}, requiring months-long incubation studies under
+307,\cite{oecd307} requiring months-long incubation studies under
 controlled temperature and moisture. \koc{} is measured via batch
 equilibrium adsorption (OECD 106)~\cite{oecd106}. Both are expensive,
 time-consuming, and subject to substantial inter-laboratory variability.
@@ -122,9 +122,9 @@ would accelerate the regulatory pipeline and reduce animal testing
 requirements.
 
 Classical machine learning approaches, including Random Forests
-(RF)~\cite{breiman2001} and Gradient Boosting (GB)~\cite{friedman2001},
+(RF)~\cite{breiman2001} and Gradient Boosting (GB),\cite{friedman2001}
 have been applied to QSAR prediction of physicochemical and environmental
-fate properties~\cite{mansouri2018}. While \koc{} prediction from
+fate properties.\cite{mansouri2018} While \koc{} prediction from
 structural descriptors achieves reasonable accuracy (\rtwo{}~$> 0.7$),
 \degtl{} remains notoriously difficult to predict because soil degradation
 depends on microbial community composition, soil organic matter, and
@@ -134,13 +134,13 @@ Quantum machine learning (QML) offers a fundamentally different
 computational paradigm. Variational quantum circuits
 (VQCs)~\cite{cerezo2021} encode classical data into quantum states via
 parameterized gates and can represent functions in exponentially large
-Hilbert spaces~\cite{havlicek2019}. The IQP (Instantaneous Quantum
+Hilbert spaces.\cite{havlicek2019} The IQP (Instantaneous Quantum
 Polynomial) encoding scheme~\cite{schuld2019iqp} and data
 re-uploading~\cite{perezslava2020} have been shown to increase the
-expressive power of shallow quantum circuits~\cite{schuld2020}.
+expressive power of shallow quantum circuits.\cite{schuld2020}
 
 This work investigates whether VQCs, implemented via PennyLane on a
-statevector simulator~\cite{pennylane2022}, can extract predictive signal
+statevector simulator,\cite{pennylane2022} can extract predictive signal
 for pesticide fate properties that classical models miss. Rather than
 claiming quantum advantage, we present a systematic comparative benchmark
 that highlights both the potential and the fundamental limitations of
@@ -157,8 +157,7 @@ near-term QML on small regulatory datasets.
 \label{sec:dataset}
 
 The dataset comprises \nsub{} pesticide active substances registered in
-the EU Substances, Preparations and Indicators Navigator (EU
-SPIN)~\cite{euspin2024}. These span 50 chemical classes including
+the EU Pesticides Database.\cite{euspin2024} These span 50 chemical classes including
 organophosphates (7), triazoles (9), neonicotinoids (7), pyrethroids (6),
 strobilurins (6), and sulfonylureas (6), among others. Target properties
 include:
@@ -181,7 +180,7 @@ are shown in \cref{fig:dataset}.
   \includegraphics[width=\textwidth]{fig1_dataset_overview.pdf}
   \caption{Distribution of (a)~soil degradation half-life (\degtl{}) and
            (b)~organic carbon sorption coefficient (\koc{}) for the
-           \nsub{} EU SPIN pesticides, shown on log\textsubscript{10}
+           \nsub{} EU Pesticides Database pesticides, shown on log\textsubscript{10}
            scale. Red dashed lines indicate medians.}
   \label{fig:dataset}
 \end{figure}
@@ -292,9 +291,9 @@ Both circuits share the same architecture (\cref{fig:circuit}):
 \end{enumerate}
 
 For the \degtl{} circuit (8q/6L): $6 \times 8 \times 3 = 144$ variational
-plus 9 readout = 153 parameters ($N_\text{params}/N_\text{data} = 1.39$).
+plus 9 readout = 153 parameters ($N_\text{params}/N_\text{train} = 1.74$).
 For the \koc{} circuit (12q/8L): $8 \times 12 \times 3 = 288$ variational
-plus 13 readout = 301 parameters ($N_\text{params}/N_\text{data} = 2.74$).
+plus 13 readout = 301 parameters ($N_\text{params}/N_\text{train} = 3.42$).
 The per-target design balances expressivity against overfitting risk:
 
 \begin{figure}[htbp]
@@ -475,9 +474,10 @@ classical baselines.
       & \degtl{}         & LOO    & 0.075   \\
       & \koc{} (21f)     & LOO    & 0.497   \\
     \midrule
-    \multirow{2}{*}{VQC (per-target)}
+    \multirow{3}{*}{VQC (per-target)}
       & \degtl{} (8q)    & 5-fold & $-$0.028 \\
-      & \koc{} (12q)     & 5-fold & 0.269   \\
+      & \koc{} (12q, 21f) & 5-fold & 0.269$^\dagger$  \\
+      & \koc{} (12q, 20f) & 5-fold & 0.231   \\
     \midrule
     \multirow{2}{*}{Hybrid (nested CV)}
       & \degtl{}         & nested LOO & 0.288   \\
@@ -503,8 +503,10 @@ Key observations:
         same information from log\,$P$ and solubility independently.
   \item \textbf{RF leads DegT50, GB competitive:} RF achieves the highest
         \loocv{} \rtwo{} for \degtl{} (0.287), with GB close behind
-        (0.283). For \koc{} (21 features), RF leads (0.759) followed
-        by GB (0.752). Linear models substantially trail.
+        (0.283). For the fair \koc{} benchmark (20~features), GB leads
+        (0.750) followed by RF (0.712), while linear models substantially
+        trail (Ridge = 0.532). For the 21-feature set, Ridge artificially
+        leads (0.825) by exploiting the leaked bioaccessibility feature.
   \item \textbf{MLP underperforms:} The neural network (0.075 DegT50,
         0.497 Koc) performs worst among all models except VQC, confirming
         that high-capacity models struggle with $N = 110$ samples.
@@ -564,8 +566,8 @@ features), below the GB baseline of 0.752.
 The \degtl{} per-target circuit has a substantially improved
 parameter-to-data ratio:
 \begin{equation}
-  \frac{N_\text{params}}{N_\text{data}} = \frac{153}{110} = 1.39
-  \quad\text{(vs.\ 2.74 for the original 12-qubit circuit)}
+  \frac{N_\text{params}}{N_\text{data}} = \frac{153}{110} = 1.74
+  \quad\text{(vs.\ 3.42 for the original 12-qubit circuit)}
 \end{equation}
 
 The MLP neural network (64-32 hidden layers, standardized features)
@@ -619,11 +621,16 @@ spuriously inflated result due to data leakage in the stacking weight.
 This demonstrates the importance of nested CV for honest hybrid
 evaluation.
 
-\textbf{Circularity caveat:} Because the VQC was trained on all
-\nfeat{} features (including bioaccessibility~$B$), the \koc{}
-evaluation inherits the circular contribution of~$B$. A strictly
-circularity-free comparison would require retraining the VQC
-without~$B$, which was not performed.
+\textbf{Fair Koc VQC evaluation:} To eliminate the circular contribution
+of bioaccessibility~$B$, we retrained the 12-qubit \koc{} VQC on the fair
+20-feature set (excluding~$B$), using \texttt{diff\_method="backprop"}
+for computational efficiency. The resulting 5-fold CV \rtwo{} drops from
+0.269 (21 features, with circularity) to \textbf{0.231} (20 features,
+fair). This confirms that the VQC cannot compete with RF
+(\rtwo{}~$= 0.712$ on the same 20-feature set) even when evaluated fairly.
+High variance across folds ($-0.504$ to $0.571$) further confirms that
+the 12-qubit circuit with 301 parameters
+($N_\text{params}/N_\text{train} = 3.42$) severely overfits.
 
 
 % ── 3.4 AOP Features ────────────────────────────────────────────
@@ -684,7 +691,7 @@ factors contribute:
 \begin{enumerate}
   \item \textbf{Overfitting:} Despite the improved
         $N_\text{params}/N_\text{data}$ ratio of 1.39 for the 8-qubit
-        \degtl{} circuit (vs.\ 2.74 for the original 12-qubit circuit),
+        \degtl{} circuit (vs.\ 3.42 for the original 12-qubit circuit),
         the VQC still produces negative \rtwo{}. Even near-unity ratios
         appear insufficient for generalization with $N = 110$ samples.
         Classical models with far fewer effective parameters (RF uses
@@ -693,7 +700,7 @@ factors contribute:
 
   \item \textbf{Barren plateaus:} With 8--12 qubits and 6--8
         layers, the VQC may suffer from vanishing gradients in portions of
-        the parameter landscape~\cite{mcclean2018}, making optimization
+        the parameter landscape,\cite{mcclean2018} making optimization
         unreliable with limited training data for validation.
 
   \item \textbf{The DegT50 problem is inherently hard:} Even with perfect
@@ -710,9 +717,12 @@ factors contribute:
         regression---itself a linear model---already achieves \rtwo{}~=~0.825
         for \koc{} with the 21-feature set (inflated by bioaccessibility
         circularity; the fair 20-feature \rtwo{} is 0.532),
-        it is unclear whether the quantum feature map provides
-        additional expressive power beyond what a linear model over the
-        raw descriptors captures.
+        and that the fair VQC achieves only \rtwo{}~$= 0.231$, the IQP-style
+        quantum feature map appears to \emph{reduce} rather than enhance
+        the linear decodability of the molecular descriptor features.
+        The classical descriptors, when passed directly to Ridge
+        regression, retain more predictive structure than after
+        transformation through the quantum embedding.
 \end{enumerate}
 
 To disentangle these hypotheses, we conducted a systematic architecture
@@ -789,7 +799,7 @@ This study contributes to the growing body of critical QML benchmarks that
 distinguish genuine quantum advantage from overstatement. Reporting negative results
 is essential for the field's credibility and helps practitioners avoid
 deploying quantum solutions where classical methods
-suffice~\cite{cerezo2021}.
+suffice.\cite{cerezo2021}
 
 
 % ══════════════════════════════════════════════════════════════════
@@ -799,19 +809,20 @@ suffice~\cite{cerezo2021}.
 
 We presented a comparative study of variational quantum circuits
 and classical machine learning for predicting pesticide environmental fate
-properties from the EU SPIN database. Key findings:
+properties from the EU Pesticides Database database. Key findings:
 
 \begin{enumerate}
   \item \textbf{Per-target circuit design reduces overfitting:} Replacing
-        the single 12-qubit circuit ($N_\text{params}/N = 2.74$) with an
-        8-qubit \degtl{} circuit ($N_\text{params}/N = 1.39$) improved
+        the single 12-qubit circuit ($N_\text{params}/N_\text{train} = 3.42$) with an
+        8-qubit \degtl{} circuit ($N_\text{params}/N = 1.74$) improved
         \degtl{} \rtwo{} from $-0.141$ to $-0.028$ (5-fold CV). However,
         the \rtwo{} remains below zero, meaning the model still fails to
         outperform a constant mean prediction.
 
-  \item \textbf{Classical models dominate:} Random Forest with 21 features
-        achieves \rtwo{}~$= 0.287$ for \degtl{} and $0.759$ for \koc{}
-        (\loocv{}). Gradient Boosting performs comparably (0.283, 0.752),
+  \item \textbf{Classical models dominate:} Random Forest achieves
+        \rtwo{}~$= 0.287$ for \degtl{} and $0.712$ for \koc{}
+        (\loocv{}, fair 20-feature set excluding bioaccessibility).
+        Gradient Boosting performs comparably (0.283, 0.750),
         while the MLP neural network (0.075, 0.497) underperforms,
         confirming that high-capacity models struggle with small datasets.
 
@@ -853,6 +864,10 @@ All quantum circuit simulations were performed using the PennyLane
 statevector simulator on consumer-grade hardware. Classical baseline
 computations used scikit-learn. The author thanks the PennyLane and
 scikit-learn developer communities for their open-source contributions.
+The author acknowledges the use of Claude (Anthropic) as a coding and
+writing assistant during manuscript preparation, code development, and
+data analysis. All scientific conclusions, interpretations, and
+experimental design are solely the author's.
 
 
 % ══════════════════════════════════════════════════════════════════
@@ -861,6 +876,8 @@ scikit-learn developer communities for their open-source contributions.
 
 The substance database, quantum circuit implementation, classical baselines,
 and all analysis code are available at:\\
+Zenodo (DOI: \url{https://doi.org/10.5281/zenodo.19386784})
+and are also available on GitHub:
 \url{https://github.com/c-arda/Quantum-Pesticide-Fate-Modeling}
 
 
