@@ -58,3 +58,10 @@ EXPERIMENT_RESULTS.md
 *experiment_plan*
 *_old.*
 cv_*_results.json
+docs/
+manuscript/head_foot/
+manuscript/manuscript.zip
+manuscript/main_rsc*
+manuscript/rsc.bst
+*.db
+scripts/*results*
