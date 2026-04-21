@@ -299,6 +299,7 @@ if _sqlite_data is None:
         "koc": 21699, "kfoc": 21699, "freundlich_n": 0.85,
         "vapor_pressure": 1.3e-7, "henry_const": 2.1e-7,
         "solubility": 10500, "pka": 2.3, "logP": -3.4,
+        "pka_values": [0.8, 2.3, 5.7, 10.2],  # P-OH(1), COOH, P-OH(2), NH2+
         "cls": "Phosphonate", "status": "Approved",
         "n_atoms": 17, "n_heavy": 10, "hbd": 4, "hba": 6, "n_rings": 0, "n_rotatable": 4
     },
@@ -309,6 +310,7 @@ if _sqlite_data is None:
         "koc": 500, "kfoc": 500, "freundlich_n": 0.90,
         "vapor_pressure": 3.1e-7, "henry_const": 2.0e-8,
         "solubility": 1370000, "pka": 2.0, "logP": -4.0,
+        "pka_values": [2.0, 2.9, 9.8],  # P-OH, COOH, NH3+
         "cls": "Phosphonate", "status": "Not approved",
         "n_atoms": 26, "n_heavy": 12, "hbd": 4, "hba": 5, "n_rings": 0, "n_rotatable": 4
     },
@@ -434,6 +436,7 @@ if _sqlite_data is None:
         "koc": 60, "kfoc": 60, "freundlich_n": 0.90,
         "vapor_pressure": 1.9e-5, "henry_const": 1.3e-8,
         "solubility": 677, "pka": 2.73, "logP": 2.81,
+        "pka_values": [2.73],  # carboxylic acid — anionic at soil pH
         "cls": "Phenoxyacetic acid", "status": "Approved",
         "n_atoms": 19, "n_heavy": 13, "hbd": 1, "hba": 3, "n_rings": 1, "n_rotatable": 3
     },
@@ -444,6 +447,7 @@ if _sqlite_data is None:
         "koc": 74, "kfoc": 74, "freundlich_n": 0.90,
         "vapor_pressure": 4.0e-6, "henry_const": 1.6e-7,
         "solubility": 734, "pka": 3.07, "logP": 2.75,
+        "pka_values": [3.07],  # carboxylic acid — anionic at soil pH
         "cls": "Phenoxyacetic acid", "status": "Approved",
         "n_atoms": 22, "n_heavy": 13, "hbd": 1, "hba": 3, "n_rings": 1, "n_rotatable": 3
     },
@@ -456,6 +460,7 @@ if _sqlite_data is None:
         "koc": 35, "kfoc": 35, "freundlich_n": 0.90,
         "vapor_pressure": 3.3e-10, "henry_const": 1.7e-10,
         "solubility": 2790, "pka": 3.3, "logP": 0.018,
+        "pka_values": [3.3],  # sulfonamide NH — anionic at soil pH
         "cls": "Sulfonylurea", "status": "Approved",
         "n_atoms": 41, "n_heavy": 26, "hbd": 2, "hba": 9, "n_rings": 2, "n_rotatable": 5
     },
@@ -466,6 +471,7 @@ if _sqlite_data is None:
         "koc": 26, "kfoc": 26, "freundlich_n": 0.92,
         "vapor_pressure": 5.2e-8, "henry_const": 5.2e-8,
         "solubility": 2040, "pka": 4.7, "logP": 0.78,
+        "pka_values": [4.7],  # sulfonamide NH — partially anionic at soil pH
         "cls": "Sulfonylurea", "status": "Approved",
         "n_atoms": 43, "n_heavy": 27, "hbd": 1, "hba": 9, "n_rings": 2, "n_rotatable": 6
     },
@@ -554,6 +560,7 @@ if _sqlite_data is None:
         "koc": 1000000, "kfoc": 1000000, "freundlich_n": 0.80,
         "vapor_pressure": 1.0e-7, "henry_const": 5.0e-12,
         "solubility": 718000, "pka": None, "logP": -4.6,
+        "permanently_charged": True,  # quaternary N — always dicationic
         "cls": "Bipyridilium", "status": "Not approved",
         "n_atoms": 26, "n_heavy": 14, "hbd": 0, "hba": 2, "n_rings": 2, "n_rotatable": 1
     },

@@ -75,9 +75,9 @@ classical regressors. We encode 21 physicochemical descriptors for
 8-qubit circuit for \degtl{} (17 core features) and a 12-qubit circuit
 for \koc{} (all 21 features), each with IQP-style encoding and data
 re-uploading. Leave-one-out cross-validation benchmarks reveal that
-Random Forest (RF) achieves \rtwo{}~=~0.287 for \degtl{} and 0.712 for
-\koc{}, while Gradient Boosting (GB) reaches 0.283 and 0.750,
-respectively (fair 20-feature set, excluding circular bioaccessibility). An MLP neural network achieves only 0.075 and 0.497.
+Random Forest (RF) achieves \rtwo{}~=~0.290 for \degtl{} and 0.712 for
+\koc{}, while Gradient Boosting (GB) reaches 0.285 and 0.742,
+respectively (fair 20-feature set, excluding circular bioaccessibility). An MLP neural network achieves only 0.073 and 0.535.
 The VQC alone underperforms all classical baselines
 (\rtwo{}~$= -0.028$ for \degtl{}, 5-fold CV). A hybrid stacking
 framework with nested LOO-CV for leakage-free $\alpha$ optimization
@@ -459,20 +459,20 @@ classical baselines.
       & \koc{} (20f)     & LOO    & 0.512   \\
     \midrule
     \multirow{4}{*}{Random Forest}
-      & \degtl{}         & LOO    & \textbf{0.287}   \\
-      & \degtl{}         & 5-fold & 0.275   \\
+      & \degtl{}         & LOO    & \textbf{0.290}   \\
+      & \degtl{}         & 5-fold & 0.273   \\
       & \koc{} (21f)     & LOO    & \textbf{0.759}   \\
       & \koc{} (20f)     & LOO    & 0.712   \\
     \midrule
     \multirow{4}{*}{Gradient Boosting}
-      & \degtl{}         & LOO    & 0.283   \\
-      & \degtl{}         & 5-fold & 0.290   \\
-      & \koc{} (21f)     & LOO    & 0.752   \\
-      & \koc{} (20f)     & LOO    & 0.750   \\
+      & \degtl{}         & LOO    & 0.285   \\
+      & \degtl{}         & 5-fold & 0.288   \\
+      & \koc{} (21f)     & LOO    & 0.755   \\
+      & \koc{} (20f)     & LOO    & 0.742   \\
     \midrule
     \multirow{2}{*}{MLP}
-      & \degtl{}         & LOO    & 0.075   \\
-      & \koc{} (21f)     & LOO    & 0.497   \\
+      & \degtl{}         & LOO    & 0.073   \\
+      & \koc{} (21f)     & LOO    & 0.535   \\
     \midrule
     \multirow{3}{*}{VQC (per-target)}
       & \degtl{} (8q)    & 5-fold & $-$0.028 \\
@@ -502,13 +502,13 @@ Key observations:
         $\rightarrow$ 0.750), because tree-based methods can derive the
         same information from log\,$P$ and solubility independently.
   \item \textbf{RF leads DegT50, GB competitive:} RF achieves the highest
-        \loocv{} \rtwo{} for \degtl{} (0.287), with GB close behind
-        (0.283). For the fair \koc{} benchmark (20~features), GB leads
-        (0.750) followed by RF (0.712), while linear models substantially
+        \loocv{} \rtwo{} for \degtl{} (0.290), with GB close behind
+        (0.285). For the fair \koc{} benchmark (20~features), GB leads
+        (0.742) followed by RF (0.712), while linear models substantially
         trail (Ridge = 0.532). For the 21-feature set, Ridge artificially
         leads (0.825) by exploiting the leaked bioaccessibility feature.
-  \item \textbf{MLP underperforms:} The neural network (0.075 DegT50,
-        0.497 Koc) performs worst among all models except VQC, confirming
+  \item \textbf{MLP underperforms:} The neural network (0.073 DegT50,
+        0.535 Koc) performs worst among all models except VQC, confirming
         that high-capacity models struggle with $N = 110$ samples.
   \item \degtl{} prediction is poor across all models (\rtwo{}~$< 0.30$),
         suggesting a fundamental ceiling for structure-only prediction.
@@ -569,9 +569,12 @@ parameter-to-data ratio:
 \end{equation}
 
 The MLP neural network (64-32 hidden layers, standardized features)
-achieves \rtwo{}~$= 0.075$ for \degtl{} and $0.497$ for \koc{}
+achieves \rtwo{}~$= 0.073$ for \degtl{} and $0.535$ for \koc{}
 (\loocv{}), performing worse than both tree-based models, confirming
 that the small dataset size limits all high-capacity models.
+A smaller MLP (8-4 hidden layers, 217 parameters) performs even worse
+(\rtwo{}~$= -0.28$ for \degtl{}), confirming that reducing neural network
+capacity to match the VQC parameter count does not rescue performance.
 
 \Cref{fig:training_curves} provides direct empirical evidence: training
 loss decreases steadily while validation loss plateaus or increases,
@@ -648,7 +651,7 @@ yields no improvement in RF \loocv{} performance (\cref{tab:aop}).
     \textbf{Feature Set} & \textbf{$N_\text{features}$} &
       \textbf{\degtl{} \rtwo{}} & \textbf{\koc{} \rtwo{}} \\
     \midrule
-    Molecular descriptors only     & 21 & 0.287 & 0.759 \\
+    Molecular descriptors only     & 21 & 0.290 & 0.759 \\
     + AOP MoA pathways             & 27 & 0.283 & 0.758 \\
     \midrule
     $\Delta$\rtwo{}                & +6 & $-0.004$ & $-0.001$ \\
@@ -696,10 +699,13 @@ factors contribute:
         bagging and feature subsampling as implicit regularization) are
         more robust.
 
-  \item \textbf{Barren plateaus:} With 8--12 qubits and 6--8
-        layers, the VQC may suffer from vanishing gradients in portions of
-        the parameter landscape,\cite{mcclean2018} making optimization
-        unreliable with limited training data for validation.
+  \item \textbf{Barren plateaus:} Gradient variance analysis at random
+        initialization across 100 seeds confirms that
+        $\mathrm{Var}[\|\nabla L\|] = 0.40 \gg 10^{-3}$, ruling out barren
+        plateaus\cite{mcclean2018} as the performance bottleneck at this
+        circuit size (8--12 qubits). The VQC's poor \degtl{} performance
+        is therefore attributed to data and feature limitations, not
+        trainability.
 
   \item \textbf{The DegT50 problem is inherently hard:} Even with perfect
         structural descriptors, soil half-life depends on microbial
@@ -818,10 +824,10 @@ properties from the EU Pesticides Database. Key findings:
         outperform a constant mean prediction.
 
   \item \textbf{Classical models dominate:} Random Forest achieves
-        \rtwo{}~$= 0.287$ for \degtl{} and $0.712$ for \koc{}
+        \rtwo{}~$= 0.290$ for \degtl{} and $0.712$ for \koc{}
         (\loocv{}, fair 20-feature set excluding bioaccessibility).
-        Gradient Boosting performs comparably (0.283, 0.750),
-        while the MLP neural network (0.075, 0.497) underperforms,
+        Gradient Boosting performs comparably (0.285, 0.742),
+        while the MLP neural network (0.073, 0.535) underperforms,
         confirming that high-capacity models struggle with small datasets.
 
   \item \textbf{Hybrid stacking provides no significant improvement:}
