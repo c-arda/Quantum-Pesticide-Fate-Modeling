@@ -33,11 +33,11 @@ SMILES → RDKit descriptors → 17 features → [0, π] scaling
                                               ↓
                     ┌─────────────── Per-target VQC (PennyLane) ──────────────┐
                     │                                                         │
-                    │  DegT50 circuit (6q/5L)      Koc circuit (12q/8L)      │
+                    │  DegT50 circuit (8q/6L)      Koc circuit (12q/8L)      │
                     │  ├─ Hadamard + RZ encoding   ├─ Hadamard + RZ encoding │
                     │  ├─ IQP ZZ entanglement      ├─ IQP ZZ entanglement   │
                     │  ├─ Data re-uploading         ├─ RY cross-rotation     │
-                    │  └─ 5 variational layers      ├─ Data re-uploading     │
+                    │  └─ 6 variational layers      ├─ Data re-uploading     │
                     │                               └─ 8 variational layers  │
                     │  ⟨Z₀⟩...⟨Z₅⟩ → readout       ⟨Z₀⟩...⟨Z₁₁⟩ → readout │
                     └─────────────────────────────────────────────────────────┘

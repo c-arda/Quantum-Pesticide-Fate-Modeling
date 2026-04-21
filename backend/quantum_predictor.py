@@ -5,9 +5,9 @@ Per-target variational quantum circuits for predicting pesticide
 environmental fate properties (DegT50 and Koc) from molecular descriptors.
 
 v3 Upgrades (Phase 5a):
-  - Per-target circuits: 6-qubit for DegT50, 12-qubit for Koc
+  - Per-target circuits: 8-qubit for DegT50, 12-qubit for Koc
   - Early stopping with patience to prevent overtraining
-  - Reduced DegT50 overfitting (params/data: 2.7 → 0.87)
+  - Reduced DegT50 overfitting (params/data: 2.7 → 1.39)
 
 v2 Upgrades:
   - 12 qubits (was 6) → larger Hilbert space
@@ -17,7 +17,7 @@ v2 Upgrades:
   - Log-space prediction for better dynamic range coverage
 
 Architecture:
-  - DegT50: 6 qubits × 5 layers = 97 params (regularized)
+  - DegT50: 8 qubits × 6 layers = 153 params (regularized)
   - Koc:   12 qubits × 8 layers = 301 params (expressive)
   - IQP-style feature-entangled encoding (ZZ interactions)
   - Measurement: PauliZ expectations → linear readout
@@ -269,7 +269,7 @@ def extract_features(substance):
 
 
 # ── Quantum circuits ────────────────────────────────────────────────
-# Two circuit sizes: 6-qubit (DegT50) and 12-qubit (Koc)
+# Two circuit sizes: 8-qubit (DegT50) and 12-qubit (Koc)
 
 def _build_circuit_body(features, weights, n_qubits, n_layers):
     """Shared circuit body: IQP encoding + variational layers."""
@@ -911,7 +911,7 @@ def get_circuit_info():
         "early_stopping": f"patience={EARLY_STOP_PATIENCE}",
         "device": "default.qubit (statevector simulator)",
         "framework": f"PennyLane {qml.__version__}",
-        "architecture": "Per-target: 6q/5L (DegT50) + 12q/8L (Koc)",
+        "architecture": "Per-target: 8q/6L (DegT50) + 12q/8L (Koc)",
     }
 
 
@@ -1040,18 +1040,34 @@ def run_cross_validation(n_epochs_cv=60, lr_cv=0.05, k_folds=None):
                 results.append(completed_results[sub["name"]])
                 continue
 
-            train_feat = [f for j, f in enumerate(all_features) if j != i]
+            # Per-target feature sets (B4 fix: was using 12q Koc circuit for DegT50)
+            train_feat_deg = [f for j, f in enumerate(all_features_deg) if j != i]
+            train_feat_full = [f for j, f in enumerate(all_features) if j != i]
             train_deg = [t for j, t in enumerate(all_deg) if j != i]
             train_koc = [t for j, t in enumerate(all_koc) if j != i]
 
-            w_deg, r_deg, _ = _train_model(train_feat, train_deg, n_epochs=n_epochs_cv, lr=lr_cv)
-            w_koc, r_koc, _ = _train_model(train_feat, train_koc, n_epochs=n_epochs_cv, lr=lr_cv)
+            # DegT50: 8q circuit with 17 features
+            w_deg, r_deg, _ = _train_model(
+                train_feat_deg, train_deg, n_epochs=n_epochs_cv, lr=lr_cv,
+                n_qubits=N_QUBITS_DEG, n_layers=N_LAYERS_DEG,
+                circuit_fn=quantum_circuit_deg
+            )
+            # Koc: 12q circuit with all 21 features
+            w_koc, r_koc, _ = _train_model(
+                train_feat_full, train_koc, n_epochs=n_epochs_cv, lr=lr_cv,
+                n_qubits=N_QUBITS_KOC, n_layers=N_LAYERS_KOC,
+                circuit_fn=quantum_circuit_koc
+            )
 
-            feat = all_features[i]
-            exp_deg = quantum_circuit(feat, w_deg)
-            exp_koc = quantum_circuit(feat, w_koc)
-            pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS]), pnp.array(exp_deg)) + r_deg[N_QUBITS])
-            pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS]), pnp.array(exp_koc)) + r_koc[N_QUBITS])
+            # DegT50 prediction with 17 features → 8q circuit
+            feat_deg = all_features_deg[i]
+            exp_deg = quantum_circuit_deg(feat_deg, w_deg)
+            pred_deg = float(pnp.dot(pnp.array(r_deg[:N_QUBITS_DEG]), pnp.array(exp_deg)) + r_deg[N_QUBITS_DEG])
+
+            # Koc prediction with 21 features → 12q circuit
+            feat_koc = all_features[i]
+            exp_koc = quantum_circuit_koc(feat_koc, w_koc)
+            pred_koc = float(pnp.dot(pnp.array(r_koc[:N_QUBITS_KOC]), pnp.array(exp_koc)) + r_koc[N_QUBITS_KOC])
 
             fold_result = {
                 "name": sub["name"],
