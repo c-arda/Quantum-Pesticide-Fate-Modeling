@@ -46,7 +46,6 @@
 \newcommand{\nparams}{153/301}% per-target
 \newcommand{\nsub}{110}
 \newcommand{\nfeat}{21}
-\newcommand{\pending}[1]{\textcolor{red!70!black}{\textbf{[PENDING: #1]}}}
 
 % ═══════════════════════════════════════════════════════════════════
 \begin{document}
@@ -677,6 +676,111 @@ result is not a statistical artifact of sparse coverage.
 \end{figure}
 
 
+% ── 3.5 Domain Applicability (Leave-One-Class-Out) ───────────────
+\subsection{Domain Applicability: Leave-One-Class-Out Generalization}
+\label{sec:results_loco}
+
+Random LOO cross-validation assumes that test substances are drawn from the
+same chemical distribution as the training set. Regulators, however, often
+need predictions for novel active ingredients whose nearest analogues have
+been removed from the training pool. To probe generalization beyond the
+training chemistry, we repeated the RF and GB evaluations under
+leave-one-class-out cross-validation (LOCO), grouping the 110~substances
+into their 50 distinct chemical classes (e.g.\ Organophosphate, Triazole,
+Pyrethroid, Sulfonylurea, Neonicotinoid). For each held-out class, the
+model was trained on the remaining 49 classes and evaluated on every
+substance in the held-out class, so no training point shares the test
+point's chemistry.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Leave-one-class-out cross-validation (LOCO) over 50 chemical
+           classes, compared with standard LOO. $\Delta$ = LOO~$-$~LOCO.
+           Koc generalizes across chemical classes; \degtl{} does not.}
+  \label{tab:loco}
+  \small
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Model / target} & \textbf{LOO~\rtwo{}} & \textbf{LOCO~\rtwo{}} &
+      \textbf{$\Delta$} \\
+    \midrule
+    RF \degtl{} (21f) & 0.287 & 0.134 & 0.153 \\
+    RF Koc (21f)      & 0.759 & 0.724 & 0.035 \\
+    GB \degtl{} (21f) & 0.285 & 0.042 & 0.243 \\
+    GB Koc (20f, fair)& 0.742 & 0.717 & 0.025 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The Koc models are effectively robust to chemical-class extrapolation:
+RF loses only \rtwo{}~$=$~0.035 (and GB~0.025) when the test class is
+entirely absent from training. This is consistent with Koc being driven
+by bulk physicochemical properties---lipophilicity (logP), polar surface
+area, and aromatic fraction---which transfer smoothly between chemistries.
+In contrast, the \degtl{} models lose more than half their explanatory
+power under LOCO (RF: 0.287~$\to$~0.134; GB: 0.285~$\to$~0.042), suggesting
+that soil biodegradation is governed by class-specific enzymatic pathways
+that the descriptor set captures only implicitly through class-level
+memorization. The regulatory implication is concrete: predicted-\degtl{}
+values for a substance whose chemical class is under-represented in the
+training set should be reported with substantially wider confidence
+bounds than a naive LOO error estimate would suggest, whereas Koc
+predictions carry comparable uncertainty in- and out-of-class.
+
+
+% ── 3.6 Binary Regulatory Classification ─────────────────────────
+\subsection{Binary Persistence Classification}
+\label{sec:results_binary}
+
+Beyond continuous \degtl{} regression, EU regulatory practice under
+Regulation~(EC)~1107/2009 relies on two discrete persistence categories:
+\emph{persistent} ($P$, \degtl{} $>$~60~d) and \emph{very persistent}
+($vP$, \degtl{} $>$~180~d). Because regulators act on these binary
+labels rather than on the continuous half-life, a model that fails in
+regression can still be useful if it correctly separates the classes.
+We therefore re-evaluated Random Forest and Gradient Boosting as binary
+classifiers using the same \nfeat{}-feature set and leave-one-out
+cross-validation, reporting both balanced accuracy (BA) and the Matthews
+correlation coefficient (MCC). With $n_P = 29 / 82$ and $n_{vP} = 10 /
+101$, the class distribution is severely skewed, especially for $vP$.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Binary persistence classification (LOO-CV). $P$: \degtl~$>$~60~d;
+           $vP$: \degtl~$>$~180~d. BA = balanced accuracy, MCC = Matthews
+           correlation coefficient. Class counts: $n_P/n_{\neg P} = 29/82$;
+           $n_{vP}/n_{\neg vP} = 10/101$.}
+  \label{tab:binary}
+  \small
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Model} & \textbf{$P$ BA} & \textbf{$P$ MCC} &
+      \textbf{$vP$ BA} & \textbf{$vP$ MCC} \\
+    \midrule
+    Random Forest     & 0.642 & 0.365 & 0.500 & 0.000 \\
+    Gradient Boosting & \textbf{0.722} & \textbf{0.498} &
+                        \textbf{0.720} & \textbf{0.422} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Gradient Boosting clearly outperforms RF on both thresholds. The
+$vP$~result is particularly striking: RF collapses to the majority class
+(BA = 0.500, MCC = 0, predicting zero out of ten true $vP$ substances),
+whereas GB recovers 5/10 $vP$ substances with only 6 false positives
+(confusion matrix $[[95, 6], [5, 5]]$). This asymmetry reflects RF's
+implicit reliance on bagging-vote majority under severe imbalance
+($\sim$10:1), while GB's sequential residual fitting retains sensitivity
+to the minority class. For regulatory pre-screening---where the cost of
+missing a $vP$ substance far exceeds the cost of a false positive---GB
+is the defensible choice, despite RF's marginally higher continuous-\rtwo{}
+headline number. These discrete-threshold results are consistent with the
+continuous regression findings: \degtl{} prediction from structural
+descriptors alone is feasible for the $P / \neg P$ boundary but
+challenging for the $vP / \neg vP$ boundary, where signal is limited by
+the small number of $vP$ substances rather than by model capacity.
+
+
 % ══════════════════════════════════════════════════════════════════
 \section{Discussion}
 \label{sec:discussion}
@@ -741,42 +845,77 @@ a reduced learning rate (0.03) and extended training (120~epochs).
 \begin{table}[htbp]
   \centering
   \caption{Architecture experiment: DegT50 prediction (5-fold CV) across
-           four circuit variants. These experiments used the initial single
-           12-qubit circuit (\rtwo{}~$= -0.141$); the per-target 8-qubit
-           circuit (\rtwo{}~$= -0.028$) was developed subsequently based on
-           these findings.}
+           four circuit variants, averaged over 5 random seeds
+           (0, 1, 7, 42, 2024). These experiments used the initial single
+           12-qubit circuit (\rtwo{}~$= -0.141$, single-seed); the
+           per-target 8-qubit circuit (\rtwo{}~$= -0.028$) was developed
+           subsequently based on these findings. Variant~B is the only
+           variant using the full 21-feature set (all four DegT50-targeted
+           descriptors included) on the narrower 8-qubit register; the
+           remaining variants use the 17-feature core set.}
   \label{tab:arch}
   \small
-  \begin{tabular}{llcccccc}
+  \begin{tabular}{llccccccc}
     \toprule
     \textbf{Variant} & \textbf{Architecture} & \textbf{$N_q$} &
       \textbf{$L$} & \textbf{Epochs} &
-      \textbf{Train MSE} & \textbf{\rtwo{}} & \textbf{Time} \\
+      \textbf{\rtwo{} mean~$\pm$~std} & \textbf{\rtwo{} range} & \textbf{Time/seed} \\
     \midrule
-    A & All-to-all CZ, 2$\times$ re-upload  & 12 & 3  & 80  & 0.183 & $-$0.157 & 2.1\,h \\
-    B & Ring CNOT, 3$\times$ re-upload       &  8 & 12 & 100 & 0.003 & $-$0.190 & 3.3\,h \\
-    C & \texttt{StronglyEntanglingLayers}    & 12 & 5  & 60  & 0.165 & $-$0.146 & 1.3\,h \\
-    D & Baseline+, lr$=$0.03                 & 12 & 8  & 120 & 0.009 & $-$0.205 & 4.1\,h \\
+    A & All-to-all CZ, 2$\times$ re-upload      & 12 & 3  & 80  & \textbf{+0.051~$\pm$~0.121} & $-0.12$ to $+0.23$ & 1.0\,h \\
+    B & Ring CNOT, 3$\times$ re-upload (21f)    &  8 & 12 & 100 & $-$0.412~$\pm$~0.079 & $-0.54$ to $-0.29$ & 2.4\,h \\
+    C & \texttt{StronglyEntanglingLayers}       & 12 & 5  & 60  & $-$0.111~$\pm$~0.093 & $-0.23$ to $+0.02$ & 1.1\,h \\
+    D & Baseline+, lr$=$0.03                    & 12 & 8  & 120 & $-$0.264~$\pm$~0.178 & $-0.57$ to $-0.06$ & 3.4\,h \\
     \midrule
-    \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.04)}} & 12 & 8 & 60
-      & --- & $-$0.141 \\
+    \multicolumn{2}{l}{\emph{Current baseline (lr$=$0.04, single seed)}} & 12 & 8 & 60
+      & $-0.141$ & --- & --- \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-No variant improves upon the baseline. Remarkably, the two variants that
-achieve near-zero training MSE---variant~B (0.003) and variant~D
-(0.009)---produce the \emph{worst} test \rtwo{} ($-0.190$ and $-0.205$,
-respectively), while the underfit variants~A and~C (training MSE $\sim$0.17)
-perform marginally better. This anti-correlation between training fitness
-and generalization is a textbook signature of severe overfitting and
-demonstrates that the VQC has \emph{sufficient} expressivity to memorize
-\degtl{} training data but cannot extract a generalizable
-structure--activity relationship. The failure is therefore intrinsic to the
-target property and feature set, not to circuit architecture. Notably,
-variant~A uses only 3 layers ($N_\text{params}/N_\text{data} \approx 1.0$),
-yet still produces negative \rtwo{}, demonstrating that reducing the
-parameter count alone does not rescue \degtl{} prediction.
+Averaged over five random seeds, only variant~A achieves a marginally
+positive mean \rtwo{} (+0.051~$\pm$~0.121), and its 1$\sigma$ band
+straddles zero ($-0.12$ to $+0.23$); no variant robustly exceeds a
+constant-mean prediction. Variant~B is the worst on average
+($-0.412~\pm~0.079$), reflecting the expected penalty of compressing the
+full 21-feature set (including the four DegT50-targeted descriptors) into
+an 8-qubit register: the parameter-to-data ratio rises to roughly $3/1$
+and the model memorizes training fluctuations rather than learning a
+transferable structure--activity relationship. This is consistent with
+the per-target design choice of restricting the production 8-qubit
+\degtl{} circuit to the 17-feature core set
+(Section~\ref{sec:training}). Variants~C (\texttt{StronglyEntanglingLayers},
+$-0.111~\pm~0.093$) and~D (extended training, $-0.264~\pm~0.178$) sit
+between A and~B, with D exhibiting the largest seed-to-seed variance
+($\sigma = 0.18$, range $-0.57$ to $-0.06$)---a signature of
+loss-landscape roughness rather than a robust architectural effect. In
+all four variants the per-variant standard deviation is of the same order
+as or larger than the mean, so single-seed rankings between variants are
+not statistically meaningful at $n_\text{seed} = 5$. Even the
+best-averaged variant~A remains an order of magnitude below RF (0.290)
+and does not outperform the MLP (0.073), reinforcing the main conclusion
+that near-term VQCs of this size cannot compete with ensemble methods on
+$N \approx 110$ regulatory data. The architecture sweep therefore shows
+no robust winner; earlier single-seed comparisons across these variants
+reflect seed noise rather than a systematic ``depth vs.\ width'' effect.
+
+\subsection{Null-Model Benchmark: Physics-Based Koc Prediction}
+
+To calibrate expectations for both classical and quantum models, we applied
+the well-known Sabljic \emph{et al.}\ (1995) single-parameter QSAR for
+soil sorption,
+$\log K_\text{oc} = 0.81\,\log K_\text{ow} + 0.10$,
+to all \nsub{} substances. This correlation, derived from a limited set of
+non-ionic organics, yields \rtwo{}~$= -0.97$ and MAE~$= 1.16$ log units
+on the present EU Pesticides Database. The catastrophic failure reflects
+the chemical diversity of the regulatory dataset---spanning ionizable
+herbicides, systemic fungicides, and zwitterionic compounds---which violates
+the applicability domain of correlations fitted to
+hydrophobic-partitioning-dominated systems. This null-model result provides
+two anchors: first, that physics-based QSAR does not transfer to regulatory
+mixtures without descriptor engineering; and second, that the multi-feature
+RF achieving \rtwo{}~$= 0.712$ (20-feature fair set) represents a
+substantial improvement over na\"ive structure--activity reasoning,
+not merely a statistical artefact.
 
 \subsection{When Might QML Add Value?}
 

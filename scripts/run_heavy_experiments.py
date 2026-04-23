@@ -147,7 +147,7 @@ def exp2_grouped_cv():
     # Build class groups
     class_to_indices = defaultdict(list)
     for i, s in enumerate(SUBSTANCES):
-        cls = s.get("chemical_class", s.get("class", "unknown"))
+        cls = s.get("cls", s.get("chemical_class", s.get("class", "unknown")))
         class_to_indices[cls].append(i)
 
     classes = sorted(class_to_indices.keys())

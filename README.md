@@ -91,8 +91,13 @@ python3 -m http.server 8765
 |--------|----------|-------------|
 | GET | `/api/health` | Backend health check |
 | GET | `/api/substances` | List all 110 substances |
+| GET | `/api/scenarios` | FOCUS groundwater scenario list |
 | GET | `/api/quantum/status` | Per-target circuit info (8q DegT50, 12q Koc) |
 | GET | `/api/quantum/predict/<name>` | Predict DegT50/Koc for a substance |
+| GET | `/api/quantum/predict-all` | Batch predictions for all substances |
+| GET | `/api/quantum/cv-results` | VQC cross-validation detail |
+| GET | `/api/quantum/cross-validation` | Full CV run |
+| GET | `/api/validation` | Field validation data |
 | GET | `/api/classical-baseline` | RF + GBM cross-validation results |
 | GET | `/api/error-analysis` | Prediction errors by chemical class |
 | GET | `/api/hybrid-results` | Hybrid QML+RF stacking results |
@@ -123,7 +128,7 @@ qp-fate/
 ├── requirements.txt        # Python dependencies
 ├── backend/
 │   ├── server.py           # Flask API server
-│   ├── quantum_predictor.py # Per-target VQC (6q DegT50 + 12q Koc)
+│   ├── quantum_predictor.py # Per-target VQC (8q DegT50 + 12q Koc)
 │   ├── classical_predictor.py # RF + GBM baselines
 │   ├── hybrid_predictor.py # QML+RF stacking
 │   ├── spin_database.py    # SQLite loader (110 substances)
