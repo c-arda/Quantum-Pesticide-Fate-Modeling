@@ -828,9 +828,6 @@ factors contribute:
         and that the fair VQC achieves only \rtwo{}~$= 0.231$, the IQP-style
         quantum feature map appears to \emph{reduce} rather than enhance
         the linear decodability of the molecular descriptor features.
-        The classical descriptors, when passed directly to Ridge
-        regression, retain more predictive structure than after
-        transformation through the quantum embedding.
 \end{enumerate}
 
 To disentangle these hypotheses, we conducted a systematic architecture
@@ -892,9 +889,7 @@ all four variants the per-variant standard deviation is of the same order
 as or larger than the mean, so single-seed rankings between variants are
 not statistically meaningful at $n_\text{seed} = 5$. Even the
 best-averaged variant~A remains an order of magnitude below RF (0.290)
-and does not outperform the MLP (0.073), reinforcing the main conclusion
-that near-term VQCs of this size cannot compete with ensemble methods on
-$N \approx 110$ regulatory data. The architecture sweep therefore shows
+and does not outperform the MLP (0.073). The architecture sweep shows
 no robust winner; earlier single-seed comparisons across these variants
 reflect seed noise rather than a systematic ``depth vs.\ width'' effect.
 
@@ -913,7 +908,7 @@ the applicability domain of correlations fitted to
 hydrophobic-partitioning-dominated systems. This null-model result provides
 two anchors: first, that physics-based QSAR does not transfer to regulatory
 mixtures without descriptor engineering; and second, that the multi-feature
-RF achieving \rtwo{}~$= 0.712$ (20-feature fair set) represents a
+RF achieving \rtwo{}~$= 0.712$ (20-feature fair set) is a
 substantial improvement over na\"ive structure--activity reasoning,
 not merely a statistical artefact.
 
