@@ -65,3 +65,27 @@ manuscript/main_rsc*
 manuscript/rsc.bst
 *.db
 scripts/*results*
+
+# ── Git Content Policy (PRIVATE — not for public repos) ──
+# Manuscripts & drafts (submitted separately to journals)
+manuscript/
+cover_letter*
+Cover.*
+*draft*
+*.docx
+*.odt
+*.tex
+
+# Infrastructure & deployment
+docs/
+k8s/
+Dockerfile
+.dockerignore
+batch_runner.py
+docker-compose*.yml
+
+# Large computation artifacts
+*.pkl
+*.cube
+*.chk
+checkpoints/
