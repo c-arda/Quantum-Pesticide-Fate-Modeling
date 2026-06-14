@@ -98,21 +98,13 @@ def extract_features(substance):
             from rdkit import Chem
             mol = Chem.MolFromSmiles(smiles)
             if mol:
-                # SMARTS patterns for enzymatically/hydrolytically-cleavable bonds
-                # Phase 4a originals + pesticide-fate review expansion
+                # SMARTS patterns for enzymatically-cleavable bonds
                 patterns = [
-                    Chem.MolFromSmarts("[C](=O)[O][C,c]"),           # ester
-                    Chem.MolFromSmarts("[C](=O)[NH]"),                # amide
-                    Chem.MolFromSmarts("[NH]C(=O)O"),                 # carbamate
-                    Chem.MolFromSmarts("[P](=O)(O)(O)"),              # phosphoester
-                    Chem.MolFromSmarts("[C](=O)S"),                   # thioester
-                    # Expanded: pesticide-fate review additions
-                    Chem.MolFromSmarts("[S](=O)(=O)[NH]C(=O)[NH]"),  # sulfonylurea bridge
-                    Chem.MolFromSmarts("[NH]([CH3])C(=O)O[c]"),      # N-methylcarbamate (carbaryl)
-                    Chem.MolFromSmarts("Clc1nc(N)nc(N)n1"),           # triazine hydrolytic dechlorination
-                    Chem.MolFromSmarts("[S](=O)(=O)[NH][c]"),         # sulfonamide
-                    Chem.MolFromSmarts("COC(=O)/C=C"),                # strobilurin methoxyacrylate
-                    Chem.MolFromSmarts("ClCC(=O)N([C])[C]"),          # chloroacetamide
+                    Chem.MolFromSmarts("[C](=O)[O][C,c]"),    # ester
+                    Chem.MolFromSmarts("[C](=O)[NH]"),         # amide
+                    Chem.MolFromSmarts("[NH]C(=O)O"),          # carbamate
+                    Chem.MolFromSmarts("[P](=O)(O)(O)"),       # phosphoester
+                    Chem.MolFromSmarts("[C](=O)S"),            # thioester
                 ]
                 for pat in patterns:
                     if pat:
@@ -136,58 +128,23 @@ def extract_features(substance):
     # 3. Bioaccessibility: log10(solubility / koc) — microbial availability
     bioaccessibility = np.log10(max(sol, 1e-6) / max(koc, 1))
 
-    # 4. Speciation-aware charge state — Henderson-Hasselbalch at soil pH 6.5
-    #    Fixes: single-pKa logic failed for glyphosate (4 pKa values),
-    #    sulfonylureas, 2,4-D, imazapyr, bentazone (all ionisable at soil pH).
-    #    Now computes neutral fraction α_neutral for Henry's law correction too.
-    SOIL_PH = 6.5
-    pka_values = substance.get("pka_values", None)  # list of pKa values
-    pka = substance.get("pka", None)  # single pKa (legacy)
-    is_permanently_charged = substance.get("permanently_charged", False)
-
-    if is_permanently_charged:
-        # Diquat, paraquat — quaternary ammonium, always cationic
-        charge_state = 1.0
-        alpha_neutral = 0.0
-    elif pka_values and len(pka_values) > 0:
-        # Multi-pKa speciation (glyphosate, imidazolinones, etc.)
-        # For acids: fraction neutral = 1 / (1 + 10^(pH - pKa))
-        # For bases: fraction neutral = 1 / (1 + 10^(pKa - pH))
-        # Simplified: compute product of acid/base neutral fractions
-        alpha_neutral = 1.0
-        net_charge = 0.0
-        for pk in sorted(pka_values):
-            if pk < SOIL_PH:
-                # This group is deprotonated at soil pH → anionic contribution
-                frac_ionized = 1.0 / (1.0 + 10 ** (pk - SOIL_PH))
-                alpha_neutral *= (1.0 - frac_ionized)
-                net_charge -= frac_ionized
-            else:
-                # This group is protonated at soil pH → neutral or cationic
-                frac_protonated = 1.0 / (1.0 + 10 ** (SOIL_PH - pk))
-                alpha_neutral *= frac_protonated
-                # Bases contribute positive charge when protonated
-                if pk > 8.0:  # likely an amine
-                    net_charge += frac_protonated
-        # Encode as signed charge magnitude
-        charge_state = float(np.clip(net_charge, -1.0, 1.0))
-        alpha_neutral = float(np.clip(alpha_neutral, 0.0, 1.0))
-    elif pka is not None:
-        # Single pKa — legacy path with improved logic
-        if pka > 10:
-            charge_state = 1.0
-            alpha_neutral = 1.0 / (1.0 + 10 ** (pka - SOIL_PH))
-        elif pka < 2:
-            charge_state = -0.5
-            alpha_neutral = 1.0 / (1.0 + 10 ** (SOIL_PH - pka))
-        else:
-            frac_ionized = 1.0 / (1.0 + 10 ** (pka - SOIL_PH))
-            charge_state = float(np.clip(-frac_ionized, -1.0, 1.0))
-            alpha_neutral = float(1.0 - frac_ionized)
-    else:
+    # ── Phase 4b: Blind-spot corrections ──
+    # 4. Charge state — pKa-based cationic correction
+    #    Permanently charged molecules (Diquat, Paraquat) bind irreversibly
+    #    to clay minerals → effective bioaccessibility ≈ 0
+    pka = substance.get("pka", None)
+    if pka is None:
         # Neutral molecule — no charge correction
         charge_state = 0.0
-        alpha_neutral = 1.0
+    elif pka > 10:
+        # Strong base → fully protonated at soil pH → cationic binding
+        charge_state = 1.0
+    elif pka < 2:
+        # Strong acid → anionic at soil pH → mobile
+        charge_state = -0.5
+    else:
+        # Weak acid/base — partial correction
+        charge_state = max(0, (pka - 5.0) / 5.0)  # 0 at pH5, 1.0 at pH10
 
     # 5. Conjugated pi system size — photolability proxy
     #    Large conjugated systems (rotenone, pyrethrins) absorb UV/vis
@@ -242,11 +199,8 @@ def extract_features(substance):
 
     # 8. Henry-to-solubility ratio — volatilization as degradation pathway
     #    High Henry const + low solubility → volatile loss from soil
-    #    Fix: use effective Henry constant H_eff = H × α_neutral for ionisables
-    #    (at soil pH 6.5, ionised forms do not partition to gas phase)
     henry = substance.get("henry_const", 1e-5)
-    henry_eff = henry * alpha_neutral  # corrected for ionisation
-    henry_volatility = np.log10(max(henry_eff, 1e-15)) - np.log10(max(sol, 1e-6))
+    henry_volatility = np.log10(max(henry, 1e-15)) - np.log10(max(sol, 1e-6))
 
     # 9. Oxidation susceptibility — electron-rich sites for cytochrome P450
     #    Tertiary C, allylic/benzylic, thioethers → metabolic lability
