@@ -4,6 +4,7 @@ numpy>=2.4,<3.0
 scipy>=1.15,<2.0
 pennylane>=0.44,<0.46
 scikit-learn>=1.8,<1.9
+matplotlib>=3.8,<4.0
 rdkit>=2025.3
 # Phase 6: noisy-sim harness + IonQ access (see docs/PHASE6_HARDWARE_DEPLOYMENT_PLAN.md)
 pennylane-cirq>=0.36
