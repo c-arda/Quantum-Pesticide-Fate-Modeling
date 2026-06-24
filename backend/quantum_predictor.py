@@ -9,7 +9,7 @@ v3 Upgrades (Phase 5a):
   - Early stopping with patience to prevent overtraining
   - Reduced DegT50 overfitting (params/data: 2.7 → 1.39)
 
-v2 Upgrades:
+v2 Upgrades (single-circuit history; superseded by the per-target design above):
   - 12 qubits (was 6) → larger Hilbert space
   - 8 variational layers (was 4) → more expressivity
   - Gradient-based Adam optimizer (was stochastic perturbation)
