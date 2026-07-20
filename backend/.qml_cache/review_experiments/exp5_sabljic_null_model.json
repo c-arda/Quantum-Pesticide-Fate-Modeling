@@ -1,0 +1,9 @@
+{
+  "experiment": "sabljic_null_model_koc",
+  "formula": "log_Koc = 0.81 * log_Kow + 0.10",
+  "reference": "Sabljic et al. 1995, Chemosphere 31:4489",
+  "r2_koc": -0.9695,
+  "mae_koc": 1.1561,
+  "n_substances": 110,
+  "elapsed_seconds": 0.1
+}

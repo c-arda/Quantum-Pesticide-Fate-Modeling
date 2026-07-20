@@ -34,16 +34,24 @@
   new §3.5 "Domain Applicability" subsection in `main.tex` / `main_rsc.tex`.
 - Source of truth: `backend/.qml_cache/review_experiments/exp2_grouped_cv.json`.
 
-### Exp 3: Binary P/vP Classification
+### Exp 3: Binary P/vP Classification (re-run 2026-06-11 on gnosys — N=110 fix)
+
+> The original laptop32 run used a stale 111-substance snapshot (its class
+> counts summed to 111: 10 vP vs 101 non-vP). The live `substances.db` holds
+> 110 unique substances — the 111th was a duplicate `Difenoconazole` that the
+> SQLite migration deduped via `INSERT OR REPLACE` on a UNIQUE name. Re-run on
+> N=110; the numbers below are canonical and match `tab:binary` in `main.tex`.
 
 | Model | P (>60d) BA | P MCC | vP (>180d) BA | vP MCC |
 |-------|------------|-------|---------------|--------|
-| RF | 0.642 | 0.365 | 0.500 | 0.000 |
-| **GB** | **0.722** | **0.498** | **0.720** | **0.422** |
+| RF | 0.660 | 0.432 | 0.500 | 0.000 |
+| **GB** | **0.791** | **0.623** | **0.670** | **0.340** |
 
+- Class counts: $n_P$ = 28/82, $n_{vP}$ = 10/100.
 - GB is clearly better for regulatory classification.
-- RF completely fails on vP (predicts all non-vP — class imbalance issue: 10 vP vs 101 non-vP).
-- GB gets 5/10 vP correct with only 6 false positives — usable for screening.
+- RF completely fails on vP (predicts all non-vP — class imbalance issue: 10 vP vs 100 non-vP).
+- GB gets 4/10 vP correct with 6 false positives — usable for screening.
+- Source of truth: `backend/.qml_cache/review_experiments/exp3_binary_classification.json`.
 
 ---
 
@@ -51,7 +59,7 @@
 
 | File | Key Result |
 |------|-----------|
-| `exp2_17feature_baseline.json` | 17-feature baseline ≈ 21-feature; RF DegT50 R²=0.29 |
+| `exp2_17feature_baseline.json` | Dropping the 4 DegT50-targeted descriptors costs RF 0.112 and GB 0.153 on DegT50 (RF 0.290→0.178, GB 0.285→0.132); Koc is unaffected (Δ ≤ 0.009). The earlier "17f ≈ 21f" summary here was wrong — it quoted the 21f value as if it were the 17f result. |
 | `exp3_bioaccessibility_ablation.json` | Removing bioaccessibility drops R² by only 0.013 — negligible |
 | `exp4_mlp_baseline.json` | MLP(8,4) R²=−0.28; MLP(64,32) R²=0.07 — still poor for DegT50 |
 | `exp5_sabljic_null_model.json` | Koc R²=−0.97 — Sabljic formula fails on this dataset |

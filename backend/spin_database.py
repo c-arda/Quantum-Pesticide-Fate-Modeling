@@ -681,16 +681,6 @@ if _sqlite_data is None:
         "n_atoms": 35, "n_heavy": 22, "hbd": 1, "hba": 3, "n_rings": 3, "n_rotatable": 3
     },
     {
-        "name": "Difenoconazole", "cas": "119446-68-3", "formula": "C19H17Cl2N3O3",
-        "smiles": "OC(Cn1cncn1)c1ccc(Oc2ccc(Cl)cc2Cl)cc1OC1COCC1", "mw": 406.3,
-        "degT50_soil": 90, "degT50_water": 65, "degT50_sediment": 400,
-        "koc": 3760, "kfoc": 3760, "freundlich_n": 0.85,
-        "vapor_pressure": 3.3e-8, "henry_const": 1.0e-6,
-        "solubility": 15, "pka": 1.07, "logP": 4.36,
-        "cls": "Triazole", "status": "Approved",
-        "n_atoms": 44, "n_heavy": 27, "hbd": 1, "hba": 6, "n_rings": 4, "n_rotatable": 7
-    },
-    {
         "name": "Penconazole", "cas": "66246-88-6", "formula": "C13H15Cl2N3",
         "smiles": "CCCC(Cn1cncn1)c1ccc(Cl)cc1Cl", "mw": 284.2,
         "degT50_soil": 117, "degT50_water": 60, "degT50_sediment": 250,

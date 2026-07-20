@@ -1,0 +1,1069 @@
+{
+  "stage": "phase6_optionB_aria1_full_study",
+  "generated_utc": "2026-05-01T13:19:59.229986+00:00",
+  "weights_sha256": "cc76311107b09028ccee7ac7797181d2fde62c0677327b4b3f67f0c2431b1085",
+  "shots_per_job": 1024,
+  "n_aria1_compounds": 110,
+  "panel_a_engine_fidelity": {
+    "n_matched": 110,
+    "deg": {
+      "r2_noiseless_in_sample": 0.81290226818354,
+      "r2_aria1_in_sample": 0.6070404499334999,
+      "mae_noiseless": 0.22513044613931676,
+      "mae_aria1": 0.3413277025183133,
+      "rmse_noiseless": 0.2946695180962446,
+      "rmse_aria1": 0.42704621354005823,
+      "delta_r2_noise_penalty": 0.20586181825004013,
+      "paired_delta_abs_residual": {
+        "mean": 0.1161972563789965,
+        "ci95_lo": 0.08246230998990242,
+        "ci95_hi": 0.15218019064587937,
+        "interpretation": "positive = Aria-1 noise increases |residual| vs noiseless"
+      }
+    },
+    "koc": {
+      "r2_noiseless_in_sample": 0.956894064975774,
+      "r2_aria1_in_sample": 0.519503923675023,
+      "mae_noiseless": 0.17251949566595276,
+      "mae_aria1": 0.5970999266235016,
+      "rmse_noiseless": 0.21580939634861177,
+      "rmse_aria1": 0.7205211571037885,
+      "delta_r2_noise_penalty": 0.43739014130075105,
+      "paired_delta_abs_residual": {
+        "mean": 0.4245804309575488,
+        "ci95_lo": 0.34695606435301557,
+        "ci95_hi": 0.5039482845625302,
+        "interpretation": "positive = Aria-1 noise increases |residual| vs noiseless"
+      }
+    }
+  },
+  "panel_b_generalization": {
+    "VQC_noiseless_5fold": {
+      "deg_r2": -0.028,
+      "koc_r2": 0.2692,
+      "deg_mae": 0.5552,
+      "koc_mae": 0.5693
+    },
+    "VQC_aria1_in_sample": {
+      "deg_r2": 0.6070404499334999,
+      "koc_r2": 0.519503923675023,
+      "caveat": "In-sample only. Per-fold Aria-1 retraining is queue-prohibitive (~30 min/fold \u00d7 5 folds \u00d7 2 targets); treat as upper bound. Fair generalization comparison would require ~5 hr of additional IonQ queue time."
+    },
+    "RandomForest_5fold": {
+      "deg_r2": 0.2735,
+      "koc_r2": 0.7645,
+      "deg_mae": 0.4482,
+      "koc_mae": 0.3015
+    },
+    "GradientBoosting_5fold": {
+      "deg_r2": 0.2033,
+      "koc_r2": 0.7819,
+      "deg_mae": 0.4788,
+      "koc_mae": 0.2996
+    },
+    "Ridge_5fold": {
+      "deg_r2": 0.2502,
+      "koc_r2": 0.8246,
+      "deg_mae": 0.4553,
+      "koc_mae": 0.2714
+    },
+    "Lasso_5fold": {
+      "deg_r2": 0.0264,
+      "koc_r2": 0.7336,
+      "deg_mae": 0.5377,
+      "koc_mae": 0.3444
+    }
+  },
+  "per_compound": [
+    {
+      "name": "Chlorpyrifos",
+      "deg_exp": 1.6989700043360187,
+      "koc_exp": 3.9112108931375533,
+      "deg_pred_noiseless": 1.3376277490589554,
+      "deg_pred_aria1": 1.120795680804866,
+      "koc_pred_noiseless": 3.7253376731080747,
+      "koc_pred_aria1": 2.584901681661325
+    },
+    {
+      "name": "Dimethoate",
+      "deg_exp": 0.3979400086720376,
+      "koc_exp": 1.4471580313422192,
+      "deg_pred_noiseless": 0.5980739143949056,
+      "deg_pred_aria1": 0.6909828341365762,
+      "koc_pred_noiseless": 1.2836889656437982,
+      "koc_pred_aria1": 1.2645490434098483
+    },
+    {
+      "name": "Malathion",
+      "deg_exp": 0.0,
+      "koc_exp": 3.255272505103306,
+      "deg_pred_noiseless": 0.4237915870647836,
+      "deg_pred_aria1": 0.4059387248872504,
+      "koc_pred_noiseless": 3.110954348939031,
+      "koc_pred_aria1": 2.4252731810538415
+    },
+    {
+      "name": "Phosmet",
+      "deg_exp": 0.6989700043360189,
+      "koc_exp": 2.8188854145940097,
+      "deg_pred_noiseless": 1.4590063151563748,
+      "deg_pred_aria1": 1.4061904984739808,
+      "koc_pred_noiseless": 2.4792481604526064,
+      "koc_pred_aria1": 1.942303675857398
+    },
+    {
+      "name": "Imidacloprid",
+      "deg_exp": 2.2810333672477277,
+      "koc_exp": 2.3521825181113627,
+      "deg_pred_noiseless": 1.8497918896334413,
+      "deg_pred_aria1": 1.8257402718368447,
+      "koc_pred_noiseless": 2.3000548738509674,
+      "koc_pred_aria1": 1.9416597995379377
+    },
+    {
+      "name": "Thiamethoxam",
+      "deg_exp": 1.6989700043360187,
+      "koc_exp": 1.7481880270062005,
+      "deg_pred_noiseless": 1.2955627510254057,
+      "deg_pred_aria1": 1.216204498112622,
+      "koc_pred_noiseless": 1.795275478756841,
+      "koc_pred_aria1": 1.76937409723875
+    },
+    {
+      "name": "Clothianidin",
+      "deg_exp": 2.7363965022766426,
+      "koc_exp": 2.089905111439398,
+      "deg_pred_noiseless": 2.581841093826217,
+      "deg_pred_aria1": 1.9925193615072376,
+      "koc_pred_noiseless": 2.0753230035545096,
+      "koc_pred_aria1": 1.9068362028080226
+    },
+    {
+      "name": "Acetamiprid",
+      "deg_exp": 0.47712125471966244,
+      "koc_exp": 2.3010299956639813,
+      "deg_pred_noiseless": 0.7147766278599471,
+      "deg_pred_aria1": 0.7372783223242594,
+      "koc_pred_noiseless": 1.924513121090845,
+      "koc_pred_aria1": 1.6972656578088179
+    },
+    {
+      "name": "Thiacloprid",
+      "deg_exp": 1.255272505103306,
+      "koc_exp": 2.788875115775417,
+      "deg_pred_noiseless": 1.4547120006516714,
+      "deg_pred_aria1": 1.3071819138674319,
+      "koc_pred_noiseless": 3.3476277750192445,
+      "koc_pred_aria1": 2.6610136279279724
+    },
+    {
+      "name": "Tebuconazole",
+      "deg_exp": 1.7403626894942439,
+      "koc_exp": 2.885926339801431,
+      "deg_pred_noiseless": 1.650430580641872,
+      "deg_pred_aria1": 1.449922763737666,
+      "koc_pred_noiseless": 2.8140268036284466,
+      "koc_pred_aria1": 2.3290599069973363
+    },
+    {
+      "name": "Propiconazole",
+      "deg_exp": 1.6020599913279623,
+      "koc_exp": 3.035829825252828,
+      "deg_pred_noiseless": 1.598956744115791,
+      "deg_pred_aria1": 1.5688088451350881,
+      "koc_pred_noiseless": 3.0802749541440924,
+      "koc_pred_aria1": 2.5793006837510037
+    },
+    {
+      "name": "Epoxiconazole",
+      "deg_exp": 2.0791812460476247,
+      "koc_exp": 3.030599721965951,
+      "deg_pred_noiseless": 2.288373640472114,
+      "deg_pred_aria1": 1.7233962488686525,
+      "koc_pred_noiseless": 3.1753157875379223,
+      "koc_pred_aria1": 2.4538124509001826
+    },
+    {
+      "name": "Metconazole",
+      "deg_exp": 1.9030899869919435,
+      "koc_exp": 2.7075701760979363,
+      "deg_pred_noiseless": 1.8276130040827079,
+      "deg_pred_aria1": 1.5102360504685985,
+      "koc_pred_noiseless": 2.5630163319891976,
+      "koc_pred_aria1": 2.124564663439413
+    },
+    {
+      "name": "Lambda-cyhalothrin",
+      "deg_exp": 1.4771212547196624,
+      "koc_exp": 5.195899652409234,
+      "deg_pred_noiseless": 1.6096693575174128,
+      "deg_pred_aria1": 1.4046387381017729,
+      "koc_pred_noiseless": 5.093131496640069,
+      "koc_pred_aria1": 3.922565364520172
+    },
+    {
+      "name": "Cypermethrin",
+      "deg_exp": 1.7781512503836436,
+      "koc_exp": 4.799340549453582,
+      "deg_pred_noiseless": 1.555050162674561,
+      "deg_pred_aria1": 1.355143092362718,
+      "koc_pred_noiseless": 4.932583955437849,
+      "koc_pred_aria1": 3.4454141876934474
+    },
+    {
+      "name": "Deltamethrin",
+      "deg_exp": 1.3222192947339193,
+      "koc_exp": 5.662757831681574,
+      "deg_pred_noiseless": 1.3953357805138658,
+      "deg_pred_aria1": 1.2712978913517934,
+      "koc_pred_noiseless": 5.512455391109181,
+      "koc_pred_aria1": 4.236950014201912
+    },
+    {
+      "name": "Azoxystrobin",
+      "deg_exp": 1.8920946026904804,
+      "koc_exp": 2.6263403673750423,
+      "deg_pred_noiseless": 1.8086659401253797,
+      "deg_pred_aria1": 1.3559404745443626,
+      "koc_pred_noiseless": 2.5803482175441133,
+      "koc_pred_aria1": 2.0548071308858744
+    },
+    {
+      "name": "Pyraclostrobin",
+      "deg_exp": 1.505149978319906,
+      "koc_exp": 3.9691828592322613,
+      "deg_pred_noiseless": 0.865897936393478,
+      "deg_pred_aria1": 0.6628449378100083,
+      "koc_pred_noiseless": 3.9621015467467036,
+      "koc_pred_aria1": 2.7997864105394905
+    },
+    {
+      "name": "Kresoxim-methyl",
+      "deg_exp": 0.0,
+      "koc_exp": 2.4885507165004443,
+      "deg_pred_noiseless": 0.6852729981583365,
+      "deg_pred_aria1": 0.5651307609798785,
+      "koc_pred_noiseless": 2.48158816534063,
+      "koc_pred_aria1": 1.9865364915171688
+    },
+    {
+      "name": "Glyphosate",
+      "deg_exp": 1.0791812460476249,
+      "koc_exp": 4.336439719816778,
+      "deg_pred_noiseless": 1.0341603601973866,
+      "deg_pred_aria1": 0.721656729673123,
+      "koc_pred_noiseless": 4.109029599036185,
+      "koc_pred_aria1": 3.1613346240384606
+    },
+    {
+      "name": "Glufosinate-ammonium",
+      "deg_exp": 0.8450980400142568,
+      "koc_exp": 2.6989700043360187,
+      "deg_pred_noiseless": 0.7672270597305308,
+      "deg_pred_aria1": 0.6213710476368995,
+      "koc_pred_noiseless": 2.481633527071011,
+      "koc_pred_aria1": 1.8668515540150148
+    },
+    {
+      "name": "Pendimethalin",
+      "deg_exp": 1.954242509439325,
+      "koc_exp": 4.24281463978553,
+      "deg_pred_noiseless": 2.107008835178321,
+      "deg_pred_aria1": 1.6993690788815328,
+      "koc_pred_noiseless": 3.6415207803581935,
+      "koc_pred_aria1": 2.7148108976922933
+    },
+    {
+      "name": "Trifluralin",
+      "deg_exp": 2.230448921378274,
+      "koc_exp": 3.9030899869919438,
+      "deg_pred_noiseless": 2.101317880001448,
+      "deg_pred_aria1": 1.677509317751566,
+      "koc_pred_noiseless": 3.8556879001259197,
+      "koc_pred_aria1": 3.1196000523901564
+    },
+    {
+      "name": "Mancozeb",
+      "deg_exp": 0.0,
+      "koc_exp": 2.999130541287371,
+      "deg_pred_noiseless": 0.37553727218428473,
+      "deg_pred_aria1": 0.5183405946728922,
+      "koc_pred_noiseless": 2.8785174851485955,
+      "koc_pred_aria1": 2.188064798989402
+    },
+    {
+      "name": "Thiram",
+      "deg_exp": 1.1760912590556813,
+      "koc_exp": 2.8260748027008264,
+      "deg_pred_noiseless": 0.9488555727372037,
+      "deg_pred_aria1": 0.70773542408632,
+      "koc_pred_noiseless": 2.6629546921430753,
+      "koc_pred_aria1": 2.13906613051032
+    },
+    {
+      "name": "Metazachlor",
+      "deg_exp": 0.8450980400142568,
+      "koc_exp": 1.7323937598229686,
+      "deg_pred_noiseless": 0.8076521000159788,
+      "deg_pred_aria1": 0.7097689120395738,
+      "koc_pred_noiseless": 2.2666295312353024,
+      "koc_pred_aria1": 1.983399327073164
+    },
+    {
+      "name": "S-Metolachlor",
+      "deg_exp": 1.1760912590556813,
+      "koc_exp": 2.3010299956639813,
+      "deg_pred_noiseless": 0.9374755366273184,
+      "deg_pred_aria1": 0.7950778156110954,
+      "koc_pred_noiseless": 2.3252049040455716,
+      "koc_pred_aria1": 1.6867257751141498
+    },
+    {
+      "name": "Prosulfocarb",
+      "deg_exp": 1.0,
+      "koc_exp": 3.2286569581089353,
+      "deg_pred_noiseless": 1.1081931822553193,
+      "deg_pred_aria1": 0.9141615572529038,
+      "koc_pred_noiseless": 3.029481162682789,
+      "koc_pred_aria1": 2.173674133766208
+    },
+    {
+      "name": "Metaldehyde",
+      "deg_exp": 0.7781512503836436,
+      "koc_exp": 1.5314789170422551,
+      "deg_pred_noiseless": 0.8297306201686562,
+      "deg_pred_aria1": 0.488804100541985,
+      "koc_pred_noiseless": 1.4134052424127719,
+      "koc_pred_aria1": 0.9164345483302688
+    },
+    {
+      "name": "Ferric phosphate",
+      "deg_exp": -0.3010299956639812,
+      "koc_exp": 4.0,
+      "deg_pred_noiseless": -0.2965766120820231,
+      "deg_pred_aria1": -0.10991675039101823,
+      "koc_pred_noiseless": 3.9539984495424303,
+      "koc_pred_aria1": 3.042116302341359
+    },
+    {
+      "name": "Chlorothalonil",
+      "deg_exp": 1.3424226808222062,
+      "koc_exp": 3.1398790864012365,
+      "deg_pred_noiseless": 1.384378483619028,
+      "deg_pred_aria1": 1.173424054413728,
+      "koc_pred_noiseless": 3.1254524781673383,
+      "koc_pred_aria1": 2.526580343341828
+    },
+    {
+      "name": "2,4-D",
+      "deg_exp": 1.0,
+      "koc_exp": 1.7781512503836436,
+      "deg_pred_noiseless": 1.1873293783654955,
+      "deg_pred_aria1": 0.896170111717348,
+      "koc_pred_noiseless": 1.9138711625802096,
+      "koc_pred_aria1": 1.8751318662248688
+    },
+    {
+      "name": "MCPA",
+      "deg_exp": 1.146128035678238,
+      "koc_exp": 1.8692317197309762,
+      "deg_pred_noiseless": 1.1083139503763313,
+      "deg_pred_aria1": 1.0309396941486124,
+      "koc_pred_noiseless": 1.6926960550580223,
+      "koc_pred_aria1": 1.3703666829999421
+    },
+    {
+      "name": "Metsulfuron-methyl",
+      "deg_exp": 1.4771212547196624,
+      "koc_exp": 1.5440680443502757,
+      "deg_pred_noiseless": 1.3648097491496616,
+      "deg_pred_aria1": 1.5094225523352445,
+      "koc_pred_noiseless": 1.4598296750910627,
+      "koc_pred_aria1": 1.4322758719316906
+    },
+    {
+      "name": "Tribenuron-methyl",
+      "deg_exp": 0.6989700043360189,
+      "koc_exp": 1.414973347970818,
+      "deg_pred_noiseless": 0.5114988876003341,
+      "deg_pred_aria1": 0.6280617697944947,
+      "koc_pred_noiseless": 1.6086669998448926,
+      "koc_pred_aria1": 1.4307682819185574
+    },
+    {
+      "name": "Isoproturon",
+      "deg_exp": 1.0791812460476249,
+      "koc_exp": 2.0863598306747484,
+      "deg_pred_noiseless": 1.230058177456478,
+      "deg_pred_aria1": 1.0122668113782034,
+      "koc_pred_noiseless": 2.112758911557656,
+      "koc_pred_aria1": 1.7417689460786607
+    },
+    {
+      "name": "Diuron",
+      "deg_exp": 1.8750612633917,
+      "koc_exp": 2.910090545594068,
+      "deg_pred_noiseless": 1.774718112487728,
+      "deg_pred_aria1": 1.3078029788855523,
+      "koc_pred_noiseless": 3.0365109592589237,
+      "koc_pred_aria1": 2.2792618888358613
+    },
+    {
+      "name": "Linuron",
+      "deg_exp": 1.6812412373755872,
+      "koc_exp": 2.568201724066995,
+      "deg_pred_noiseless": 1.3626734659207287,
+      "deg_pred_aria1": 1.1200699066852966,
+      "koc_pred_noiseless": 2.4118459385007034,
+      "koc_pred_aria1": 1.9048462691407853
+    },
+    {
+      "name": "Pirimicarb",
+      "deg_exp": 0.9542425094393249,
+      "koc_exp": 2.5888317255942073,
+      "deg_pred_noiseless": 0.6155648781727643,
+      "deg_pred_aria1": 0.8271834110718881,
+      "koc_pred_noiseless": 2.357452004194783,
+      "koc_pred_aria1": 2.1868744103478246
+    },
+    {
+      "name": "Methomyl",
+      "deg_exp": 0.8450980400142568,
+      "koc_exp": 1.8573324964312685,
+      "deg_pred_noiseless": 0.8250524419600056,
+      "deg_pred_aria1": 0.6050330109305355,
+      "koc_pred_noiseless": 2.030204598776186,
+      "koc_pred_aria1": 1.9522944938295854
+    },
+    {
+      "name": "Carbendazim",
+      "deg_exp": 1.6020599913279623,
+      "koc_exp": 2.3521825181113627,
+      "deg_pred_noiseless": 1.6732621198690505,
+      "deg_pred_aria1": 1.450329561153866,
+      "koc_pred_noiseless": 2.110694803196793,
+      "koc_pred_aria1": 1.7359325233298848
+    },
+    {
+      "name": "Thiophanate-methyl",
+      "deg_exp": 0.6020599913279624,
+      "koc_exp": 3.2624510897304293,
+      "deg_pred_noiseless": 0.6660161748785883,
+      "deg_pred_aria1": 0.7534189485568692,
+      "koc_pred_noiseless": 3.1055941217376892,
+      "koc_pred_aria1": 2.0973095269226674
+    },
+    {
+      "name": "Diquat",
+      "deg_exp": 3.0,
+      "koc_exp": 6.0,
+      "deg_pred_noiseless": 2.7228761575381704,
+      "deg_pred_aria1": 2.4377022474042693,
+      "koc_pred_noiseless": 5.885328907961087,
+      "koc_pred_aria1": 4.886799759594155
+    },
+    {
+      "name": "Terbuthylazine",
+      "deg_exp": 1.4471580313422192,
+      "koc_exp": 2.3636119798921444,
+      "deg_pred_noiseless": 1.6150096242470133,
+      "deg_pred_aria1": 1.3945702183724165,
+      "koc_pred_noiseless": 2.2080508943525867,
+      "koc_pred_aria1": 1.6588389567493822
+    },
+    {
+      "name": "Atrazine",
+      "deg_exp": 1.8750612633917,
+      "koc_exp": 2.0,
+      "deg_pred_noiseless": 1.3535316270768496,
+      "deg_pred_aria1": 1.2823503949527029,
+      "koc_pred_noiseless": 2.105947327728289,
+      "koc_pred_aria1": 2.156999267894537
+    },
+    {
+      "name": "Boscalid",
+      "deg_exp": 2.3010299956639813,
+      "koc_exp": 2.887617300335736,
+      "deg_pred_noiseless": 2.3736274680756466,
+      "deg_pred_aria1": 1.965589431748906,
+      "koc_pred_noiseless": 2.9635660259474728,
+      "koc_pred_aria1": 2.2864104103720835
+    },
+    {
+      "name": "Fluopyram",
+      "deg_exp": 2.4771212547196626,
+      "koc_exp": 2.629409599102719,
+      "deg_pred_noiseless": 2.229680149632012,
+      "deg_pred_aria1": 1.979121592597977,
+      "koc_pred_noiseless": 2.3215829169104945,
+      "koc_pred_aria1": 2.1955643727767398
+    },
+    {
+      "name": "Chlorantraniliprole",
+      "deg_exp": 2.775974331129369,
+      "koc_exp": 2.558708570533166,
+      "deg_pred_noiseless": 2.3260965810297085,
+      "deg_pred_aria1": 1.8274195815488765,
+      "koc_pred_noiseless": 2.703326328528094,
+      "koc_pred_aria1": 2.3365925145898214
+    },
+    {
+      "name": "Spinosad",
+      "deg_exp": 0.9542425094393249,
+      "koc_exp": 4.1673173347481764,
+      "deg_pred_noiseless": 0.9932631392685705,
+      "deg_pred_aria1": 0.8394838531037213,
+      "koc_pred_noiseless": 3.845640232651004,
+      "koc_pred_aria1": 3.196301819253048
+    },
+    {
+      "name": "Indoxacarb",
+      "deg_exp": 0.6020599913279624,
+      "koc_exp": 3.835056101720116,
+      "deg_pred_noiseless": 0.800375302837532,
+      "deg_pred_aria1": 0.779430008340118,
+      "koc_pred_noiseless": 3.7394864298998582,
+      "koc_pred_aria1": 2.690444732939502
+    },
+    {
+      "name": "Fipronil",
+      "deg_exp": 1.8129133566428555,
+      "koc_exp": 2.904715545278681,
+      "deg_pred_noiseless": 1.7931250288603766,
+      "deg_pred_aria1": 1.4246906994258541,
+      "koc_pred_noiseless": 3.0369165858920573,
+      "koc_pred_aria1": 2.7524158286197253
+    },
+    {
+      "name": "Cyproconazole",
+      "deg_exp": 1.7781512503836436,
+      "koc_exp": 2.637489729512511,
+      "deg_pred_noiseless": 2.0940966425387946,
+      "deg_pred_aria1": 1.8322571761123836,
+      "koc_pred_noiseless": 2.4326711409886905,
+      "koc_pred_aria1": 2.0717600577883992
+    },
+    {
+      "name": "Flutriafol",
+      "deg_exp": 3.1427022457376155,
+      "koc_exp": 2.311753861055754,
+      "deg_pred_noiseless": 2.29474429246042,
+      "deg_pred_aria1": 1.8761376632670643,
+      "koc_pred_noiseless": 2.2684878749182475,
+      "koc_pred_aria1": 1.8293910731158647
+    },
+    {
+      "name": "Penconazole",
+      "deg_exp": 2.0681858617461617,
+      "koc_exp": 3.089905111439398,
+      "deg_pred_noiseless": 1.8385596605914238,
+      "deg_pred_aria1": 1.8333098724784445,
+      "koc_pred_noiseless": 3.251812122892896,
+      "koc_pred_aria1": 2.3305468475580695
+    },
+    {
+      "name": "Bifenthrin",
+      "deg_exp": 1.9822712330395684,
+      "koc_exp": 5.117271295655764,
+      "deg_pred_noiseless": 1.7979865277221831,
+      "deg_pred_aria1": 1.2892966238562507,
+      "koc_pred_noiseless": 4.660546663668903,
+      "koc_pred_aria1": 3.5075087476539863
+    },
+    {
+      "name": "Esfenvalerate",
+      "deg_exp": 1.6434526764861874,
+      "koc_exp": 4.826074802700826,
+      "deg_pred_noiseless": 1.5597399704126444,
+      "deg_pred_aria1": 1.3015417891845522,
+      "koc_pred_noiseless": 4.983626041924116,
+      "koc_pred_aria1": 4.156598921859896
+    },
+    {
+      "name": "Permethrin",
+      "deg_exp": 1.1139433523068367,
+      "koc_exp": 5.0,
+      "deg_pred_noiseless": 1.3917432708796424,
+      "deg_pred_aria1": 1.318712913848683,
+      "koc_pred_noiseless": 4.991518050834892,
+      "koc_pred_aria1": 3.9918273832267586
+    },
+    {
+      "name": "Diazinon",
+      "deg_exp": 1.6020599913279623,
+      "koc_exp": 2.784617292632875,
+      "deg_pred_noiseless": 1.4381720509925295,
+      "deg_pred_aria1": 1.0949459934417665,
+      "koc_pred_noiseless": 2.4483210552026278,
+      "koc_pred_aria1": 2.2129357766321607
+    },
+    {
+      "name": "Acephate",
+      "deg_exp": 0.47712125471966244,
+      "koc_exp": 1.414973347970818,
+      "deg_pred_noiseless": 0.3564576604084749,
+      "deg_pred_aria1": 0.4934967381583595,
+      "koc_pred_noiseless": 1.6231199248824284,
+      "koc_pred_aria1": 1.1315947860713906
+    },
+    {
+      "name": "Profenofos",
+      "deg_exp": 0.9030899869919435,
+      "koc_exp": 3.3044905277734875,
+      "deg_pred_noiseless": 1.233385134540089,
+      "deg_pred_aria1": 1.0363600589993642,
+      "koc_pred_noiseless": 3.647278366907682,
+      "koc_pred_aria1": 2.8411104468911033
+    },
+    {
+      "name": "Trifloxystrobin",
+      "deg_exp": 0.8450980400142568,
+      "koc_exp": 3.3760291817281805,
+      "deg_pred_noiseless": 0.9621590054811617,
+      "deg_pred_aria1": 1.017309621522168,
+      "koc_pred_noiseless": 3.3054115865031193,
+      "koc_pred_aria1": 2.4667561256881174
+    },
+    {
+      "name": "Fluoxastrobin",
+      "deg_exp": 1.0791812460476249,
+      "koc_exp": 2.7032913781186614,
+      "deg_pred_noiseless": 1.2560723596591858,
+      "deg_pred_aria1": 1.2804525535807625,
+      "koc_pred_noiseless": 2.8901193953998012,
+      "koc_pred_aria1": 2.4216745523041907
+    },
+    {
+      "name": "Picoxystrobin",
+      "deg_exp": 1.3424226808222062,
+      "koc_exp": 2.8785217955012063,
+      "deg_pred_noiseless": 1.0573238603504223,
+      "deg_pred_aria1": 0.9241936787719353,
+      "koc_pred_noiseless": 2.8540836691660973,
+      "koc_pred_aria1": 2.523192346117823
+    },
+    {
+      "name": "Dinotefuran",
+      "deg_exp": 1.9138138523837167,
+      "koc_exp": 1.414973347970818,
+      "deg_pred_noiseless": 1.5846458874008535,
+      "deg_pred_aria1": 1.5100749334645691,
+      "koc_pred_noiseless": 1.4879600684882517,
+      "koc_pred_aria1": 1.059044744902263
+    },
+    {
+      "name": "Nitenpyram",
+      "deg_exp": 0.0,
+      "koc_exp": 1.4771212547196624,
+      "deg_pred_noiseless": 0.3626243202933237,
+      "deg_pred_aria1": 0.6063961697476796,
+      "koc_pred_noiseless": 1.4116502348356712,
+      "koc_pred_aria1": 1.1920398860029602
+    },
+    {
+      "name": "Methiocarb",
+      "deg_exp": 0.6020599913279624,
+      "koc_exp": 2.8195439355418688,
+      "deg_pred_noiseless": 1.1892572123437715,
+      "deg_pred_aria1": 1.261714187427709,
+      "koc_pred_noiseless": 2.6095745647431343,
+      "koc_pred_aria1": 2.205182589015561
+    },
+    {
+      "name": "Oxamyl",
+      "deg_exp": 0.6989700043360189,
+      "koc_exp": 1.3979400086720377,
+      "deg_pred_noiseless": 0.7233870260357718,
+      "deg_pred_aria1": 0.6402347960252909,
+      "koc_pred_noiseless": 1.361211721661415,
+      "koc_pred_aria1": 1.39762508997666
+    },
+    {
+      "name": "Aldicarb",
+      "deg_exp": 1.4771212547196624,
+      "koc_exp": 1.4771212547196624,
+      "deg_pred_noiseless": 1.2313661884143658,
+      "deg_pred_aria1": 1.0905130965702186,
+      "koc_pred_noiseless": 1.5899389320352735,
+      "koc_pred_aria1": 1.4763011502832795
+    },
+    {
+      "name": "Penthiopyrad",
+      "deg_exp": 1.9493900066449128,
+      "koc_exp": 2.9916690073799486,
+      "deg_pred_noiseless": 2.1407754768086713,
+      "deg_pred_aria1": 1.7476994945783177,
+      "koc_pred_noiseless": 3.25869985071397,
+      "koc_pred_aria1": 2.229298006769425
+    },
+    {
+      "name": "Isopyrazam",
+      "deg_exp": 2.285557309007774,
+      "koc_exp": 3.2011238972073794,
+      "deg_pred_noiseless": 2.144209505562578,
+      "deg_pred_aria1": 1.961076755849927,
+      "koc_pred_noiseless": 3.520353169741643,
+      "koc_pred_aria1": 2.8505030610532
+    },
+    {
+      "name": "Fluxapyroxad",
+      "deg_exp": 2.1931245983544616,
+      "koc_exp": 2.683947130751512,
+      "deg_pred_noiseless": 2.3366945707790543,
+      "deg_pred_aria1": 1.6435426387901002,
+      "koc_pred_noiseless": 2.867496277076542,
+      "koc_pred_aria1": 2.7023944286416675
+    },
+    {
+      "name": "Sulfosulfuron",
+      "deg_exp": 1.0413926851582251,
+      "koc_exp": 1.5563025007672873,
+      "deg_pred_noiseless": 1.1601128750252212,
+      "deg_pred_aria1": 1.0938513220457122,
+      "koc_pred_noiseless": 1.4265874393527056,
+      "koc_pred_aria1": 1.2091848085540713
+    },
+    {
+      "name": "Nicosulfuron",
+      "deg_exp": 1.414973347970818,
+      "koc_exp": 1.4771212547196624,
+      "deg_pred_noiseless": 1.2948672581478446,
+      "deg_pred_aria1": 1.1616466389449323,
+      "koc_pred_noiseless": 1.6868679344893032,
+      "koc_pred_aria1": 1.3055954779999337
+    },
+    {
+      "name": "Flufenacet",
+      "deg_exp": 1.146128035678238,
+      "koc_exp": 2.603144372620182,
+      "deg_pred_noiseless": 1.242351179934282,
+      "deg_pred_aria1": 1.1944002887303458,
+      "koc_pred_noiseless": 3.0720857097831678,
+      "koc_pred_aria1": 2.654269489450486
+    },
+    {
+      "name": "Clomazone",
+      "deg_exp": 1.380211241711606,
+      "koc_exp": 2.4771212547196626,
+      "deg_pred_noiseless": 1.6143361880981857,
+      "deg_pred_aria1": 1.3446280208151467,
+      "koc_pred_noiseless": 2.6636092432206095,
+      "koc_pred_aria1": 2.3243300283517767
+    },
+    {
+      "name": "Dimethenamid-P",
+      "deg_exp": 1.0413926851582251,
+      "koc_exp": 2.110589710299249,
+      "deg_pred_noiseless": 1.3172725936776741,
+      "deg_pred_aria1": 1.2180506708514645,
+      "koc_pred_noiseless": 2.249698265140499,
+      "koc_pred_aria1": 1.9667340046255952
+    },
+    {
+      "name": "Metribuzin",
+      "deg_exp": 1.2787536009528289,
+      "koc_exp": 1.5797835966168101,
+      "deg_pred_noiseless": 0.7821869998032336,
+      "deg_pred_aria1": 0.805590647883274,
+      "koc_pred_noiseless": 1.5853688989874661,
+      "koc_pred_aria1": 1.7630219487487317
+    },
+    {
+      "name": "Flupyradifurone",
+      "deg_exp": 1.8195439355418688,
+      "koc_exp": 2.161368002234975,
+      "deg_pred_noiseless": 1.2442641369354355,
+      "deg_pred_aria1": 1.1389941343994043,
+      "koc_pred_noiseless": 1.9463633957193118,
+      "koc_pred_aria1": 1.2681530113809
+    },
+    {
+      "name": "Sulfoxaflor",
+      "deg_exp": 1.0791812460476249,
+      "koc_exp": 1.568201724066995,
+      "deg_pred_noiseless": 0.9697266119716381,
+      "deg_pred_aria1": 1.0486226970083719,
+      "koc_pred_noiseless": 1.9741383344837886,
+      "koc_pred_aria1": 1.5128252166619358
+    },
+    {
+      "name": "Cyantraniliprole",
+      "deg_exp": 1.5314789170422551,
+      "koc_exp": 2.760422483423212,
+      "deg_pred_noiseless": 1.896200682930719,
+      "deg_pred_aria1": 1.5053560652403168,
+      "koc_pred_noiseless": 2.6285387754006506,
+      "koc_pred_aria1": 2.5830422023553865
+    },
+    {
+      "name": "Fenpropimorph",
+      "deg_exp": 1.4471580313422192,
+      "koc_exp": 3.591064607026499,
+      "deg_pred_noiseless": 1.6007906140165502,
+      "deg_pred_aria1": 1.360745848880484,
+      "koc_pred_noiseless": 3.6863902518529432,
+      "koc_pred_aria1": 2.8966079783204655
+    },
+    {
+      "name": "Spiroxamine",
+      "deg_exp": 1.4913616938342726,
+      "koc_exp": 3.278753600952829,
+      "deg_pred_noiseless": 1.1475247504087003,
+      "deg_pred_aria1": 1.1902090310491658,
+      "koc_pred_noiseless": 2.996186302098212,
+      "koc_pred_aria1": 2.304577821309782
+    },
+    {
+      "name": "Diflubenzuron",
+      "deg_exp": 1.1139433523068367,
+      "koc_exp": 3.5563025007672873,
+      "deg_pred_noiseless": 1.0122939046682222,
+      "deg_pred_aria1": 0.8347415867431404,
+      "koc_pred_noiseless": 3.347221308749372,
+      "koc_pred_aria1": 2.499144415275477
+    },
+    {
+      "name": "Lufenuron",
+      "deg_exp": 2.1398790864012365,
+      "koc_exp": 3.950364854376123,
+      "deg_pred_noiseless": 1.6362965007043258,
+      "deg_pred_aria1": 1.4175327776620774,
+      "koc_pred_noiseless": 3.7454138498018894,
+      "koc_pred_aria1": 3.118764006371458
+    },
+    {
+      "name": "Flonicamid",
+      "deg_exp": 0.36172783601759284,
+      "koc_exp": 1.6334684555795864,
+      "deg_pred_noiseless": 1.0537624560591905,
+      "deg_pred_aria1": 1.1013396854835453,
+      "koc_pred_noiseless": 1.860071178348052,
+      "koc_pred_aria1": 1.5690131012180033
+    },
+    {
+      "name": "Pyriproxyfen",
+      "deg_exp": 1.3010299956639813,
+      "koc_exp": 4.903632516084238,
+      "deg_pred_noiseless": 1.40865931603737,
+      "deg_pred_aria1": 1.5627950484877982,
+      "koc_pred_noiseless": 4.6342758270498585,
+      "koc_pred_aria1": 3.3125528556992503
+    },
+    {
+      "name": "Aclonifen",
+      "deg_exp": 2.0718820073061255,
+      "koc_exp": 3.852845818014997,
+      "deg_pred_noiseless": 2.0003935443656222,
+      "deg_pred_aria1": 1.1850434983340419,
+      "koc_pred_noiseless": 3.7577682730682986,
+      "koc_pred_aria1": 2.8909757582182976
+    },
+    {
+      "name": "Diflufenican",
+      "deg_exp": 2.4983105537896004,
+      "koc_exp": 3.5336449787987627,
+      "deg_pred_noiseless": 2.355371762691724,
+      "deg_pred_aria1": 1.6376246533816334,
+      "koc_pred_noiseless": 3.336988522412646,
+      "koc_pred_aria1": 2.6771440578263306
+    },
+    {
+      "name": "Propyzamide",
+      "deg_exp": 1.6989700043360187,
+      "koc_exp": 2.9242792860618816,
+      "deg_pred_noiseless": 1.7515718145681993,
+      "deg_pred_aria1": 1.4523551098821434,
+      "koc_pred_noiseless": 2.675130029963701,
+      "koc_pred_aria1": 2.0127182058499495
+    },
+    {
+      "name": "Napropamide",
+      "deg_exp": 1.845098040014257,
+      "koc_exp": 2.9111576087399764,
+      "deg_pred_noiseless": 1.3454744035492014,
+      "deg_pred_aria1": 0.9325911852501796,
+      "koc_pred_noiseless": 2.6216328939248554,
+      "koc_pred_aria1": 1.9837142502382936
+    },
+    {
+      "name": "Bentazone",
+      "deg_exp": 1.3010299956639813,
+      "koc_exp": 1.7403626894942439,
+      "deg_pred_noiseless": 1.435372436515182,
+      "deg_pred_aria1": 1.2958935616660252,
+      "koc_pred_noiseless": 1.8142701404381878,
+      "koc_pred_aria1": 1.4677948309956133
+    },
+    {
+      "name": "Mecoprop-P",
+      "deg_exp": 0.9030899869919435,
+      "koc_exp": 1.6720978579357175,
+      "deg_pred_noiseless": 0.9387192951008123,
+      "deg_pred_aria1": 1.0054822529474028,
+      "koc_pred_noiseless": 1.8286543746838557,
+      "koc_pred_aria1": 1.7263369839453224
+    },
+    {
+      "name": "Phenmedipham",
+      "deg_exp": 1.3979400086720377,
+      "koc_exp": 3.24551266781415,
+      "deg_pred_noiseless": 1.3458517396878542,
+      "deg_pred_aria1": 1.1152372480550818,
+      "koc_pred_noiseless": 2.970379723954174,
+      "koc_pred_aria1": 1.9330005956939487
+    },
+    {
+      "name": "Ethofumesate",
+      "deg_exp": 1.4771212547196624,
+      "koc_exp": 2.167317334748176,
+      "deg_pred_noiseless": 1.1217789124170991,
+      "deg_pred_aria1": 0.9043622742787875,
+      "koc_pred_noiseless": 2.7445105957102682,
+      "koc_pred_aria1": 2.029474889351012
+    },
+    {
+      "name": "Prosulfuron",
+      "deg_exp": 1.2041199826559248,
+      "koc_exp": 1.4913616938342726,
+      "deg_pred_noiseless": 0.9384897740300144,
+      "deg_pred_aria1": 0.8946680461451535,
+      "koc_pred_noiseless": 1.5813058680821,
+      "koc_pred_aria1": 1.7334112771920536
+    },
+    {
+      "name": "Foramsulfuron",
+      "deg_exp": 0.8450980400142568,
+      "koc_exp": 1.7481880270062005,
+      "deg_pred_noiseless": 0.903396558372058,
+      "deg_pred_aria1": 0.9093596985565144,
+      "koc_pred_noiseless": 1.7045493988139881,
+      "koc_pred_aria1": 1.09012700867346
+    },
+    {
+      "name": "Quinoxyfen",
+      "deg_exp": 2.3364597338485296,
+      "koc_exp": 3.7634279935629373,
+      "deg_pred_noiseless": 2.1789940967208636,
+      "deg_pred_aria1": 1.9568677999527364,
+      "koc_pred_noiseless": 3.7915783367670093,
+      "koc_pred_aria1": 2.988595506202101
+    },
+    {
+      "name": "Trinexapac-ethyl",
+      "deg_exp": 0.0,
+      "koc_exp": 1.591064607026499,
+      "deg_pred_noiseless": 0.755524590344481,
+      "deg_pred_aria1": 0.7901106590170612,
+      "koc_pred_noiseless": 1.420744540494025,
+      "koc_pred_aria1": 0.5857258985584595
+    },
+    {
+      "name": "Prohexadione-calcium",
+      "deg_exp": 0.3010299956639812,
+      "koc_exp": 1.4471580313422192,
+      "deg_pred_noiseless": 0.6130999509580268,
+      "deg_pred_aria1": 0.7400738906660276,
+      "koc_pred_noiseless": 1.4209705551549732,
+      "koc_pred_aria1": 1.576107259673744
+    },
+    {
+      "name": "Simazine",
+      "deg_exp": 1.7781512503836436,
+      "koc_exp": 2.113943352306837,
+      "deg_pred_noiseless": 1.7704077139057985,
+      "deg_pred_aria1": 1.5956293722779793,
+      "koc_pred_noiseless": 2.099897466075899,
+      "koc_pred_aria1": 1.6349331306576491
+    },
+    {
+      "name": "Rotenone",
+      "deg_exp": 0.47712125471966244,
+      "koc_exp": 4.778151250383644,
+      "deg_pred_noiseless": 0.47409364754294536,
+      "deg_pred_aria1": 0.5649688010778622,
+      "koc_pred_noiseless": 4.75704402288685,
+      "koc_pred_aria1": 3.799543959631499
+    },
+    {
+      "name": "Chlortoluron",
+      "deg_exp": 1.6020599913279623,
+      "koc_exp": 2.292256071356476,
+      "deg_pred_noiseless": 1.4118229747847169,
+      "deg_pred_aria1": 1.3472501982591973,
+      "koc_pred_noiseless": 2.353096316750851,
+      "koc_pred_aria1": 2.1849568938229957
+    },
+    {
+      "name": "Mecoprop",
+      "deg_exp": 0.9030899869919435,
+      "koc_exp": 1.4913616938342726,
+      "deg_pred_noiseless": 0.881384046553445,
+      "deg_pred_aria1": 0.6225737534612737,
+      "koc_pred_noiseless": 1.7914721935119484,
+      "koc_pred_aria1": 1.6021587366379713
+    },
+    {
+      "name": "Chloridazon",
+      "deg_exp": 1.6232492903979006,
+      "koc_exp": 2.0791812460476247,
+      "deg_pred_noiseless": 1.7768849853414324,
+      "deg_pred_aria1": 1.4665002962778648,
+      "koc_pred_noiseless": 2.095845489867582,
+      "koc_pred_aria1": 1.7318461673313497
+    },
+    {
+      "name": "Famoxadone",
+      "deg_exp": 0.9030899869919435,
+      "koc_exp": 3.7558748556724915,
+      "deg_pred_noiseless": 1.11732845751883,
+      "deg_pred_aria1": 1.344220150118794,
+      "koc_pred_noiseless": 3.577584969596271,
+      "koc_pred_aria1": 3.1224077755791657
+    },
+    {
+      "name": "Pyrimethanil",
+      "deg_exp": 1.7403626894942439,
+      "koc_exp": 2.4785664955938436,
+      "deg_pred_noiseless": 1.7502074604301172,
+      "deg_pred_aria1": 1.6567713767401635,
+      "koc_pred_noiseless": 2.3487656198460223,
+      "koc_pred_aria1": 2.090801830625977
+    },
+    {
+      "name": "Abamectin",
+      "deg_exp": 1.4471580313422192,
+      "koc_exp": 3.6989700043360187,
+      "deg_pred_noiseless": 1.1349058756235229,
+      "deg_pred_aria1": 0.7367983801844005,
+      "koc_pred_noiseless": 3.4169710049452466,
+      "koc_pred_aria1": 2.7586094942123376
+    },
+    {
+      "name": "Fenhexamid",
+      "deg_exp": 0.0,
+      "koc_exp": 2.6766936096248664,
+      "deg_pred_noiseless": 0.749536974129919,
+      "deg_pred_aria1": 0.6627968777885165,
+      "koc_pred_noiseless": 2.833128861148866,
+      "koc_pred_aria1": 2.142107110144368
+    },
+    {
+      "name": "Prothioconazole",
+      "deg_exp": 1.0,
+      "koc_exp": 3.469822015978163,
+      "deg_pred_noiseless": 1.2318057140262484,
+      "deg_pred_aria1": 1.0905115933709533,
+      "koc_pred_noiseless": 3.091155327633479,
+      "koc_pred_aria1": 2.3451861516534955
+    },
+    {
+      "name": "Difenoconazole",
+      "deg_exp": 1.9294189257142926,
+      "koc_exp": 3.575187844927661,
+      "deg_pred_noiseless": 1.9965903509026748,
+      "deg_pred_aria1": 1.813883508285353,
+      "koc_pred_noiseless": 3.2609554103935143,
+      "koc_pred_aria1": 2.612846544860653
+    }
+  ]
+}

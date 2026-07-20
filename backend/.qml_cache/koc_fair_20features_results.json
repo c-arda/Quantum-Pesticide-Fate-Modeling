@@ -1,0 +1,74 @@
+{
+  "experiment": "koc_vqc_fair_20features",
+  "description": "Koc VQC retrained without bioaccessibility feature B (reviewer fix 1B)",
+  "n_features": 20,
+  "excluded_feature": "bioaccessibility",
+  "n_qubits": 12,
+  "n_layers": 8,
+  "n_params": 301,
+  "n_substances": 110,
+  "n_folds": 5,
+  "overall_r2": 0.23058550346964934,
+  "overall_mse": 0.8313118946342655,
+  "total_time_seconds": 6023.785672426224,
+  "diff_method": "backprop",
+  "fold_results": [
+    {
+      "fold": 1,
+      "train_mse": 0.022179348069056873,
+      "test_r2": 0.10019122378085576,
+      "test_mse": 1.0054206350961452,
+      "time_seconds": 1211.1718587875366
+    },
+    {
+      "fold": 2,
+      "train_mse": 0.005042189848082177,
+      "test_r2": 0.5713772712043227,
+      "test_mse": 0.46144427054204873,
+      "time_seconds": 1203.6152894496918
+    },
+    {
+      "fold": 3,
+      "train_mse": 0.011092549666341989,
+      "test_r2": 0.48040438409488284,
+      "test_mse": 0.5748909370900758,
+      "time_seconds": 1201.3218648433685
+    },
+    {
+      "fold": 4,
+      "train_mse": 0.013831596238986436,
+      "test_r2": 0.2633989470031155,
+      "test_mse": 0.8620996603297413,
+      "time_seconds": 1202.222145318985
+    },
+    {
+      "fold": 5,
+      "train_mse": 0.019256742091025538,
+      "test_r2": -0.5041214967580563,
+      "test_mse": 1.2527039701133165,
+      "time_seconds": 1202.5882720947266
+    }
+  ],
+  "feature_names_used": [
+    "mw",
+    "logP",
+    "n_heavy",
+    "hbd",
+    "hba",
+    "n_rings",
+    "n_rotatable",
+    "solubility_log",
+    "vapor_pressure_log",
+    "freundlich_n",
+    "tpsa_approx",
+    "aromatic_ring_frac",
+    "n_hydrolyzable",
+    "n_halogens",
+    "charge_state",
+    "conjugated_pi_size",
+    "heteroatom_ratio",
+    "sp3_fraction",
+    "henry_volatility",
+    "oxidation_susceptibility"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "experiment": "binary_persistence_classification",
+  "P_threshold_days": 60,
+  "vP_threshold_days": 180,
+  "n_P": 28,
+  "n_non_P": 82,
+  "n_vP": 10,
+  "n_non_vP": 100,
+  "RF_P_60d_balanced_acc": 0.6603,
+  "RF_P_60d_mcc": 0.4325,
+  "RF_P_60d_confusion": [
+    [
+      79,
+      3
+    ],
+    [
+      18,
+      10
+    ]
+  ],
+  "GB_P_60d_balanced_acc": 0.7909,
+  "GB_P_60d_mcc": 0.6233,
+  "GB_P_60d_confusion": [
+    [
+      77,
+      5
+    ],
+    [
+      10,
+      18
+    ]
+  ],
+  "RF_vP_180d_balanced_acc": 0.5,
+  "RF_vP_180d_mcc": 0.0,
+  "RF_vP_180d_confusion": [
+    [
+      100,
+      0
+    ],
+    [
+      10,
+      0
+    ]
+  ],
+  "GB_vP_180d_balanced_acc": 0.67,
+  "GB_vP_180d_mcc": 0.34,
+  "GB_vP_180d_confusion": [
+    [
+      94,
+      6
+    ],
+    [
+      6,
+      4
+    ]
+  ],
+  "elapsed_seconds": 47.3
+}

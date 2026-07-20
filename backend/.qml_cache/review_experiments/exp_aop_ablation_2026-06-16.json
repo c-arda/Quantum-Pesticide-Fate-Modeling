@@ -1,0 +1,36 @@
+{
+  "experiment": "aop_ablation_RF_21f_vs_27f",
+  "date": "2026-06-16",
+  "rf_params": {
+    "n_estimators": 200,
+    "max_depth": 10,
+    "random_state": 42
+  },
+  "cv": "leave-one-out",
+  "elapsed_seconds": 62.9,
+  "coverage": {
+    "n_substances": 110,
+    "n_mapped": 67,
+    "coverage_pct": 60.9,
+    "pathway_counts": {
+      "ache_inhibitor": 15,
+      "cell_division": 6,
+      "endocrine_disruptor": 13,
+      "gaba_ion_channel": 11,
+      "mitochondrial": 12,
+      "nachr_agonist": 10
+    },
+    "n_unmapped": 43
+  },
+  "ablation": {
+    "n_base_features": 21,
+    "n_extended_features": 27,
+    "n_moa_features": 6,
+    "base_deg_r2": 0.2871,
+    "extended_deg_r2": 0.2848,
+    "deg_r2_delta": -0.0023,
+    "base_koc_r2": 0.7586,
+    "extended_koc_r2": 0.7568,
+    "koc_r2_delta": -0.0018
+  }
+}

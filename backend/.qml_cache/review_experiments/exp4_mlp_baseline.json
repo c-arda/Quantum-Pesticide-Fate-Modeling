@@ -1,0 +1,12 @@
+{
+  "experiment": "M2_mlp_capacity_comparison",
+  "MLP_8_4_deg_r2": -0.2774,
+  "MLP_8_4_koc_r2": 0.0072,
+  "MLP_8_4_params": 217,
+  "MLP_8_4_params_per_sample": 1.97,
+  "MLP_64_32_deg_r2": 0.073,
+  "MLP_64_32_koc_r2": 0.5346,
+  "MLP_64_32_params": 3521,
+  "MLP_64_32_params_per_sample": 32.01,
+  "elapsed_seconds": 96.2
+}

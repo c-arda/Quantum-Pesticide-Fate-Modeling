@@ -1,0 +1,16 @@
+{
+  "experiment": "H7_gradient_variance_at_init",
+  "n_seeds": 100,
+  "n_qubits": 8,
+  "n_layers": 6,
+  "n_substances_sampled": 10,
+  "grad_norm_mean": 2.901621,
+  "grad_norm_std": 0.633267,
+  "grad_norm_min": 1.696652,
+  "grad_norm_max": 4.139465,
+  "grad_norm_median": 2.861117,
+  "variance": 0.40102753,
+  "barren_plateau_likely": false,
+  "interpretation": "Var[||\u2207L||] = 0.401028 > 10\u207b\u00b3 \u2192 barren plateau is NOT the bottleneck at this circuit size. The VQC's poor performance is likely due to data/feature limitations, not trainability.",
+  "elapsed_seconds": 104.7
+}

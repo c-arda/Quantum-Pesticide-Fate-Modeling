@@ -1,0 +1,118 @@
+{
+  "fivefold_classical": {
+    "RF": {
+      "deg_fold_r2": [
+        0.4437,
+        0.0331,
+        -0.4638,
+        0.2656,
+        0.2545
+      ],
+      "deg_mean": 0.1066,
+      "deg_std": 0.3135,
+      "koc_fold_r2": [
+        0.4369,
+        0.9136,
+        0.7514,
+        0.8982,
+        0.804
+      ],
+      "koc_mean": 0.7608,
+      "koc_std": 0.1727
+    },
+    "GB": {
+      "deg_fold_r2": [
+        0.3391,
+        0.1219,
+        -0.7869,
+        0.332,
+        0.359
+      ],
+      "deg_mean": 0.073,
+      "deg_std": 0.4385,
+      "koc_fold_r2": [
+        0.4345,
+        0.9118,
+        0.8109,
+        0.884,
+        0.8464
+      ],
+      "koc_mean": 0.7775,
+      "koc_std": 0.1749
+    }
+  },
+  "loo_classical": {
+    "Ridge": {
+      "deg_r2": 0.1244,
+      "deg_ci_lo": -0.1441,
+      "deg_ci_hi": 0.334,
+      "koc_r2": 0.8251,
+      "koc_ci_lo": 0.7157,
+      "koc_ci_hi": 0.9127
+    },
+    "LASSO": {
+      "deg_r2": 0.0899,
+      "deg_ci_lo": 0.0021,
+      "deg_ci_hi": 0.1507,
+      "koc_r2": 0.7462,
+      "koc_ci_lo": 0.543,
+      "koc_ci_hi": 0.883
+    },
+    "RF": {
+      "deg_r2": 0.2871,
+      "deg_ci_lo": 0.1168,
+      "deg_ci_hi": 0.4293,
+      "koc_r2": 0.7586,
+      "koc_ci_lo": 0.5469,
+      "koc_ci_hi": 0.8993
+    },
+    "GB": {
+      "deg_r2": 0.2832,
+      "deg_ci_lo": 0.0435,
+      "deg_ci_hi": 0.4452,
+      "koc_r2": 0.7517,
+      "koc_ci_lo": 0.5311,
+      "koc_ci_hi": 0.9034
+    }
+  },
+  "wilcoxon_tests": {
+    "RF_vs_GB_deg": 0.1324,
+    "RF_vs_GB_koc": 0.3377,
+    "Ridge_vs_RF_deg": 0.0719,
+    "Ridge_vs_RF_koc": 0.2109,
+    "Ridge_vs_GB_deg": 0.7395,
+    "Ridge_vs_GB_koc": 0.5108,
+    "LASSO_vs_RF_deg": 0.0056,
+    "LASSO_vs_RF_koc": 0.0673,
+    "LASSO_vs_GB_deg": 0.185,
+    "LASSO_vs_GB_koc": 0.0187,
+    "LASSO_vs_Ridge_deg": 0.54,
+    "LASSO_vs_Ridge_koc": 0.0183
+  },
+  "vqc_5fold": {
+    "deg_fold_r2": [
+      0.0308,
+      -0.6824,
+      -1.3338,
+      -0.181,
+      0.2893
+    ],
+    "deg_mean": -0.3754,
+    "deg_std": 0.5758,
+    "koc_fold_r2": [
+      -0.4397,
+      0.6277,
+      0.6342,
+      0.2016,
+      0.2808
+    ],
+    "koc_mean": 0.2609,
+    "koc_std": 0.3921
+  },
+  "_statistics": {
+    "loo_classical": "Pooled LOO R2 over all 110 held-out predictions, with a 95% percentile bootstrap CI (1000 resamples of the substances, seed 42, predictions held fixed). These ARE the values in manuscript Table 1.",
+    "fivefold_classical": "MEAN of the five per-fold R2 values, +/- their std. This is NOT the pooled 5-fold R2 reported in manuscript Table 1 (RF DegT50 0.275, GB 0.290), which is computed once over all held-out predictions. Both derive from the same predictions; they are different statistics.",
+    "vqc_5fold": "MEAN of the five per-fold R2 values, +/- their std, recomputed from cv_results_k5.json. The manuscript reports the POOLED values (DegT50 -0.028, Koc 0.269) from that file. Both are correct; the per-fold mean is noisier because each fold holds only 22 substances.",
+    "wilcoxon_tests": "Wilcoxon signed-rank on per-substance LOO squared residuals."
+  }
+}

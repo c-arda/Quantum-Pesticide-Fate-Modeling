@@ -1,3 +1,18 @@
+> ## ⚠️ SUPERSEDED — GPU smoke test on SYNTHETIC data. Not a manuscript result.
+>
+> This file records a **pipeline throughput check** run on 80 randomly generated
+> samples to verify the `lightning.qubit` GPU path end-to-end. The negative R²
+> values below are the expected outcome on random targets and say nothing about
+> model quality.
+>
+> Its variant labels also predate the published architectures and do **not**
+> match them (e.g. `B_deep_narrow` = 6 qubits here vs 8 qubits in the paper's
+> seed sweep). Do not compare these numbers against the manuscript.
+>
+> **Canonical results:** `HEAVY_EXPERIMENTS_STATUS.md` (real data, N=110) and
+> `backend/.qml_cache/review_experiments/*.json`. The published per-target
+> circuits are 8 qubits / 6 layers (DegT50) and 12 qubits / 8 layers (Koc).
+
 # QPFate DegT50 Quantum Circuit Training Results
 **Date**: 2026-05-03  
 **Backend**: PennyLane lightning.qubit (C++ accelerated)  

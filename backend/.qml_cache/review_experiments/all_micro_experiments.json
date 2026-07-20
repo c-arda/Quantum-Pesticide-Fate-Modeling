@@ -1,0 +1,12 @@
+{
+  "total_seconds": 533.1,
+  "experiments": [
+    "exp1",
+    "exp2",
+    "exp3",
+    "exp4",
+    "exp5",
+    "exp6"
+  ],
+  "host": "c-latitude551016GB"
+}

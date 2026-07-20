@@ -2,8 +2,10 @@
 Classical ML Baseline — Random Forest & Gradient Boosting
 ==========================================================
 Provides a classical machine learning baseline for direct comparison
-with the quantum ML predictions. Uses the exact same 12 molecular
-descriptor features as the quantum circuit.
+with the quantum ML predictions. Uses the exact same 21 molecular
+descriptor features (FEATURE_NAMES) as the quantum circuits. Note that
+the per-target VQCs consume subsets of these: DegT50 uses indices 0-16
+(17 features), Koc uses all 21.
 
 This module trains instantly (<1 sec) and serves as the benchmark
 that the quantum model must beat to claim quantum advantage.
@@ -87,7 +89,7 @@ def train_classical_baseline():
         model_koc_no_B = {}
 
         for cv_name, cv_obj in [("loo", LeaveOneOut()), ("5fold", KFold(n_splits=5, shuffle=True, random_state=42))]:
-            # DegT50 (all 17 features — no circularity)
+            # DegT50 (all 21 features — no circularity)
             model_deg = ModelClass(**params)
             pred_deg = cross_val_predict(model_deg, X, y_deg, cv=cv_obj)
 

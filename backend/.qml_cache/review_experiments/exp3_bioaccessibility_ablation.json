@@ -1,0 +1,8 @@
+{
+  "experiment": "H3_bioaccessibility_ablation_degtl50",
+  "RF_deg_r2_with_bioaccessibility": 0.2897,
+  "RF_deg_r2_without_bioaccessibility": 0.2767,
+  "delta_r2": 0.013,
+  "bioaccessibility_index": 14,
+  "elapsed_seconds": 52.0
+}

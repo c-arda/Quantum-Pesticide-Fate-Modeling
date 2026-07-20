@@ -8,18 +8,16 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E.svg?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![HTML5](https://img.shields.io/badge/HTML5-CSS3-E34F26.svg?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![EC 1107/2009](https://img.shields.io/badge/EU-EC%201107%2F2009-003399.svg?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48L3N2Zz4=)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex%3A32009R1107)
-[![ChemRxiv](https://img.shields.io/badge/ChemRxiv-10.26434/chemrxiv.15000799-B31B1B.svg)](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000799/v1)
-[![Digital Discovery](https://img.shields.io/badge/Digital_Discovery-In_Preparation-0072B2.svg)](https://www.rsc.org/journals-books-databases/about-journals/digital-discovery/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19386784.svg)](https://doi.org/10.5281/zenodo.19386784)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — an 8-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances with 21 molecular descriptors from the EU SPIN database, benchmarked against Random Forest, Gradient Boosting, and MLP. **Honest negative result:** near-term VQCs cannot outperform classical models on small regulatory datasets.
+**Per-target variational quantum circuits vs. classical ML for predicting pesticide environmental fate properties** — an 8-qubit circuit for DegT50 and a 12-qubit circuit for Koc, trained on 110 substances with 21 molecular descriptors from the EU Pesticides Database, benchmarked against Random Forest, Gradient Boosting, and MLP. **Honest negative result:** near-term VQCs cannot outperform classical models on small regulatory datasets.
 
 ## Highlights
 
 - **Per-target VQCs** — 8-qubit/6-layer for DegT50 (153 params) + 12-qubit/8-layer for Koc (301 params)
 - **21 curated molecular descriptors** including DegT50-targeted degradation proxies
-- **110 pesticide substances** from the EU SPIN database (SQLite-backed, validated SMILES)
+- **110 pesticide substances** from the EU Pesticides Database (SQLite-backed, validated SMILES)
 - **Classical baselines** (Ridge, LASSO, Random Forest, Gradient Boosting, MLP) via LOO-CV
 - **Nested LOO-CV** for leakage-free hybrid stacking (α optimization)
 - **Honest negative result** — VQC R²=−0.028, hybrid improves RF by only +0.001
@@ -112,7 +110,7 @@ python3 -m http.server 8765
 | Random Forest (LOO) | **0.287** | **0.759** | 200 trees, 21 features |
 | Gradient Boosting (LOO) | 0.283 | 0.752 | 200 estimators, 21 features |
 | Hybrid QML+RF (nested CV) | 0.288 | 0.750 | α=0.20±0.02, ΔR²=+0.001 |
-| MLP Neural Network (LOO) | 0.075 | 0.497 | 64-32 hidden, 21 features |
+| MLP Neural Network (LOO) | 0.073 | 0.535 | 64-32 hidden, 21 features |
 | QML 8q+12q (5-fold) | −0.028 | 0.269 | Per-target, 17+21 features |
 | QML 12q (Phase 4d) | −0.141 | 0.412 | Overfitting baseline |
 

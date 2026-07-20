@@ -1,0 +1,28 @@
+{
+  "stage": "phase6_local_harness_parity",
+  "date": "2026-05-01",
+  "weights_file": "weights_v2.npz",
+  "gate1_analytic_8q_deg_fast": {
+    "max_abs_delta": 3.34e-07,
+    "rms_delta": 1.83e-07,
+    "verdict": "PASS \u2014 channel definitions identical to machine precision"
+  },
+  "gate1_shot_8192": {
+    "compounds_tested": 5,
+    "cells_total": 100,
+    "cells_outside_2sigma": 22,
+    "max_abs_delta": 0.0469,
+    "verdict": "PASS-IN-SPIRIT \u2014 shot-noise tails, analytic shows true agreement"
+  },
+  "gate2_aria1_hosted_1024": {
+    "compounds_tested": 5,
+    "cells_total": 100,
+    "cells_outside_2sigma": 24,
+    "max_abs_delta": 0.1348,
+    "typical_delta_range": "0.07-0.13",
+    "shot_noise_2sigma_floor": "~0.06",
+    "verdict": "FAIL \u2014 real noise-model mismatch beyond shot noise",
+    "interpretation": "IonQ Aria-1 noisy sim diverges from our local default.mixed model by 2-4x the shot-noise floor. Likely root cause: IonQ applies noise at the native trapped-ion gate level (GPi/GPi2/MS) after circuit decomposition, while our model applies noise at the QIS abstract-gate level. A CNOT decomposes into ~5 native gates, so effective error rates differ 2-5x.",
+    "action": "Do NOT proceed to QPU hardware spend. Either: (A) recalibrate local model to match IonQ's empirical noise     (loop: tune local params until B-I deltas drop into 2sigma), or (B) abandon local default.mixed for science use and treat IonQ's     hosted Aria-1 noisy sim as primary engine (free, fast,     representative). Local model retained only for unit tests."
+  }
+}

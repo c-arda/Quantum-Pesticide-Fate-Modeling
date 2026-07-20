@@ -1,0 +1,40 @@
+{
+  "config": {
+    "n_qubits": 12,
+    "n_layers": 8,
+    "n_epochs": 120,
+    "lr": 0.03,
+    "use_deg_features": false
+  },
+  "seed_results": [
+    {
+      "seed": 0,
+      "r2": -0.201,
+      "elapsed_s": 12061.2
+    },
+    {
+      "seed": 1,
+      "r2": -0.3427,
+      "elapsed_s": 12089.3
+    },
+    {
+      "seed": 7,
+      "r2": -0.1424,
+      "elapsed_s": 12134.7
+    },
+    {
+      "seed": 42,
+      "r2": -0.0629,
+      "elapsed_s": 12114.5
+    },
+    {
+      "seed": 2024,
+      "r2": -0.5696,
+      "elapsed_s": 12131.7
+    }
+  ],
+  "r2_mean": -0.2637,
+  "r2_std": 0.1782,
+  "r2_min": -0.5696,
+  "r2_max": -0.0629
+}

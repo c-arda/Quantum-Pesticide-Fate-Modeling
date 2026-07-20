@@ -1,9 +1,28 @@
 # Agent internal config (not project code)
 .agents/
 
-# QML weight cache
-backend/.qml_cache/
-.qml_cache/
+# QML cache. Bulk artifacts (weights, checkpoints, hardware runs) stay out, but
+# the result JSONs the manuscript's numbers are read from are tracked, so every
+# published claim is checkable from a clone. The directory must be un-ignored
+# first: the user's global excludes carry `.*_cache/`, and git will not descend
+# into an excluded directory, so the negations below would never fire.
+!backend/.qml_cache/
+backend/.qml_cache/*
+!backend/.qml_cache/classical_baseline.json
+!backend/.qml_cache/honest_hybrid_results.json
+!backend/.qml_cache/confidence_intervals.json
+!backend/.qml_cache/cv_results_k5.json
+!backend/.qml_cache/koc_fair_20features_results.json
+!backend/.qml_cache/training_history.json
+!backend/.qml_cache/review_experiments/
+backend/.qml_cache/review_experiments/*
+!backend/.qml_cache/review_experiments/*.json
+# Investigation scratch from the 2026-06-11 M1 root-cause hunt, NOT a result:
+# it holds the post-f1ff12c speciation-degraded run (Ridge DegT50 0.234 vs the
+# published 0.124) and would read as a contradiction of Table 1 if released.
+backend/.qml_cache/review_experiments/*_REGEN_*.json
+# Root-only (a bare `.qml_cache/` would also match backend/ and defeat the above)
+/.qml_cache/
 
 # Python
 __pycache__/
@@ -64,6 +83,10 @@ manuscript/manuscript.zip
 manuscript/main_rsc*
 manuscript/rsc.bst
 *.db
+# ...except the curated substance dataset the manuscript is built on. It was
+# tracked at Zenodo v1.0.1; the blanket *.db rule added later silently dropped
+# it from the public repo, which broke the Data Availability claim.
+!backend/substances.db
 scripts/*results*
 
 # ── Git Content Policy (PRIVATE — not for public repos) ──

@@ -1,30 +1,50 @@
 """
 Hybrid QML+RF Stacking Predictor
 ================================
-Combines Quantum ML (for DegT50) and Random Forest (for Koc) predictions
-using a learned stacking weight optimized via cross-validation.
+Blends Quantum ML and Random Forest predictions with a stacking weight α:
 
-Strategy:
-  DegT50_final = α × QML + (1-α) × RF   (α optimized per property)
-  Koc_final    = RF                       (RF clearly dominates)
+    pred_final = α × QML + (1-α) × RF     (α optimized per target)
+
+α is optimized by NESTED leave-one-out CV: for each held-out substance i,
+α is chosen by grid search (step 0.05) on the remaining N-1 substances, and
+i is then predicted with that fold-specific α. This keeps the stacking
+weight from ever seeing the held-out target.
+
+The naive alternative (optimizing α on the same predictions used to score
+R²) leaks the target into the weight and inflates R². Both are computed
+here: the manuscript reports the nested result as the headline and the
+naive one only as a cautionary comparator (§3.7, "Comparison with naive
+α optimization").
+
+Canonical artifact: .qml_cache/honest_hybrid_results.json
 """
 
 import numpy as np
-import json, os, hashlib
-
-from backend.quantum_predictor import extract_features, FEATURE_NAMES
-from backend.spin_database import SUBSTANCES
+import json, os
 
 CACHE_DIR = os.path.join(os.path.dirname(__file__), ".qml_cache")
-CACHE_FILE = os.path.join(CACHE_DIR, "hybrid_results.json")
+CACHE_FILE = os.path.join(CACHE_DIR, "honest_hybrid_results.json")
+
+# Grid searched for α, in both the nested and the naive procedure.
+ALPHA_GRID = np.arange(0.0, 1.01, 0.05)
 
 
-def _compute_hybrid_weights():
+def _r2(y_true, y_pred):
+    y_true = np.asarray(y_true, dtype=float)
+    y_pred = np.asarray(y_pred, dtype=float)
+    ss_res = np.sum((y_true - y_pred) ** 2)
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+    return 1 - ss_res / max(ss_tot, 1e-10)
+
+
+# ── Prediction loading ────────────────────────────────────────────
+
+def _load_predictions():
     """
-    Find optimal stacking weight α that minimizes LOO MSE for DegT50.
-    Uses pre-computed QML and RF predictions from their respective caches.
+    Load the cached RF (LOO) and QML (CV) predictions and align them on
+    substance name. Returns (arrays_by_target, n_common, qml_cv_type,
+    rf_baselines) or None if the classical baseline is missing.
     """
-    # Load classical baseline
     classical_cache = os.path.join(CACHE_DIR, "classical_baseline.json")
     if not os.path.exists(classical_cache):
         return None
@@ -32,154 +52,187 @@ def _compute_hybrid_weights():
     with open(classical_cache) as f:
         cl_data = json.load(f)
 
-    rf_results = cl_data["models"]["RandomForest"]["loo"]["results"]
+    rf_loo = cl_data["models"]["RandomForest"]["loo"]
+    rf_pred = {r["name"]: r for r in rf_loo["results"]}
 
-    # Build lookup: substance name → RF predictions
-    rf_pred = {}
-    for r in rf_results:
-        rf_pred[r["name"]] = {
-            "deg_pred": r["deg_pred"],  # log10 scale
-            "deg_exp": r["deg_exp"],
-            "koc_pred": r["koc_pred"],
-            "koc_exp": r["koc_exp"],
-            "deg_pred_days": r["deg_pred_days"],
-            "koc_pred_val": r.get("koc_pred_val", 10 ** r["koc_pred"]),
-        }
-
-    # Try to load QML LOO results
-    qml_loo_cache = os.path.join(CACHE_DIR, "cv_results_loo.json")
-    qml_5f_cache = os.path.join(CACHE_DIR, "cv_results_k5.json")
-
-    qml_data = None
-    cv_type = None
-    for cache, cv in [(qml_loo_cache, "loo"), (qml_5f_cache, "5fold")]:
-        if os.path.exists(cache):
-            with open(cache) as f:
+    qml_data, cv_type = None, None
+    for fname, cv in [("cv_results_loo.json", "loo"), ("cv_results_k5.json", "5fold")]:
+        path = os.path.join(CACHE_DIR, fname)
+        if os.path.exists(path):
+            with open(path) as f:
                 qml_data = json.load(f)
             cv_type = cv
             break
 
     if qml_data is None:
-        # No QML CV data available — return RF-only
-        return {
-            "alpha_deg": 0.0,
-            "alpha_koc": 0.0,
-            "qml_available": False,
-            "rf_deg_r2": cl_data["models"]["RandomForest"]["loo"]["deg_r2"],
-            "rf_koc_r2": cl_data["models"]["RandomForest"]["loo"]["koc_r2"],
-            "hybrid_deg_r2": cl_data["models"]["RandomForest"]["loo"]["deg_r2"],
-            "hybrid_koc_r2": cl_data["models"]["RandomForest"]["loo"]["koc_r2"],
-        }
+        return None
 
-    # Build QML prediction lookup from CV results
-    # LOO CV stores flat results[], K-fold also uses results[]
-    qml_pred = {}
-    for r in qml_data.get("results", []):
-        qml_pred[r["name"]] = {
-            "deg_pred": r.get("deg_pred"),
-            "koc_pred": r.get("koc_pred"),
-        }
+    qml_pred = {r["name"]: r for r in qml_data.get("results", [])}
 
-    # Find common substances
-    common = [name for name in rf_pred if name in qml_pred]
+    common = [
+        n for n in rf_pred
+        if n in qml_pred
+        and qml_pred[n].get("deg_pred") is not None
+        and qml_pred[n].get("koc_pred") is not None
+    ]
     if len(common) < 10:
-        return {
-            "alpha_deg": 0.0,
-            "alpha_koc": 0.0,
-            "qml_available": False,
-            "note": f"Only {len(common)} common substances between QML and RF CV results",
-        }
+        return None
 
-    # Grid search for optimal alpha
-    best_alpha_deg = 0.0
-    best_mse_deg = float("inf")
-    best_alpha_koc = 0.0
-    best_mse_koc = float("inf")
-
-    for alpha in np.arange(0.0, 1.01, 0.05):
-        mse_deg = 0
-        mse_koc = 0
-        n = 0
-
-        for name in common:
-            rf = rf_pred[name]
-            qml = qml_pred[name]
-
-            if qml["deg_pred"] is None or qml["koc_pred"] is None:
-                continue
-
-            # Blended prediction (log10 scale)
-            blend_deg = alpha * qml["deg_pred"] + (1 - alpha) * rf["deg_pred"]
-            blend_koc = alpha * qml["koc_pred"] + (1 - alpha) * rf["koc_pred"]
-
-            mse_deg += (blend_deg - rf["deg_exp"]) ** 2
-            mse_koc += (blend_koc - rf["koc_exp"]) ** 2
-            n += 1
-
-        if n > 0:
-            mse_deg /= n
-            mse_koc /= n
-            if mse_deg < best_mse_deg:
-                best_mse_deg = mse_deg
-                best_alpha_deg = alpha
-            if mse_koc < best_mse_koc:
-                best_mse_koc = mse_koc
-                best_alpha_koc = alpha
-
-    # Compute R² for the hybrid model
-    deg_exps = []
-    deg_hyb_preds = []
-    koc_exps = []
-    koc_hyb_preds = []
-
-    for name in common:
-        rf = rf_pred[name]
-        qml = qml_pred[name]
-        if qml["deg_pred"] is None:
-            continue
-
-        deg_exps.append(rf["deg_exp"])
-        deg_hyb_preds.append(
-            best_alpha_deg * qml["deg_pred"] + (1 - best_alpha_deg) * rf["deg_pred"]
-        )
-        koc_exps.append(rf["koc_exp"])
-        koc_hyb_preds.append(
-            best_alpha_koc * qml["koc_pred"] + (1 - best_alpha_koc) * rf["koc_pred"]
+    arrays = {}
+    for key in ("deg", "koc"):
+        arrays[key] = (
+            np.array([qml_pred[n][f"{key}_pred"] for n in common], dtype=float),
+            np.array([rf_pred[n][f"{key}_pred"] for n in common], dtype=float),
+            np.array([rf_pred[n][f"{key}_exp"] for n in common], dtype=float),
         )
 
-    def r2(y_true, y_pred):
-        y_true = np.array(y_true)
-        y_pred = np.array(y_pred)
-        ss_res = np.sum((y_true - y_pred) ** 2)
-        ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
-        return 1 - ss_res / max(ss_tot, 1e-10)
+    baselines = {
+        "rf_21feat_loo_deg_r2": round(rf_loo["deg_r2"], 4),
+        "rf_21feat_loo_koc_r2": round(rf_loo["koc_r2"], 4),
+    }
+    return arrays, len(common), cv_type, baselines
+
+
+def _best_alpha(q, r, y, mask=None):
+    """Grid-search the α minimizing blended MSE over the (masked) set."""
+    if mask is not None:
+        q, r, y = q[mask], r[mask], y[mask]
+    best_alpha, best_mse = 0.0, float("inf")
+    for alpha in ALPHA_GRID:
+        mse = np.mean((alpha * q + (1 - alpha) * r - y) ** 2)
+        if mse < best_mse:
+            best_mse, best_alpha = mse, alpha
+    return best_alpha
+
+
+# ── The two α-optimization procedures ─────────────────────────────
+
+def _naive_alpha(q, r, y):
+    """
+    LEAKY: pick α on the full set, then score R² on that same set. Reported
+    in the manuscript only to quantify how much the leak inflates R².
+    """
+    alpha = _best_alpha(q, r, y)
+    return alpha, _r2(y, alpha * q + (1 - alpha) * r)
+
+
+def _nested_loo_alpha(q, r, y):
+    """
+    HONEST: for each held-out i, choose α on the other N-1 substances and
+    predict i with it. Returns (per-fold α array, R² of the nested preds).
+    """
+    n = len(y)
+    alphas = np.empty(n)
+    preds = np.empty(n)
+    for i in range(n):
+        mask = np.ones(n, dtype=bool)
+        mask[i] = False
+        a = _best_alpha(q, r, y, mask=mask)
+        alphas[i] = a
+        preds[i] = a * q[i] + (1 - a) * r[i]
+    return alphas, _r2(y, preds)
+
+
+def _fold_distribution(alphas):
+    """Per-fold α counts, e.g. {"0.2": 101, ...}. Backs the manuscript's
+    fold-stability claim without a re-run."""
+    vals, counts = np.unique(np.round(alphas, 2), return_counts=True)
+    return {f"{v:.2f}": int(c) for v, c in zip(vals, counts)}
+
+
+# ── Public API ────────────────────────────────────────────────────
+
+def compute_honest_hybrid():
+    """Run both procedures and return the canonical result dict."""
+    loaded = _load_predictions()
+    if loaded is None:
+        return None
+    arrays, n_common, cv_type, baselines = loaded
+
+    leaky, honest, folds = {}, {}, {}
+    for key in ("deg", "koc"):
+        q, r, y = arrays[key]
+
+        alpha, r2_leaky = _naive_alpha(q, r, y)
+        leaky[f"alpha_{key}"] = float(alpha)
+        leaky[f"hybrid_{key}_r2"] = float(r2_leaky)
+
+        alphas, r2_honest = _nested_loo_alpha(q, r, y)
+        honest[f"alpha_{key}_mean"] = float(alphas.mean())
+        honest[f"alpha_{key}_std"] = float(alphas.std())
+        honest[f"hybrid_{key}_r2"] = float(r2_honest)
+        folds[f"alpha_{key}_folds"] = _fold_distribution(alphas)
+
+    delta_deg = honest["hybrid_deg_r2"] - baselines["rf_21feat_loo_deg_r2"]
+    delta_koc = honest["hybrid_koc_r2"] - baselines["rf_21feat_loo_koc_r2"]
 
     return {
-        "alpha_deg": round(best_alpha_deg, 2),
-        "alpha_koc": round(best_alpha_koc, 2),
-        "qml_available": True,
+        "method": "nested_loo_cv_alpha",
+        "n_common": n_common,
         "qml_cv_type": cv_type,
-        "n_common": len(common),
-        "rf_deg_r2": round(cl_data["models"]["RandomForest"]["loo"]["deg_r2"], 4),
-        "rf_koc_r2": round(cl_data["models"]["RandomForest"]["loo"]["koc_r2"], 4),
-        "hybrid_deg_r2": round(r2(deg_exps, deg_hyb_preds), 4),
-        "hybrid_koc_r2": round(r2(koc_exps, koc_hyb_preds), 4),
-        "hybrid_deg_mse": round(best_mse_deg, 4),
-        "hybrid_koc_mse": round(best_mse_koc, 4),
+        "alpha_grid_step": 0.05,
+        "leaky": leaky,
+        "honest": honest,
+        "fold_distribution": folds,
+        "baselines": baselines,
+        "delta_vs_rf": {
+            "deg_r2": round(delta_deg, 4),
+            "koc_r2": round(delta_koc, 4),
+        },
+        # The nested DegT50 gain over RF is +0.001 and the Koc blend is a net
+        # loss, so neither target supports a hybrid advantage. See tab:baselines
+        # and the bootstrap CIs in confidence_intervals.json.
+        "conclusion": "hybrid_within_run_to_run_noise_of_rf",
     }
 
 
 def get_hybrid_results():
-    """Return cached hybrid stacking results, computing if needed."""
+    """
+    Return the cached hybrid results, computing them if absent. Headline
+    numbers are the NESTED (honest) ones; the naive values are exposed
+    under naive_* purely as the leakage comparator.
+    """
     os.makedirs(CACHE_DIR, exist_ok=True)
 
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE) as f:
-            return json.load(f)
-
-    results = _compute_hybrid_weights()
-    if results:
+            results = json.load(f)
+    else:
+        results = compute_honest_hybrid()
+        if results is None:
+            return None
         with open(CACHE_FILE, "w") as f:
             json.dump(results, f, indent=2)
 
-    return results
+    honest, leaky = results["honest"], results["leaky"]
+    return {
+        "method": results["method"],
+        "qml_available": True,
+        "qml_cv_type": results.get("qml_cv_type"),
+        "n_common": results["n_common"],
+        "alpha_deg": round(honest["alpha_deg_mean"], 2),
+        "alpha_deg_std": round(honest["alpha_deg_std"], 3),
+        "alpha_koc": round(honest["alpha_koc_mean"], 2),
+        "alpha_koc_std": round(honest["alpha_koc_std"], 3),
+        "hybrid_deg_r2": round(honest["hybrid_deg_r2"], 4),
+        "hybrid_koc_r2": round(honest["hybrid_koc_r2"], 4),
+        "rf_deg_r2": results["baselines"]["rf_21feat_loo_deg_r2"],
+        "rf_koc_r2": results["baselines"]["rf_21feat_loo_koc_r2"],
+        "naive_alpha_deg": round(leaky["alpha_deg"], 2),
+        "naive_hybrid_deg_r2": round(leaky["hybrid_deg_r2"], 4),
+        "naive_hybrid_koc_r2": round(leaky["hybrid_koc_r2"], 4),
+        "delta_vs_rf": results["delta_vs_rf"],
+        "conclusion": results["conclusion"],
+    }
+
+
+if __name__ == "__main__":
+    import pprint
+
+    res = compute_honest_hybrid()
+    if res is None:
+        raise SystemExit("Missing classical_baseline.json or QML CV cache.")
+    with open(CACHE_FILE, "w") as f:
+        json.dump(res, f, indent=2)
+    print(f"Wrote {CACHE_FILE}")
+    pprint.pprint(res)

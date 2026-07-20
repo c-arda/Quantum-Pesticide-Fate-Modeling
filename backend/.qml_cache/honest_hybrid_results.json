@@ -1,0 +1,41 @@
+{
+  "method": "nested_loo_cv_alpha",
+  "n_common": 110,
+  "qml_cv_type": "5fold",
+  "alpha_grid_step": 0.05,
+  "leaky": {
+    "alpha_deg": 0.2,
+    "hybrid_deg_r2": 0.3052556392975865,
+    "alpha_koc": 0.0,
+    "hybrid_koc_r2": 0.7586295817566369
+  },
+  "honest": {
+    "alpha_deg_mean": 0.19636363636363635,
+    "alpha_deg_std": 0.016109131951517593,
+    "hybrid_deg_r2": 0.2876339212518165,
+    "alpha_koc_mean": 0.0009090909090909091,
+    "alpha_koc_std": 0.009491187735373227,
+    "hybrid_koc_r2": 0.7495635697948454
+  },
+  "fold_distribution": {
+    "alpha_deg_folds": {
+      "0.10": 1,
+      "0.15": 7,
+      "0.20": 101,
+      "0.25": 1
+    },
+    "alpha_koc_folds": {
+      "0.00": 109,
+      "0.10": 1
+    }
+  },
+  "baselines": {
+    "rf_21feat_loo_deg_r2": 0.2871,
+    "rf_21feat_loo_koc_r2": 0.7586
+  },
+  "delta_vs_rf": {
+    "deg_r2": 0.0005,
+    "koc_r2": -0.009
+  },
+  "conclusion": "hybrid_within_run_to_run_noise_of_rf"
+}
