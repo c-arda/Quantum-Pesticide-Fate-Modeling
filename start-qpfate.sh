@@ -8,7 +8,7 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 readonly SCRIPT_DIR
 readonly CONDA_ENV="fbond-env"
-readonly CONDA_PATH="/home/ardac/miniconda3"
+readonly CONDA_PATH="${CONDA_BASE:-$HOME/miniconda3}"
 readonly PORT=5000
 
 # ── Colors ───────────────────────────────────────────────────
